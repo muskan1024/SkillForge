@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Env files
+.env
+.env.*
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Builds
+dist/
+build/
+
+# Keys
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
