@@ -268,7 +268,412 @@
 //   )
 // }
 
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
+// import { useParams, useNavigate } from "react-router-dom";
+// import api from "../utils/api";
+// import toast from "react-hot-toast";
+// import {
+//   CheckCircle2,
+//   Circle,
+//   Clock,
+//   ChevronDown,
+//   ChevronUp,
+//   ExternalLink,
+//   Youtube,
+//   BookOpen,
+//   Code2,
+//   PlayCircle,
+//   Loader2,
+//   Trash2,
+//   ArrowLeft,
+//   MapPin,
+//   Star,
+//   Bot,
+// } from "lucide-react";
+
+// const RESOURCE_ICONS = {
+//   youtube: { icon: Youtube, color: "text-red-500 bg-red-50" },
+//   docs: { icon: BookOpen, color: "text-blue-500 bg-blue-50" },
+//   course: { icon: PlayCircle, color: "text-purple-500 bg-purple-50" },
+//   practice: { icon: Code2, color: "text-green-500 bg-green-50" },
+// };
+
+// const DIFFICULTY_COLORS = {
+//   Beginner: "bg-green-50 text-green-700",
+//   Intermediate: "bg-yellow-50 text-yellow-700",
+//   Advanced: "bg-red-50 text-red-700",
+// };
+
+// function ResourceChip({ resource }) {
+//   const meta = RESOURCE_ICONS[resource.type] || RESOURCE_ICONS.docs;
+//   const Icon = meta.icon;
+//   return (
+//     <a
+//       href={resource.url}
+//       target="_blank"
+//       rel="noopener noreferrer"
+//       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80 transition-opacity`}
+//     >
+//       <Icon size={12} />
+//       {resource.title}
+//       <ExternalLink size={10} />
+//     </a>
+//   );
+// }
+
+// function TopicCard({
+//   topic,
+//   index,
+//   isCurrent,
+//   onToggle,
+//   updating,
+//   roadmapId,
+//   onAskAI,
+// }) {
+//   const [open, setOpen] = useState(isCurrent);
+
+//   useEffect(() => {
+//     if (isCurrent) setOpen(true);
+//   }, [isCurrent]);
+
+//   return (
+//     <div
+//       className={`rounded-2xl border transition-all duration-200 ${
+//         isCurrent
+//           ? "border-brand-400 shadow-md shadow-brand-100 bg-white"
+//           : topic.completed
+//             ? "border-surface-3 bg-surface-1"
+//             : "border-surface-3 bg-white hover:border-surface-4"
+//       }`}
+//     >
+//       {/* You are here banner */}
+//       {isCurrent && (
+//         <div className="bg-brand-600 text-white px-4 py-2 rounded-t-2xl flex items-center gap-2 text-xs font-medium">
+//           <MapPin size={13} />
+//           You are here
+//           <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse-soft ml-1" />
+//         </div>
+//       )}
+
+//       <div className="p-5">
+//         <div className="flex items-start gap-4">
+//           {/* Checkbox */}
+//           <button
+//             onClick={() => onToggle(topic.id, !topic.completed)}
+//             disabled={updating}
+//             className="shrink-0 mt-0.5 transition-transform hover:scale-110"
+//           >
+//             {updating ? (
+//               <Loader2 size={22} className="text-brand-400 animate-spin" />
+//             ) : topic.completed ? (
+//               <CheckCircle2 size={22} className="text-green-500" />
+//             ) : (
+//               <Circle size={22} className="text-ink-ghost" />
+//             )}
+//           </button>
+
+//           {/* Content */}
+//           <div className="flex-1 min-w-0">
+//             <div className="flex items-start justify-between gap-3">
+//               <div>
+//                 <div className="flex items-center gap-2 flex-wrap mb-1">
+//                   <span className="text-xs font-mono text-ink-ghost">
+//                     Week {topic.week} · {topic.day_range}
+//                   </span>
+//                   <span
+//                     className={`badge text-[10px] ${DIFFICULTY_COLORS[topic.difficulty] || "bg-surface-2 text-ink-tertiary"}`}
+//                   >
+//                     {topic.difficulty}
+//                   </span>
+//                 </div>
+//                 <h3
+//                   className={`font-semibold text-base transition-colors ${
+//                     topic.completed
+//                       ? "text-ink-ghost line-through"
+//                       : isCurrent
+//                         ? "text-brand-700"
+//                         : "text-ink-primary"
+//                   }`}
+//                 >
+//                   {topic.name}
+//                 </h3>
+//               </div>
+//               <div className="flex items-center gap-2 shrink-0">
+//                 <span className="flex items-center gap-1 text-xs text-ink-ghost">
+//                   <Clock size={12} /> {topic.estimated_hours}h
+//                 </span>
+//                 <button
+//                   onClick={() => setOpen(!open)}
+//                   className="text-ink-ghost hover:text-ink-secondary p-1"
+//                 >
+//                   {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+//                 </button>
+//               </div>
+//             </div>
+
+//             {/* Expanded */}
+//             {open && (
+//               <div className="mt-4 animate-slide-up space-y-4">
+//                 <p className="text-sm text-ink-tertiary leading-relaxed">
+//                   {topic.description}
+//                 </p>
+
+//                 {/* Subtopics */}
+//                 {topic.subtopics?.length > 0 && (
+//                   <div>
+//                     <p className="text-xs font-semibold text-ink-ghost uppercase tracking-wide mb-2">
+//                       Subtopics
+//                     </p>
+//                     <ul className="space-y-1">
+//                       {topic.subtopics.map((s, i) => (
+//                         <li
+//                           key={i}
+//                           className="flex items-center gap-2 text-sm text-ink-secondary"
+//                         >
+//                           <div className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
+//                           {s}
+//                         </li>
+//                       ))}
+//                     </ul>
+//                   </div>
+//                 )}
+
+//                 {/* Resources */}
+//                 {topic.resources?.length > 0 && (
+//                   <div>
+//                     <p className="text-xs font-semibold text-ink-ghost uppercase tracking-wide mb-2">
+//                       Resources
+//                     </p>
+//                     <div className="flex flex-wrap gap-2">
+//                       {topic.resources.map((r, i) => (
+//                         <ResourceChip key={i} resource={r} />
+//                       ))}
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 {/* Ask AI button */}
+//                 <div className="pt-1 border-t border-surface-3">
+//                   <button
+//                     onClick={() => onAskAI(topic, roadmapId)}
+//                     className="flex items-center gap-2 px-4 py-2 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 rounded-xl text-sm font-medium transition-all group"
+//                   >
+//                     <Bot size={15} className="group-hover:animate-pulse" />
+//                     Ask AI about "{topic.name}"
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default function RoadmapView() {
+//   const { id } = useParams();
+//   const navigate = useNavigate();
+//   const [roadmap, setRoadmap] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [updatingTopic, setUpdatingTopic] = useState(null);
+//   const [deleting, setDeleting] = useState(false);
+
+//   useEffect(() => {
+//     api
+//       .get(`/roadmaps/${id}`)
+//       .then((r) => {
+//         setRoadmap(r.data);
+//         setLoading(false);
+//       })
+//       .catch(() => {
+//         toast.error("Roadmap not found");
+//         navigate("/roadmaps");
+//       });
+//   }, [id]);
+
+//   const handleToggle = async (topicId, completed) => {
+//     setUpdatingTopic(topicId);
+//     try {
+//       const { data } = await api.post("/progress/topic", {
+//         roadmap_id: id,
+//         topic_id: topicId,
+//         completed,
+//       });
+//       setRoadmap((prev) => ({
+//         ...prev,
+//         topics: prev.topics.map((t) =>
+//           t.id === topicId ? { ...t, completed } : t,
+//         ),
+//         completed_topics: data.completed_topics,
+//         progress_percent: data.progress_percent,
+//         current_topic_index: data.current_topic_index,
+//       }));
+//       if (completed) toast.success("+10 XP earned! 🎉", { icon: "⭐" });
+//     } catch {
+//       toast.error("Failed to update progress");
+//     } finally {
+//       setUpdatingTopic(null);
+//     }
+//   };
+
+//   // Navigate to AI chat with pre-filled prompt about this topic
+//   const handleAskAI = (topic, roadmapId) => {
+//     const prompt = `Explain the topic "${topic.name}" to me in detail. Cover the following subtopics: ${topic.subtopics?.join(", ") || "the key concepts"}. I'm currently learning this as part of my roadmap and I'm at ${topic.difficulty} level. Please give examples and practical tips.`;
+//     const encodedPrompt = encodeURIComponent(prompt);
+//     navigate(`/chat?prompt=${encodedPrompt}&roadmap=${roadmapId}`);
+//   };
+
+//   const handleDelete = async () => {
+//     if (!confirm("Delete this roadmap? This cannot be undone.")) return;
+//     setDeleting(true);
+//     try {
+//       await api.delete(`/roadmaps/${id}`);
+//       toast.success("Roadmap deleted");
+//       navigate("/roadmaps");
+//     } catch {
+//       toast.error("Delete failed");
+//       setDeleting(false);
+//     }
+//   };
+
+//   if (loading)
+//     return (
+//       <div className="flex items-center justify-center h-64">
+//         <Loader2 size={28} className="text-brand-500 animate-spin" />
+//       </div>
+//     );
+//   if (!roadmap) return null;
+
+//   const weeks = [...new Set(roadmap.topics.map((t) => t.week))].sort(
+//     (a, b) => a - b,
+//   );
+
+//   return (
+//     <div className="max-w-3xl mx-auto animate-fade-in">
+//       {/* Back */}
+//       <button
+//         onClick={() => navigate(-1)}
+//         className="btn-ghost flex items-center gap-2 text-sm mb-6 -ml-2"
+//       >
+//         <ArrowLeft size={16} /> Back
+//       </button>
+
+//       {/* Header */}
+//       <div className="card p-6 mb-6">
+//         <div className="flex items-start justify-between gap-4 mb-4">
+//           <div>
+//             <div className="flex items-center gap-2 flex-wrap mb-2">
+//               <span className="badge bg-brand-50 text-brand-700">
+//                 {roadmap.skill_level}
+//               </span>
+//               <span className="badge bg-surface-2 text-ink-tertiary">
+//                 {roadmap.timeline}
+//               </span>
+//               {roadmap.progress_percent >= 100 && (
+//                 <span className="badge bg-green-50 text-green-700">
+//                   ✓ Completed
+//                 </span>
+//               )}
+//             </div>
+//             <h1 className="text-xl font-semibold text-ink-primary">
+//               {roadmap.title}
+//             </h1>
+//             <p className="text-sm text-ink-tertiary mt-1">
+//               Goal: {roadmap.learning_goal}
+//             </p>
+//           </div>
+//           <button
+//             onClick={handleDelete}
+//             disabled={deleting}
+//             className="text-ink-ghost hover:text-red-500 p-2 transition-colors"
+//           >
+//             {deleting ? (
+//               <Loader2 size={18} className="animate-spin" />
+//             ) : (
+//               <Trash2 size={18} />
+//             )}
+//           </button>
+//         </div>
+
+//         {/* Progress */}
+//         <div>
+//           <div className="flex items-center justify-between mb-2">
+//             <span className="text-sm text-ink-secondary font-medium">
+//               {roadmap.completed_topics} / {roadmap.total_topics} topics
+//               completed
+//             </span>
+//             <span className="text-sm font-semibold text-brand-600">
+//               {roadmap.progress_percent}%
+//             </span>
+//           </div>
+//           <div className="h-3 bg-surface-2 rounded-full overflow-hidden">
+//             <div
+//               className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-700"
+//               style={{ width: `${roadmap.progress_percent}%` }}
+//             />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Topics by week */}
+//       {weeks.map((week) => (
+//         <div key={week} className="mb-8">
+//           <div className="flex items-center gap-3 mb-4">
+//             <span className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+//               Week {week}
+//             </span>
+//             <div className="flex-1 h-px bg-surface-3" />
+//           </div>
+//           <div className="space-y-3">
+//             {roadmap.topics
+//               .filter((t) => t.week === week)
+//               .map((topic) => {
+//                 const globalIndex = roadmap.topics.findIndex(
+//                   (t) => t.id === topic.id,
+//                 );
+//                 const isCurrent =
+//                   globalIndex === roadmap.current_topic_index &&
+//                   roadmap.progress_percent < 100;
+//                 return (
+//                   <TopicCard
+//                     key={topic.id}
+//                     topic={topic}
+//                     index={globalIndex}
+//                     isCurrent={isCurrent}
+//                     onToggle={handleToggle}
+//                     updating={updatingTopic === topic.id}
+//                     roadmapId={id}
+//                     onAskAI={handleAskAI}
+//                   />
+//                 );
+//               })}
+//           </div>
+//         </div>
+//       ))}
+
+//       {roadmap.progress_percent >= 100 && (
+//         <div className="card p-8 text-center mt-4">
+//           <div className="text-4xl mb-3">🎉</div>
+//           <h2 className="text-lg font-semibold text-ink-primary mb-1">
+//             Roadmap complete!
+//           </h2>
+//           <p className="text-sm text-ink-tertiary mb-4">
+//             You've finished all topics. Ready for the next challenge?
+//           </p>
+//           <button
+//             onClick={() => navigate("/onboarding")}
+//             className="btn-primary inline-flex items-center gap-2"
+//           >
+//             <Star size={16} /> Create a new roadmap
+//           </button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import toast from "react-hot-toast";
@@ -289,6 +694,12 @@ import {
   MapPin,
   Star,
   Bot,
+  FileText,
+  StickyNote,
+  Download,
+  X,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 
 const RESOURCE_ICONS = {
@@ -297,110 +708,478 @@ const RESOURCE_ICONS = {
   course: { icon: PlayCircle, color: "text-purple-500 bg-purple-50" },
   practice: { icon: Code2, color: "text-green-500 bg-green-50" },
 };
-
-const DIFFICULTY_COLORS = {
+const DIFF_COLORS = {
   Beginner: "bg-green-50 text-green-700",
   Intermediate: "bg-yellow-50 text-yellow-700",
   Advanced: "bg-red-50 text-red-700",
 };
 
-function ResourceChip({ resource }) {
-  const meta = RESOURCE_ICONS[resource.type] || RESOURCE_ICONS.docs;
-  const Icon = meta.icon;
+/* ── Quiz Modal ──────────────────────────────────────────────── */
+function QuizModal({ topic, roadmapId, onClose, onPassed }) {
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    api
+      .post("/quiz/generate", {
+        roadmap_id: roadmapId,
+        topic_id: topic.id,
+        topic_name: topic.name,
+        subtopics: topic.subtopics || [],
+        difficulty: topic.difficulty || "Beginner",
+      })
+      .then((r) => {
+        setQuestions(r.data.questions);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Quiz generation failed");
+        onClose();
+      });
+  }, []);
+
+  const handleSubmit = async () => {
+    if (Object.keys(answers).length < questions.length) {
+      toast.error("Please answer all questions");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const ans = questions.map((_, i) => answers[i] ?? -1);
+      const res = await api.post("/quiz/submit", {
+        roadmap_id: roadmapId,
+        topic_id: topic.id,
+        answers: ans,
+        questions,
+      });
+      setResult(res.data);
+      if (res.data.passed) onPassed(res.data);
+    } catch {
+      toast.error("Submission failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <a
-      href={resource.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80 transition-opacity`}
-    >
-      <Icon size={12} />
-      {resource.title}
-      <ExternalLink size={10} />
-    </a>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-surface-3 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <div>
+            <h2 className="font-semibold text-ink-primary">
+              Quiz: {topic.name}
+            </h2>
+            <p className="text-xs text-ink-ghost mt-0.5">
+              Score 60%+ to auto-complete this topic
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-surface-2 rounded-xl text-ink-ghost"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {loading ? (
+            <div className="flex flex-col items-center py-12">
+              <Loader2 size={32} className="text-brand-500 animate-spin mb-3" />
+              <p className="text-sm text-ink-tertiary">
+                Generating quiz questions…
+              </p>
+            </div>
+          ) : result ? (
+            <div className="text-center py-8">
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${result.passed ? "bg-green-100" : "bg-red-100"}`}
+              >
+                {result.passed ? (
+                  <Check size={36} className="text-green-600" />
+                ) : (
+                  <X size={36} className="text-red-500" />
+                )}
+              </div>
+              <h3 className="text-2xl font-bold text-ink-primary mb-1">
+                {result.score}%
+              </h3>
+              <p className="text-ink-tertiary mb-2">
+                {result.correct}/{result.total} correct
+              </p>
+              <div
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium mb-6 ${result.passed ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}
+              >
+                {result.passed ? (
+                  <>
+                    <Check size={15} /> Topic completed! +15 XP
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle size={15} /> Need 60% to pass — try again
+                  </>
+                )}
+              </div>
+              {/* Answer review */}
+              <div className="text-left space-y-4 mt-6">
+                {questions.map((q, i) => {
+                  const userAns = result.answers[i];
+                  const correct = q.correct;
+                  const isRight = userAns === correct;
+                  return (
+                    <div
+                      key={i}
+                      className={`p-4 rounded-xl border ${isRight ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+                    >
+                      <p className="text-sm font-medium text-ink-primary mb-2">
+                        {i + 1}. {q.question}
+                      </p>
+                      <p
+                        className={`text-xs mb-1 ${isRight ? "text-green-700" : "text-red-600"}`}
+                      >
+                        Your answer: {q.options[userAns] || "Not answered"}
+                      </p>
+                      {!isRight && (
+                        <p className="text-xs text-green-700">
+                          Correct: {q.options[correct]}
+                        </p>
+                      )}
+                      {q.explanation && (
+                        <p className="text-xs text-ink-tertiary mt-2 italic">
+                          {q.explanation}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={onClose} className="btn-primary mt-6">
+                {result.passed ? "Continue Learning" : "Close & Review"}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {questions.map((q, qi) => (
+                <div key={qi} className="p-4 bg-surface-1 rounded-xl">
+                  <p className="text-sm font-semibold text-ink-primary mb-3">
+                    {qi + 1}. {q.question}
+                  </p>
+                  <div className="space-y-2">
+                    {q.options.map((opt, oi) => (
+                      <label
+                        key={oi}
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${answers[qi] === oi ? "bg-brand-50 border-brand-400" : "bg-white border-surface-3 hover:border-brand-200"}`}
+                      >
+                        <input
+                          type="radio"
+                          name={`q${qi}`}
+                          className="hidden"
+                          onChange={() =>
+                            setAnswers((p) => ({ ...p, [qi]: oi }))
+                          }
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[qi] === oi ? "border-brand-500 bg-brand-500" : "border-surface-4"}`}
+                        >
+                          {answers[qi] === oi && (
+                            <div className="w-2 h-2 rounded-full bg-white" />
+                          )}
+                        </div>
+                        <span className="text-sm text-ink-secondary">
+                          {opt}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={handleSubmit}
+                disabled={
+                  submitting || Object.keys(answers).length < questions.length
+                }
+                className="btn-primary w-full justify-center"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Submitting…
+                  </>
+                ) : (
+                  "Submit Quiz"
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
+/* ── Study Notes Modal ───────────────────────────────────────── */
+function NotesModal({ topic, onClose }) {
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .post("/features/study-notes", {
+        topic_name: topic.name,
+        subtopics: topic.subtopics || [],
+        difficulty: topic.difficulty,
+      })
+      .then((r) => {
+        setNotes(r.data.notes);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Notes generation failed");
+        onClose();
+      });
+  }, []);
+
+  const downloadPDF = () => {
+    const blob = new Blob([notes], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${topic.name.replace(/\s+/g, "-")}-notes.txt`;
+    a.click();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="border-b border-surface-3 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-ink-primary">
+              Study Notes: {topic.name}
+            </h2>
+            <p className="text-xs text-ink-ghost mt-0.5">
+              AI-generated comprehensive notes
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!loading && (
+              <button
+                onClick={downloadPDF}
+                className="btn-secondary flex items-center gap-2 text-xs py-2"
+              >
+                <Download size={14} /> Download
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-surface-2 rounded-xl text-ink-ghost"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex flex-col items-center py-16">
+              <Loader2 size={32} className="text-brand-500 animate-spin mb-3" />
+              <p className="text-sm text-ink-tertiary">
+                Generating study notes…
+              </p>
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap text-sm text-ink-secondary font-sans leading-relaxed">
+              {notes}
+            </pre>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Per-Topic User Notes ─────────────────────────────────────── */
+function TopicNotes({ topicId, roadmapId }) {
+  const [note, setNote] = useState("");
+  const [saved, setSaved] = useState(true);
+  const timer = useRef(null);
+
+  useEffect(() => {
+    api
+      .get(`/notes/${roadmapId}/${topicId}`)
+      .then((r) => setNote(r.data.content || ""));
+  }, [topicId]);
+
+  const handleChange = (val) => {
+    setNote(val);
+    setSaved(false);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      await api.post("/notes/", {
+        roadmap_id: roadmapId,
+        topic_id: topicId,
+        content: val,
+      });
+      setSaved(true);
+    }, 1000);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold text-ink-ghost uppercase tracking-wide">
+          My Notes
+        </p>
+        <span
+          className={`text-[10px] ${saved ? "text-green-500" : "text-ink-ghost"}`}
+        >
+          {saved ? "✓ Saved" : "Saving…"}
+        </span>
+      </div>
+      <textarea
+        value={note}
+        onChange={(e) => handleChange(e.target.value)}
+        rows={3}
+        className="w-full input text-xs resize-none"
+        placeholder="Write your personal notes for this topic…"
+      />
+    </div>
+  );
+}
+
+/* ── Graphical Roadmap View ──────────────────────────────────── */
+function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
+  return (
+    <div className="overflow-x-auto pb-4">
+      <div className="flex flex-col items-center gap-0 min-w-max mx-auto">
+        {topics.map((topic, i) => {
+          const isCurrent = i === currentIndex;
+          const isDone = topic.completed;
+          return (
+            <div key={topic.id} className="flex flex-col items-center">
+              <div
+                onClick={() => onTopicClick(topic)}
+                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${
+                  isDone
+                    ? "bg-green-50 border-green-400"
+                    : isCurrent
+                      ? "bg-brand-50 border-brand-500 shadow-lg shadow-brand-100"
+                      : "bg-white border-surface-3 hover:border-brand-300"
+                }`}
+              >
+                {isCurrent && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[10px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <MapPin size={9} /> You are here
+                  </div>
+                )}
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                      isDone
+                        ? "bg-green-500 text-white"
+                        : isCurrent
+                          ? "bg-brand-600 text-white"
+                          : "bg-surface-3 text-ink-ghost"
+                    }`}
+                  >
+                    {isDone ? <Check size={13} /> : i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-xs font-semibold truncate ${isCurrent ? "text-brand-700" : isDone ? "text-green-700" : "text-ink-primary"}`}
+                    >
+                      {topic.name}
+                    </p>
+                    <p className="text-[10px] text-ink-ghost mt-0.5">
+                      Week {topic.week} · {topic.estimated_hours}h
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {i < topics.length - 1 && (
+                <div
+                  className={`w-0.5 h-6 ${topics[i + 1]?.completed ? "bg-green-400" : i < currentIndex ? "bg-green-300" : "bg-surface-3"}`}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── Topic Card ──────────────────────────────────────────────── */
 function TopicCard({
   topic,
   index,
   isCurrent,
-  onToggle,
-  updating,
-  roadmapId,
+  onQuiz,
   onAskAI,
+  onNotes,
+  roadmapId,
 }) {
   const [open, setOpen] = useState(isCurrent);
-
   useEffect(() => {
     if (isCurrent) setOpen(true);
   }, [isCurrent]);
 
   return (
     <div
+      id={`topic-${topic.id}`}
       className={`rounded-2xl border transition-all duration-200 ${
         isCurrent
           ? "border-brand-400 shadow-md shadow-brand-100 bg-white"
           : topic.completed
             ? "border-surface-3 bg-surface-1"
-            : "border-surface-3 bg-white hover:border-surface-4"
+            : "border-surface-3 bg-white"
       }`}
     >
-      {/* You are here banner */}
       {isCurrent && (
         <div className="bg-brand-600 text-white px-4 py-2 rounded-t-2xl flex items-center gap-2 text-xs font-medium">
-          <MapPin size={13} />
-          You are here
-          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse-soft ml-1" />
+          <MapPin size={13} /> You are here{" "}
+          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-1" />
         </div>
       )}
-
-      <div className="p-5">
-        <div className="flex items-start gap-4">
-          {/* Checkbox */}
-          <button
-            onClick={() => onToggle(topic.id, !topic.completed)}
-            disabled={updating}
-            className="shrink-0 mt-0.5 transition-transform hover:scale-110"
+      <div className="p-4 sm:p-5">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div
+            className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+              topic.completed
+                ? "bg-green-500 text-white"
+                : isCurrent
+                  ? "bg-brand-600 text-white"
+                  : "bg-surface-3 text-ink-ghost"
+            }`}
           >
-            {updating ? (
-              <Loader2 size={22} className="text-brand-400 animate-spin" />
-            ) : topic.completed ? (
-              <CheckCircle2 size={22} className="text-green-500" />
-            ) : (
-              <Circle size={22} className="text-ink-ghost" />
-            )}
-          </button>
-
-          {/* Content */}
+            {topic.completed ? <Check size={13} /> : index + 1}
+          </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="text-xs font-mono text-ink-ghost">
                     Week {topic.week} · {topic.day_range}
                   </span>
                   <span
-                    className={`badge text-[10px] ${DIFFICULTY_COLORS[topic.difficulty] || "bg-surface-2 text-ink-tertiary"}`}
+                    className={`badge text-[10px] ${DIFF_COLORS[topic.difficulty] || "bg-surface-2 text-ink-tertiary"}`}
                   >
                     {topic.difficulty}
                   </span>
+                  {topic.quiz_score !== undefined && (
+                    <span className="badge bg-green-50 text-green-700 text-[10px]">
+                      Quiz: {topic.quiz_score}%
+                    </span>
+                  )}
                 </div>
                 <h3
-                  className={`font-semibold text-base transition-colors ${
-                    topic.completed
-                      ? "text-ink-ghost line-through"
-                      : isCurrent
-                        ? "text-brand-700"
-                        : "text-ink-primary"
-                  }`}
+                  className={`font-semibold text-sm sm:text-base ${topic.completed ? "text-ink-ghost line-through" : isCurrent ? "text-brand-700" : "text-ink-primary"}`}
                 >
                   {topic.name}
                 </h3>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="flex items-center gap-1 text-xs text-ink-ghost">
-                  <Clock size={12} /> {topic.estimated_hours}h
+                  <Clock size={11} />
+                  {topic.estimated_hours}h
                 </span>
                 <button
                   onClick={() => setOpen(!open)}
@@ -411,14 +1190,13 @@ function TopicCard({
               </div>
             </div>
 
-            {/* Expanded */}
             {open && (
-              <div className="mt-4 animate-slide-up space-y-4">
-                <p className="text-sm text-ink-tertiary leading-relaxed">
-                  {topic.description}
-                </p>
-
-                {/* Subtopics */}
+              <div className="mt-4 space-y-4 animate-slide-up">
+                {topic.description && (
+                  <p className="text-sm text-ink-tertiary leading-relaxed">
+                    {topic.description}
+                  </p>
+                )}
                 {topic.subtopics?.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-ink-ghost uppercase tracking-wide mb-2">
@@ -437,29 +1215,54 @@ function TopicCard({
                     </ul>
                   </div>
                 )}
-
-                {/* Resources */}
                 {topic.resources?.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-ink-ghost uppercase tracking-wide mb-2">
                       Resources
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {topic.resources.map((r, i) => (
-                        <ResourceChip key={i} resource={r} />
-                      ))}
+                      {topic.resources.map((r, i) => {
+                        const meta =
+                          RESOURCE_ICONS[r.type] || RESOURCE_ICONS.docs;
+                        const Icon = meta.icon;
+                        return (
+                          <a
+                            key={i}
+                            href={r.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80`}
+                          >
+                            <Icon size={12} />
+                            {r.title}
+                            <ExternalLink size={10} />
+                          </a>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
-
-                {/* Ask AI button */}
-                <div className="pt-1 border-t border-surface-3">
+                <TopicNotes topicId={topic.id} roadmapId={roadmapId} />
+                <div className="flex flex-wrap gap-2 pt-1 border-t border-surface-3">
+                  {!topic.completed && (
+                    <button
+                      onClick={() => onQuiz(topic)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-medium transition-all"
+                    >
+                      <Star size={13} /> Take Quiz to Complete
+                    </button>
+                  )}
                   <button
-                    onClick={() => onAskAI(topic, roadmapId)}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 rounded-xl text-sm font-medium transition-all group"
+                    onClick={() => onNotes(topic)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl text-xs font-medium transition-all"
                   >
-                    <Bot size={15} className="group-hover:animate-pulse" />
-                    Ask AI about "{topic.name}"
+                    <FileText size={13} /> Study Notes
+                  </button>
+                  <button
+                    onClick={() => onAskAI(topic)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 rounded-xl text-xs font-medium transition-all"
+                  >
+                    <Bot size={13} /> Ask AI
                   </button>
                 </div>
               </div>
@@ -471,13 +1274,16 @@ function TopicCard({
   );
 }
 
+/* ── Main RoadmapView ────────────────────────────────────────── */
 export default function RoadmapView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [updatingTopic, setUpdatingTopic] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [quizTopic, setQuizTopic] = useState(null);
+  const [notesTopic, setNotesTopic] = useState(null);
+  const [viewMode, setViewMode] = useState("list"); // 'list' | 'graph'
 
   useEffect(() => {
     api
@@ -492,49 +1298,54 @@ export default function RoadmapView() {
       });
   }, [id]);
 
-  const handleToggle = async (topicId, completed) => {
-    setUpdatingTopic(topicId);
-    try {
-      const { data } = await api.post("/progress/topic", {
-        roadmap_id: id,
-        topic_id: topicId,
-        completed,
-      });
-      setRoadmap((prev) => ({
-        ...prev,
-        topics: prev.topics.map((t) =>
-          t.id === topicId ? { ...t, completed } : t,
-        ),
-        completed_topics: data.completed_topics,
-        progress_percent: data.progress_percent,
-        current_topic_index: data.current_topic_index,
-      }));
-      if (completed) toast.success("+10 XP earned! 🎉", { icon: "⭐" });
-    } catch {
-      toast.error("Failed to update progress");
-    } finally {
-      setUpdatingTopic(null);
-    }
+  const handleQuizPassed = (result) => {
+    setRoadmap((prev) => ({
+      ...prev,
+      topics: prev.topics.map((t) =>
+        t.id === quizTopic.id
+          ? { ...t, completed: true, quiz_score: result.score }
+          : t,
+      ),
+      completed_topics: result.completed_topics ?? prev.completed_topics,
+      progress_percent: result.progress_percent ?? prev.progress_percent,
+      current_topic_index:
+        result.current_topic_index ?? prev.current_topic_index,
+    }));
+    toast.success(`Topic completed! Score: ${result.score}% 🎉`, {
+      icon: "⭐",
+    });
   };
 
-  // Navigate to AI chat with pre-filled prompt about this topic
-  const handleAskAI = (topic, roadmapId) => {
-    const prompt = `Explain the topic "${topic.name}" to me in detail. Cover the following subtopics: ${topic.subtopics?.join(", ") || "the key concepts"}. I'm currently learning this as part of my roadmap and I'm at ${topic.difficulty} level. Please give examples and practical tips.`;
-    const encodedPrompt = encodeURIComponent(prompt);
-    navigate(`/chat?prompt=${encodedPrompt}&roadmap=${roadmapId}`);
+  const handleAskAI = (topic) => {
+    const prompt = `Explain the topic "${topic.name}" in detail. Cover: ${topic.subtopics?.join(", ") || "key concepts"}. I'm at ${topic.difficulty} level.`;
+    navigate(`/chat?prompt=${encodeURIComponent(prompt)}&roadmap=${id}`);
   };
 
   const handleDelete = async () => {
-    if (!confirm("Delete this roadmap? This cannot be undone.")) return;
+    if (!confirm("Delete this roadmap?")) return;
     setDeleting(true);
     try {
       await api.delete(`/roadmaps/${id}`);
-      toast.success("Roadmap deleted");
+      toast.success("Deleted");
       navigate("/roadmaps");
     } catch {
       toast.error("Delete failed");
       setDeleting(false);
     }
+  };
+
+  const exportPDF = () => {
+    if (!roadmap) return;
+    let content = `${roadmap.title}\n${"=".repeat(60)}\nGoal: ${roadmap.learning_goal}\nLevel: ${roadmap.skill_level} | Timeline: ${roadmap.timeline}\nProgress: ${roadmap.progress_percent}%\n\n`;
+    roadmap.topics.forEach((t, i) => {
+      content += `${i + 1}. ${t.name} [${t.completed ? "✓ Done" : "Pending"}]\n   Week ${t.week} | ${t.estimated_hours}h | ${t.difficulty}\n   Subtopics: ${t.subtopics?.join(", ")}\n\n`;
+    });
+    const blob = new Blob([content], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${roadmap.title.replace(/\s+/g, "-")}-roadmap.txt`;
+    a.click();
+    toast.success("Roadmap exported!");
   };
 
   if (loading)
@@ -551,7 +1362,21 @@ export default function RoadmapView() {
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
-      {/* Back */}
+      {quizTopic && (
+        <QuizModal
+          topic={quizTopic}
+          roadmapId={id}
+          onClose={() => setQuizTopic(null)}
+          onPassed={(r) => {
+            handleQuizPassed(r);
+            setQuizTopic(null);
+          }}
+        />
+      )}
+      {notesTopic && (
+        <NotesModal topic={notesTopic} onClose={() => setNotesTopic(null)} />
+      )}
+
       <button
         onClick={() => navigate(-1)}
         className="btn-ghost flex items-center gap-2 text-sm mb-6 -ml-2"
@@ -560,9 +1385,9 @@ export default function RoadmapView() {
       </button>
 
       {/* Header */}
-      <div className="card p-6 mb-6">
+      <div className="card p-5 sm:p-6 mb-6">
         <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <span className="badge bg-brand-50 text-brand-700">
                 {roadmap.skill_level}
@@ -576,81 +1401,124 @@ export default function RoadmapView() {
                 </span>
               )}
             </div>
-            <h1 className="text-xl font-semibold text-ink-primary">
+            <h1 className="text-lg sm:text-xl font-semibold text-ink-primary">
               {roadmap.title}
             </h1>
             <p className="text-sm text-ink-tertiary mt-1">
               Goal: {roadmap.learning_goal}
             </p>
           </div>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-ink-ghost hover:text-red-500 p-2 transition-colors"
-          >
-            {deleting ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Trash2 size={18} />
-            )}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={exportPDF}
+              title="Export"
+              className="p-2 text-ink-ghost hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors"
+            >
+              <Download size={18} />
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="p-2 text-ink-ghost hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+            >
+              {deleting ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Trash2 size={18} />
+              )}
+            </button>
+          </div>
         </div>
-
-        {/* Progress */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-ink-secondary font-medium">
-              {roadmap.completed_topics} / {roadmap.total_topics} topics
-              completed
-            </span>
-            <span className="text-sm font-semibold text-brand-600">
-              {roadmap.progress_percent}%
-            </span>
-          </div>
-          <div className="h-3 bg-surface-2 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-700"
-              style={{ width: `${roadmap.progress_percent}%` }}
-            />
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-ink-secondary font-medium">
+            {roadmap.completed_topics}/{roadmap.total_topics} topics
+          </span>
+          <span className="text-sm font-semibold text-brand-600">
+            {roadmap.progress_percent}%
+          </span>
+        </div>
+        <div className="h-3 bg-surface-2 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-700"
+            style={{ width: `${roadmap.progress_percent}%` }}
+          />
+        </div>
+        {/* View toggle */}
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => setViewMode("list")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "list" ? "bg-brand-600 text-white" : "bg-surface-2 text-ink-secondary hover:bg-surface-3"}`}
+          >
+            List View
+          </button>
+          <button
+            onClick={() => setViewMode("graph")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "graph" ? "bg-brand-600 text-white" : "bg-surface-2 text-ink-secondary hover:bg-surface-3"}`}
+          >
+            Visual Map
+          </button>
         </div>
       </div>
 
-      {/* Topics by week */}
-      {weeks.map((week) => (
-        <div key={week} className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
-              Week {week}
-            </span>
-            <div className="flex-1 h-px bg-surface-3" />
-          </div>
-          <div className="space-y-3">
-            {roadmap.topics
-              .filter((t) => t.week === week)
-              .map((topic) => {
-                const globalIndex = roadmap.topics.findIndex(
-                  (t) => t.id === topic.id,
-                );
-                const isCurrent =
-                  globalIndex === roadmap.current_topic_index &&
-                  roadmap.progress_percent < 100;
-                return (
-                  <TopicCard
-                    key={topic.id}
-                    topic={topic}
-                    index={globalIndex}
-                    isCurrent={isCurrent}
-                    onToggle={handleToggle}
-                    updating={updatingTopic === topic.id}
-                    roadmapId={id}
-                    onAskAI={handleAskAI}
-                  />
-                );
-              })}
-          </div>
+      {/* Graphical View */}
+      {viewMode === "graph" && (
+        <div className="card p-6 mb-6">
+          <h2 className="text-sm font-semibold text-ink-primary mb-6 text-center">
+            Your Learning Journey
+          </h2>
+          <GraphicalRoadmap
+            topics={roadmap.topics}
+            currentIndex={roadmap.current_topic_index}
+            onTopicClick={(t) => {
+              setViewMode("list");
+              setTimeout(
+                () =>
+                  document
+                    .getElementById(`topic-${t.id}`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                100,
+              );
+            }}
+          />
         </div>
-      ))}
+      )}
+
+      {/* List View */}
+      {viewMode === "list" &&
+        weeks.map((week) => (
+          <div key={week} className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs font-semibold text-ink-ghost uppercase tracking-wider">
+                Week {week}
+              </span>
+              <div className="flex-1 h-px bg-surface-3" />
+            </div>
+            <div className="space-y-3">
+              {roadmap.topics
+                .filter((t) => t.week === week)
+                .map((topic) => {
+                  const globalIndex = roadmap.topics.findIndex(
+                    (t) => t.id === topic.id,
+                  );
+                  const isCurrent =
+                    globalIndex === roadmap.current_topic_index &&
+                    roadmap.progress_percent < 100;
+                  return (
+                    <TopicCard
+                      key={topic.id}
+                      topic={topic}
+                      index={globalIndex}
+                      isCurrent={isCurrent}
+                      roadmapId={id}
+                      onQuiz={setQuizTopic}
+                      onNotes={setNotesTopic}
+                      onAskAI={handleAskAI}
+                    />
+                  );
+                })}
+            </div>
+          </div>
+        ))}
 
       {roadmap.progress_percent >= 100 && (
         <div className="card p-8 text-center mt-4">
@@ -659,13 +1527,13 @@ export default function RoadmapView() {
             Roadmap complete!
           </h2>
           <p className="text-sm text-ink-tertiary mb-4">
-            You've finished all topics. Ready for the next challenge?
+            You've mastered all topics. Ready for the next challenge?
           </p>
           <button
             onClick={() => navigate("/onboarding")}
             className="btn-primary inline-flex items-center gap-2"
           >
-            <Star size={16} /> Create a new roadmap
+            <Star size={16} /> New roadmap
           </button>
         </div>
       )}
