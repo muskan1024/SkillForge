@@ -137,7 +137,7 @@ function ChatBubble({ msg }) {
   );
 }
 
-/* ── History Sidebar ──────────────────────────────────────── */
+/* ── History Sidebar ----- */
 function HistorySidebar({
   sessions,
   activeId,

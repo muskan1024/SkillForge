@@ -13,7 +13,7 @@ router = APIRouter()
 def get_groq():
     return Groq(api_key=get_settings().groq_api_key)
 
-# ── Study Notes ─────────────────────────────────────────────────
+# ── Study Notes ──────────────────────────────────────────────────
 class NotesRequest(BaseModel):
     topic_name: str
     subtopics: List[str] = []
@@ -27,16 +27,16 @@ async def generate_study_notes(req: NotesRequest, current_user=Depends(get_curre
 Subtopics: {", ".join(req.subtopics)}
 Level: {req.difficulty}
 
-Format as structured markdown with:
+Format as structured markdown:
 # {req.topic_name} - Study Notes
 ## Key Concepts
 ## Detailed Explanations (with examples)
-## Code Examples (if applicable)
+## Code Examples (if applicable, use proper code blocks)
 ## Common Mistakes to Avoid
 ## Quick Summary / Cheat Sheet
 ## Practice Questions
 
-Make it comprehensive but concise. Use bullet points, code blocks, and clear headings."""
+Make it comprehensive but concise."""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
@@ -46,38 +46,68 @@ Make it comprehensive but concise. Use bullet points, code blocks, and clear hea
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Notes generation failed: {str(e)}")
 
-# ── Daily Challenge ──────────────────────────────────────────────
+# ── Daily Challenge (NO mark-as-done, topic-based) ───────────────
 @router.get("/daily-challenge")
 async def get_daily_challenge(current_user=Depends(get_current_user), db=Depends(get_db)):
     today = datetime.utcnow().date().isoformat()
+
+    # Check if already generated today
     existing = await db.daily_challenges.find_one({"user_id": current_user["id"], "date": today})
     if existing:
         existing["id"] = str(existing["_id"]); existing.pop("_id", None)
         return existing
 
-    # Get user's active roadmap skills for context
-    roadmaps = [r async for r in db.roadmaps.find({"user_id": current_user["id"]}).sort("updated_at", -1).limit(1)]
-    skill_context = roadmaps[0]["skills"][0] if roadmaps and roadmaps[0].get("skills") else "Programming"
-    current_idx = roadmaps[0].get("current_topic_index", 0) if roadmaps else 0
-    topics = roadmaps[0].get("topics", []) if roadmaps else []
-    current_topic = topics[current_idx]["name"] if topics else skill_context
+    # Get user's active roadmap + CURRENT topic for context
+    roadmaps = [r async for r in db.roadmaps.find({"user_id": current_user["id"]}).sort("updated_at", -1).limit(3)]
+    
+    # Find the most recently active incomplete roadmap
+    active_roadmap = None
+    for r in roadmaps:
+        if r.get("progress_percent", 0) < 100:
+            active_roadmap = r
+            break
+
+    skill_context = "Programming"
+    current_topic = "Programming Fundamentals"
+    roadmap_title = None
+    subtopics = []
+
+    if active_roadmap:
+        current_idx = active_roadmap.get("current_topic_index", 0)
+        topics = active_roadmap.get("topics", [])
+        skills = active_roadmap.get("skills", ["Programming"])
+        skill_context = skills[0] if skills else "Programming"
+        roadmap_title = active_roadmap.get("title", "")
+        
+        if topics and current_idx < len(topics):
+            current_topic_obj = topics[current_idx]
+            current_topic = current_topic_obj.get("name", "Programming Fundamentals")
+            subtopics = current_topic_obj.get("subtopics", [])
 
     try:
         client = get_groq()
-        prompt = f"""Generate a daily coding/learning challenge for someone learning {current_topic} ({skill_context}).
+        prompt = f"""Generate ONE practical daily learning challenge for someone currently studying:
+- Skill: {skill_context}
+- Current Topic: "{current_topic}"
+- Subtopics being covered: {", ".join(subtopics) if subtopics else "general concepts"}
+{f"- Roadmap: {roadmap_title}" if roadmap_title else ""}
 
-Return ONLY valid JSON:
+The challenge MUST be directly related to "{current_topic}" so the learner can practice exactly what they are studying today.
+
+Return ONLY valid JSON (no markdown):
 {{
-  "title": "Challenge title",
-  "difficulty": "Easy|Medium|Hard",
-  "category": "topic category",
-  "description": "Clear problem description in 2-3 sentences",
-  "task": "Specific task the learner should do",
-  "hints": ["hint 1", "hint 2", "hint 3"],
-  "example_input": "example if applicable, else empty string",
-  "example_output": "expected output if applicable, else empty string",
+  "title": "Short challenge title related to {current_topic}",
+  "difficulty": "Easy",
+  "category": "{current_topic}",
+  "description": "2-sentence description of what this challenge covers and why it matters for {current_topic}",
+  "task": "The specific hands-on task the learner should complete today (be concrete and actionable)",
+  "hints": ["specific hint 1 related to {current_topic}", "specific hint 2", "specific hint 3"],
+  "example_input": "concrete example input if coding task, else empty string",
+  "example_output": "expected output if coding task, else empty string",
+  "learning_objective": "What the learner will understand after completing this challenge",
   "related_topic": "{current_topic}"
 }}"""
+
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
@@ -86,46 +116,45 @@ Return ONLY valid JSON:
         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
         text = re.sub(r'\s*```$', '', text)
         challenge = json.loads(text)
-        challenge.update({"user_id": current_user["id"], "date": today,
-                          "completed": False, "created_at": datetime.utcnow()})
+        challenge.update({
+            "user_id": current_user["id"],
+            "date": today,
+            "created_at": datetime.utcnow(),
+            "roadmap_title": roadmap_title,
+            "skill": skill_context,
+        })
         result = await db.daily_challenges.insert_one(challenge)
-        challenge["id"] = str(result.inserted_id); challenge.pop("_id", None)
+        challenge["id"] = str(result.inserted_id)
+        challenge.pop("_id", None)
         return challenge
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Challenge generation failed: {str(e)}")
 
-@router.post("/daily-challenge/{challenge_id}/complete")
-async def complete_challenge(challenge_id: str, current_user=Depends(get_current_user), db=Depends(get_db)):
-    try:
-        await db.daily_challenges.update_one(
-            {"_id": ObjectId(challenge_id), "user_id": current_user["id"]},
-            {"$set": {"completed": True, "completed_at": datetime.utcnow()}}
-        )
-        await db.users.update_one({"_id": ObjectId(current_user["id"])}, {"$inc": {"xp_points": 20}})
-        return {"success": True, "xp_gained": 20}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ── Badges ───────────────────────────────────────────────────────
+# ── Badges ────────────────────────────────────────────────────────
 @router.get("/badges")
 async def get_badges(current_user=Depends(get_current_user), db=Depends(get_db)):
     user = await db.users.find_one({"_id": ObjectId(current_user["id"])})
     earned = user.get("badges", [])
     all_badges = [
-        {"id": "first_roadmap", "name": "Pathfinder", "icon": "🗺️", "desc": "Created your first roadmap"},
-        {"id": "first_complete", "name": "Topic Master", "icon": "✅", "desc": "Completed your first topic"},
-        {"id": "ten_topics", "name": "Dedicated Learner", "icon": "📚", "desc": "Completed 10 topics"},
-        {"id": "fifty_topics", "name": "Knowledge Seeker", "icon": "🔥", "desc": "Completed 50 topics"},
-        {"id": "roadmap_complete", "name": "Roadmap Champion", "icon": "🏆", "desc": "Finished a complete roadmap"},
-        {"id": "streak_7", "name": "Week Warrior", "icon": "⚡", "desc": "7-day learning streak"},
-        {"id": "streak_30", "name": "Monthly Master", "icon": "🌟", "desc": "30-day learning streak"},
-        {"id": "xp_100", "name": "XP Hunter", "icon": "💎", "desc": "Earned 100 XP points"},
-        {"id": "multi_skill", "name": "Polymath", "icon": "🧠", "desc": "Learning 3+ different skills"},
+        {"id": "first_roadmap",   "name": "Pathfinder",        "icon": "🗺️", "desc": "Created your first roadmap"},
+        {"id": "first_complete",  "name": "Topic Master",       "icon": "✅", "desc": "Completed your first topic"},
+        {"id": "ten_topics",      "name": "Dedicated Learner",  "icon": "📚", "desc": "Completed 10 topics"},
+        {"id": "fifty_topics",    "name": "Knowledge Seeker",   "icon": "🔥", "desc": "Completed 50 topics"},
+        {"id": "roadmap_complete","name": "Roadmap Champion",   "icon": "🏆", "desc": "Finished a complete roadmap"},
+        {"id": "streak_7",        "name": "Week Warrior",       "icon": "⚡", "desc": "7-day learning streak"},
+        {"id": "streak_30",       "name": "Monthly Master",     "icon": "🌟", "desc": "30-day learning streak"},
+        {"id": "xp_100",          "name": "XP Hunter",          "icon": "💎", "desc": "Earned 100 XP points"},
+        {"id": "multi_skill",     "name": "Polymath",           "icon": "🧠", "desc": "Learning 3+ different skills"},
+        {"id": "quiz_ace",        "name": "Quiz Ace",           "icon": "🎯", "desc": "Scored 100% on any quiz"},
+        {"id": "speed_learner",   "name": "Speed Learner",      "icon": "🚀", "desc": "Completed 5 topics in one day"},
     ]
     earned_ids = {b["id"] for b in earned}
-    return {"earned": earned, "all": [{**b, "earned": b["id"] in earned_ids} for b in all_badges]}
+    return {
+        "earned": earned,
+        "all": [{**b, "earned": b["id"] in earned_ids} for b in all_badges]
+    }
 
-# ── Code Review ──────────────────────────────────────────────────
+# ── Code Review ───────────────────────────────────────────────────
 class CodeReviewRequest(BaseModel):
     code: str
     language: str
@@ -135,22 +164,22 @@ class CodeReviewRequest(BaseModel):
 async def review_code(req: CodeReviewRequest, current_user=Depends(get_current_user)):
     try:
         client = get_groq()
-        prompt = f"""You are an expert code reviewer. Review the following {req.language} code:
+        prompt = f"""You are an expert code reviewer. Review this {req.language} code:
 
 ```{req.language}
 {req.code}
 ```
 {f"Context: {req.context}" if req.context else ""}
 
-Provide a structured review with:
+Provide structured review:
 ## Overall Assessment
 ## ✅ What's Good
-## ⚠️ Issues Found (with line references if possible)
-## 🔧 Suggested Improvements (with corrected code snippets)
+## ⚠️ Issues Found
+## 🔧 Improved Code (show corrected version)
 ## 📚 Best Practices to Remember
 ## Score: X/10
 
-Be constructive, educational, and encouraging. Focus on helping the learner improve."""
+Be constructive and educational."""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
@@ -164,7 +193,7 @@ Be constructive, educational, and encouraging. Focus on helping the learner impr
 class InterviewRequest(BaseModel):
     skill: str
     level: str = "Beginner"
-    question_type: str = "technical"  # technical, behavioral, coding
+    question_type: str = "technical"
 
 class InterviewAnswer(BaseModel):
     question: str
@@ -176,20 +205,20 @@ class InterviewAnswer(BaseModel):
 async def get_interview_question(req: InterviewRequest, current_user=Depends(get_current_user)):
     try:
         client = get_groq()
-        prompt = f"""Generate ONE {req.question_type} interview question for a {req.level} {req.skill} developer position.
+        prompt = f"""Generate ONE {req.question_type} interview question for a {req.level} {req.skill} developer.
 
 Return ONLY valid JSON:
 {{
   "question": "The interview question",
   "type": "{req.question_type}",
   "difficulty": "{req.level}",
-  "what_interviewer_looks_for": "What a good answer should include (2-3 points)",
-  "follow_up": "A likely follow-up question"
+  "what_interviewer_looks_for": "2-3 key points a good answer should cover",
+  "follow_up": "A likely follow-up question the interviewer might ask"
 }}"""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.9, max_tokens=600
+            temperature=0.9, max_tokens=500
         )
         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
         text = re.sub(r'\s*```$', '', text)
@@ -201,25 +230,25 @@ Return ONLY valid JSON:
 async def evaluate_answer(req: InterviewAnswer, current_user=Depends(get_current_user)):
     try:
         client = get_groq()
-        prompt = f"""You are a senior {req.skill} interviewer evaluating a {req.level} candidate's answer.
+        prompt = f"""You are a senior {req.skill} interviewer evaluating a {req.level} candidate.
 
 Question: {req.question}
-Candidate's Answer: {req.answer}
+Answer: {req.answer}
 
-Evaluate and return JSON:
+Return ONLY valid JSON:
 {{
   "score": 7,
-  "verdict": "Good|Excellent|Needs Improvement|Poor",
+  "verdict": "Good",
   "strengths": ["strength 1", "strength 2"],
   "gaps": ["gap 1", "gap 2"],
   "ideal_answer_points": ["key point 1", "key point 2", "key point 3"],
-  "feedback": "Encouraging 2-3 sentence overall feedback",
-  "tip": "One specific tip to improve this type of answer"
+  "feedback": "2-3 sentence encouraging overall feedback",
+  "tip": "One specific improvement tip"
 }}"""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.4, max_tokens=800
+            temperature=0.4, max_tokens=700
         )
         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
         text = re.sub(r'\s*```$', '', text)

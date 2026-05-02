@@ -9,6 +9,8 @@ import RoadmapView from './pages/RoadmapView'
 import MyRoadmaps from './pages/MyRoadmaps'
 import Chat from './pages/Chat'
 import Practice from './pages/Practice'
+import InterviewPrep from './pages/InterviewPrep'
+import Badges from './pages/Badges'
 import AppLayout from './components/AppLayout'
 
 function ProtectedRoute({ children }) {
@@ -40,6 +42,8 @@ export default function App() {
         <Route path="/roadmaps/:id" element={<ProtectedRoute><AppLayout><RoadmapView /></AppLayout></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><AppLayout><Chat /></AppLayout></ProtectedRoute>} />
         <Route path="/practice" element={<ProtectedRoute><AppLayout><Practice /></AppLayout></ProtectedRoute>} />
+        <Route path="/interview" element={<ProtectedRoute><AppLayout><InterviewPrep /></AppLayout></ProtectedRoute>} />
+        <Route path="/badges" element={<ProtectedRoute><AppLayout><Badges /></AppLayout></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
