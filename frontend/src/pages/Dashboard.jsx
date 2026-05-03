@@ -188,9 +188,6 @@ function DailyChallenge() {
   );
 }
 
-// import missing icon
-// import { Code2 } from 'lucide-react'
-
 export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
