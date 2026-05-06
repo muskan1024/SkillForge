@@ -255,3 +255,75 @@ Return ONLY valid JSON:
         return json.loads(text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
+
+
+# ── Daily Challenge Answer Review ────────────────────────────────
+class ChallengeAnswerRequest(BaseModel):
+    challenge_id: str
+    challenge_title: str
+    task: str
+    answer: str
+    skill: str
+    difficulty: str
+
+@router.post("/daily-challenge/review")
+async def review_challenge_answer(req: ChallengeAnswerRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+    try:
+        client = get_groq()
+        prompt = f"""You are a strict but fair learning coach reviewing a student's answer to a daily challenge.
+
+Challenge: "{req.challenge_title}"
+Task: {req.task}
+Skill Area: {req.skill}
+Difficulty: {req.difficulty}
+Student's Answer: {req.answer}
+
+Evaluate the answer and return ONLY valid JSON:
+{{
+  "passed": true or false,
+  "score": 75,
+  "verdict": "Good" or "Excellent" or "Partial" or "Incorrect",
+  "feedback": "2-3 sentence specific feedback about their answer. Be encouraging but honest.",
+  "what_was_good": "One thing they did well (even if wrong)",
+  "what_to_improve": "One specific thing they should add or fix",
+  "xp_awarded": 20 or 10 or 0
+}}
+
+Rules:
+- passed = true only if the answer demonstrates real understanding (not just keywords)
+- score = percentage 0-100
+- xp_awarded = 20 if passed=true, 10 if partial understanding, 0 if completely wrong
+- Be strict but fair — partial credit for partial understanding
+- verdict: Excellent (90%+), Good (70-89%), Partial (40-69%), Incorrect (<40%)"""
+
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3, max_tokens=500
+        )
+        import re as re2
+        text = re2.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
+        text = re2.sub(r'\s*```$', '', text)
+        result = json.loads(text)
+
+        # Award XP if passed
+        xp = result.get("xp_awarded", 0)
+        if xp > 0:
+            await db.users.update_one(
+                {"_id": ObjectId(current_user["id"])},
+                {"$inc": {"xp_points": xp}, "$set": {"last_active": datetime.utcnow()}}
+            )
+            # Mark challenge as answered
+            try:
+                await db.daily_challenges.update_one(
+                    {"_id": ObjectId(req.challenge_id)},
+                    {"$set": {"answered": True, "xp_awarded": xp, "answered_at": datetime.utcnow()}}
+                )
+            except Exception:
+                pass
+
+        result["xp_awarded"] = xp
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Review failed: {str(e)}")
