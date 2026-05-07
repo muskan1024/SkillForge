@@ -25,6 +25,7 @@ async def get_dashboard(current_user=Depends(get_current_user), db=Depends(get_d
 
     # Streak dates for heatmap (last 30 days)
     user = await db.users.find_one({"_id": ObjectId(user_id)})
+    # Return full year of streak dates for GitHub-style graph
     streak_dates = user.get("streak_dates", [])
 
     total_completed_topics = sum(r.get("completed_topics", 0) for r in roadmaps)
@@ -48,5 +49,5 @@ async def get_dashboard(current_user=Depends(get_current_user), db=Depends(get_d
         },
         "active_roadmap": active_roadmap,
         "all_roadmaps": roadmaps,
-        "streak_dates": streak_dates[-30:],
+        "streak_dates": streak_dates,
     }

@@ -32,13 +32,23 @@ const SUGGESTIONS = [
   "Explain REST API vs GraphQL",
 ];
 
+const BG = "#0f1117";
+const SIDEBAR = "#12141c";
+const CARD = "#16181f";
+const BORDER = "rgba(255,255,255,0.06)";
+const INPUT_BG = "#1e2130";
+const TEXT1 = "#e8eaf0";
+const TEXT2 = "#94a3b8";
+const TEXT3 = "#475569";
+const BRAND = "#6366f1";
+
 /* ── Message renderer ─────────────────────────────────────── */
 function MessageContent({ text }) {
   const renderLine = (line, key) => {
     const segs = line.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((s, si) => {
       if (s.startsWith("**") && s.endsWith("**"))
         return (
-          <strong key={si} className="font-semibold text-ink-primary">
+          <strong key={si} style={{ fontWeight: 600, color: TEXT1 }}>
             {s.slice(2, -2)}
           </strong>
         );
@@ -46,7 +56,14 @@ function MessageContent({ text }) {
         return (
           <code
             key={si}
-            className="bg-surface-2 text-brand-700 px-1.5 py-0.5 rounded text-[13px] font-mono"
+            style={{
+              background: "#1e2130",
+              color: "#818cf8",
+              padding: "2px 6px",
+              borderRadius: 4,
+              fontSize: 12,
+              fontFamily: "JetBrains Mono, monospace",
+            }}
           >
             {s.slice(1, -1)}
           </code>
@@ -55,31 +72,32 @@ function MessageContent({ text }) {
     });
     if (line.startsWith("- ") || line.startsWith("• "))
       return (
-        <div key={key} className="flex gap-2 my-0.5">
-          <span className="text-brand-400 shrink-0">•</span>
+        <div key={key} style={{ display: "flex", gap: 8, margin: "2px 0" }}>
+          <span style={{ color: BRAND, flexShrink: 0 }}>•</span>
           <span>{segs.slice(1)}</span>
         </div>
       );
     if (line.match(/^\d+\.\s/)) {
       const num = line.match(/^(\d+)\./)[1];
       return (
-        <div key={key} className="flex gap-2 my-0.5">
-          <span className="text-brand-500 font-medium w-5 shrink-0">
-            {num}.
-          </span>
+        <div key={key} style={{ display: "flex", gap: 8, margin: "2px 0" }}>
+          <span style={{ color: BRAND, width: 20, flexShrink: 0 }}>{num}.</span>
           <span>{segs.slice(1)}</span>
         </div>
       );
     }
     if (/^#{1,3}\s/.test(line))
       return (
-        <p key={key} className="font-semibold text-ink-primary mt-3 mb-1">
+        <p
+          key={key}
+          style={{ fontWeight: 600, color: TEXT1, margin: "12px 0 4px" }}
+        >
           {line.replace(/^#+\s/, "")}
         </p>
       );
-    if (line.trim() === "") return <div key={key} className="h-1.5" />;
+    if (line.trim() === "") return <div key={key} style={{ height: 6 }} />;
     return (
-      <p key={key} className="my-0.5 leading-relaxed">
+      <p key={key} style={{ margin: "2px 0", lineHeight: 1.65 }}>
         {segs}
       </p>
     );
@@ -87,19 +105,29 @@ function MessageContent({ text }) {
 
   if (!text.includes("```")) {
     return (
-      <div className="text-sm text-ink-secondary">
+      <div style={{ fontSize: 14, color: TEXT2 }}>
         {text.split("\n").map((l, i) => renderLine(l, i))}
       </div>
     );
   }
   return (
-    <div className="text-sm text-ink-secondary">
+    <div style={{ fontSize: 14, color: TEXT2 }}>
       {text.split(/(```[\s\S]*?```)/g).map((seg, i) => {
         if (seg.startsWith("```")) {
           return (
             <pre
               key={i}
-              className="bg-[#1e1e2e] text-green-400 rounded-xl p-4 my-3 overflow-x-auto text-xs font-mono leading-relaxed"
+              style={{
+                background: "#0d0f14",
+                color: "#4ade80",
+                borderRadius: 12,
+                padding: 16,
+                margin: "12px 0",
+                overflowX: "auto",
+                fontSize: 12,
+                fontFamily: "JetBrains Mono, monospace",
+                lineHeight: 1.6,
+              }}
             >
               <code>{seg.replace(/^```\w*\n?/, "").replace(/```$/, "")}</code>
             </pre>
@@ -114,21 +142,50 @@ function MessageContent({ text }) {
 function ChatBubble({ msg }) {
   const isUser = msg.role === "user";
   return (
-    <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        flexDirection: isUser ? "row-reverse" : "row",
+        animationName: "slideUp",
+        animationDuration: "0.3s",
+      }}
+    >
       <div
-        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isUser ? "bg-brand-600" : "bg-surface-2 border border-surface-4"}`}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          background: isUser ? BRAND : INPUT_BG,
+          border: isUser ? "none" : `1px solid ${BORDER}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          marginTop: 2,
+        }}
       >
         {isUser ? (
-          <User size={15} className="text-white" />
+          <User size={15} color="#fff" />
         ) : (
-          <Bot size={15} className="text-brand-600" />
+          <Bot size={15} color={BRAND} />
         )}
       </div>
       <div
-        className={`max-w-[78%] rounded-2xl px-4 py-3 ${isUser ? "bg-brand-600 text-white rounded-tr-sm" : "bg-white border border-surface-3 shadow-sm rounded-tl-sm"}`}
+        style={{
+          maxWidth: "76%",
+          borderRadius: isUser ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
+          padding: "12px 16px",
+          background: isUser ? BRAND : CARD,
+          border: isUser ? "none" : `1px solid ${BORDER}`,
+        }}
       >
         {isUser ? (
-          <p className="text-sm leading-relaxed">{msg.content}</p>
+          <p
+            style={{ fontSize: 14, color: "#fff", lineHeight: 1.6, margin: 0 }}
+          >
+            {msg.content}
+          </p>
         ) : (
           <MessageContent text={msg.content} />
         )}
@@ -137,7 +194,7 @@ function ChatBubble({ msg }) {
   );
 }
 
-/* ── History Sidebar ----- */
+/* ── History Sidebar ──────────────────────────────────────── */
 function HistorySidebar({
   sessions,
   activeId,
@@ -150,8 +207,7 @@ function HistorySidebar({
   onToggle,
 }) {
   const [expanded, setExpanded] = useState({});
-  const toggle = (k) =>
-    setExpanded((p) => ({ ...p, [k]: p[k] === false ? true : false }));
+  const toggle = (k) => setExpanded((p) => ({ ...p, [k]: p[k] === false }));
 
   const grouped = {};
   sessions.forEach((s) => {
@@ -159,7 +215,6 @@ function HistorySidebar({
     if (!grouped[k]) grouped[k] = [];
     grouped[k].push(s);
   });
-
   const getRmName = (id) => {
     if (!id) return "General";
     const r = roadmaps.find((r) => r.id === id);
@@ -172,24 +227,56 @@ function HistorySidebar({
 
   return (
     <div
-      className={`flex flex-col bg-white border-r border-surface-3 transition-all duration-300 ${collapsed ? "w-12" : "w-64"} shrink-0 h-full overflow-hidden`}
+      style={{
+        width: collapsed ? 48 : 256,
+        flexShrink: 0,
+        background: SIDEBAR,
+        borderRight: `1px solid ${BORDER}`,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+        transition: "width 0.25s ease",
+      }}
     >
       {/* Header */}
       <div
-        className={`flex items-center border-b border-surface-3 px-3 py-3 gap-2 ${collapsed ? "justify-center" : "justify-between"}`}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "space-between",
+          padding: collapsed ? "14px 0" : "14px 16px",
+          borderBottom: `1px solid ${BORDER}`,
+        }}
       >
         {!collapsed && (
           <div>
-            <p className="text-sm font-semibold text-ink-primary">
+            <p
+              style={{ fontSize: 13, fontWeight: 600, color: TEXT1, margin: 0 }}
+            >
               Chat History
             </p>
-            <p className="text-[11px] text-ink-ghost">Your conversations</p>
+            <p style={{ fontSize: 11, color: TEXT3, margin: 0 }}>
+              Your conversations
+            </p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-1.5 rounded-lg hover:bg-surface-2 text-ink-ghost hover:text-ink-primary transition-colors shrink-0"
-          title={collapsed ? "Expand" : "Collapse"}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: 6,
+            borderRadius: 8,
+            color: TEXT3,
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background = "transparent")
+          }
         >
           {collapsed ? (
             <PanelLeftOpen size={16} />
@@ -201,82 +288,191 @@ function HistorySidebar({
 
       {!collapsed && (
         <>
-          {/* New chat */}
           <button
             onClick={onNew}
-            className="flex items-center gap-2 mx-3 mt-3 mb-1 px-3 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-xs font-medium transition-colors border border-brand-200"
+            style={{
+              margin: "10px 12px 4px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              background: "rgba(99,102,241,0.1)",
+              border: "1px solid rgba(99,102,241,0.2)",
+              borderRadius: 10,
+              color: "#818cf8",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(99,102,241,0.18)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "rgba(99,102,241,0.1)")
+            }
           >
             <Plus size={13} /> New chat
           </button>
 
-          {/* Sessions */}
-          <div className="flex-1 overflow-y-auto py-2">
+          <div style={{ flex: 1, overflowY: "auto", padding: "4px 0" }}>
             {loading ? (
-              <div className="flex justify-center pt-6">
-                <Loader2 size={18} className="text-brand-400 animate-spin" />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  paddingTop: 24,
+                }}
+              >
+                <Loader2
+                  size={18}
+                  color={BRAND}
+                  style={{ animation: "spin 1s linear infinite" }}
+                />
               </div>
             ) : sessions.length === 0 ? (
-              <div className="px-4 py-8 text-center">
+              <div style={{ textAlign: "center", padding: "32px 16px" }}>
                 <MessageSquare
                   size={22}
-                  className="text-ink-ghost mx-auto mb-2"
+                  color={TEXT3}
+                  style={{ margin: "0 auto 8px" }}
                 />
-                <p className="text-xs text-ink-ghost">No chats yet</p>
+                <p style={{ fontSize: 12, color: TEXT3 }}>No chats yet</p>
               </div>
             ) : (
               Object.entries(grouped).map(([key, gs]) => {
                 const isOpen = expanded[key] !== false;
                 const isGeneral = key === "general";
                 return (
-                  <div key={key} className="mb-1">
+                  <div key={key}>
                     <button
                       onClick={() => toggle(key)}
-                      className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-surface-1 transition-colors"
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 12px",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        color: TEXT2,
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background =
+                          "rgba(255,255,255,0.03)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
                     >
                       <ChevronRight
-                        size={12}
-                        className={`text-ink-ghost shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                        size={11}
+                        color={TEXT3}
+                        style={{
+                          transform: isOpen ? "rotate(90deg)" : "none",
+                          transition: "transform 0.2s",
+                          flexShrink: 0,
+                        }}
                       />
                       {isGeneral ? (
-                        <MessageSquare
-                          size={12}
-                          className="text-ink-ghost shrink-0"
-                        />
+                        <MessageSquare size={11} color={TEXT3} />
                       ) : isOpen ? (
-                        <FolderOpen
-                          size={12}
-                          className="text-brand-500 shrink-0"
-                        />
+                        <FolderOpen size={11} color={BRAND} />
                       ) : (
-                        <Folder size={12} className="text-brand-400 shrink-0" />
+                        <Folder size={11} color="#818cf8" />
                       )}
-                      <span className="text-[11px] font-medium text-ink-secondary truncate flex-1 text-left">
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          flex: 1,
+                          textAlign: "left",
+                          color: TEXT2,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {getRmName(isGeneral ? null : key)}
                       </span>
-                      <span className="text-[10px] text-ink-ghost bg-surface-2 px-1.5 py-0.5 rounded shrink-0">
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: TEXT3,
+                          background: "rgba(255,255,255,0.05)",
+                          padding: "1px 6px",
+                          borderRadius: 4,
+                        }}
+                      >
                         {gs.length}
                       </span>
                     </button>
-
                     {isOpen &&
                       gs.map((s) => (
                         <div
                           key={s.id}
                           onClick={() => onSelect(s.id)}
-                          className={`group flex items-start gap-2 pl-8 pr-3 py-2 cursor-pointer transition-colors ${activeId === s.id ? "bg-brand-50" : "hover:bg-surface-1"}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 8,
+                            paddingLeft: 28,
+                            paddingRight: 12,
+                            paddingTop: 8,
+                            paddingBottom: 8,
+                            cursor: "pointer",
+                            background:
+                              activeId === s.id
+                                ? "rgba(99,102,241,0.08)"
+                                : "transparent",
+                            transition: "all 0.15s",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (activeId !== s.id)
+                              e.currentTarget.style.background =
+                                "rgba(255,255,255,0.03)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (activeId !== s.id)
+                              e.currentTarget.style.background = "transparent";
+                          }}
                         >
-                          <div className="flex-1 min-w-0">
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             <p
-                              className={`text-[11px] font-medium truncate ${activeId === s.id ? "text-brand-700" : "text-ink-secondary"}`}
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 500,
+                                color: activeId === s.id ? "#818cf8" : TEXT2,
+                                margin: 0,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
                             >
                               {s.title}
                             </p>
                             {s.last_message && (
-                              <p className="text-[10px] text-ink-ghost truncate mt-0.5">
+                              <p
+                                style={{
+                                  fontSize: 10,
+                                  color: TEXT3,
+                                  margin: "2px 0 0",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
                                 {s.last_message}
                               </p>
                             )}
-                            <p className="text-[10px] text-ink-ghost mt-0.5">
+                            <p
+                              style={{
+                                fontSize: 10,
+                                color: TEXT3,
+                                margin: "2px 0 0",
+                              }}
+                            >
                               {s.message_count} msg
                               {s.message_count !== 1 ? "s" : ""}
                             </p>
@@ -286,7 +482,25 @@ function HistorySidebar({
                               e.stopPropagation();
                               onDelete(s.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-ink-ghost hover:text-red-500 transition-all shrink-0 mt-0.5"
+                            style={{
+                              opacity: 0,
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: 4,
+                              borderRadius: 4,
+                              color: TEXT3,
+                              transition: "all 0.15s",
+                              flexShrink: 0,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.opacity = "1";
+                              e.currentTarget.style.color = "#f87171";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.opacity = "0";
+                            }}
+                            className="delete-btn"
                           >
                             <X size={11} />
                           </button>
@@ -300,39 +514,61 @@ function HistorySidebar({
         </>
       )}
 
-      {/* Collapsed: show new chat icon only */}
       {collapsed && (
-        <div className="flex flex-col items-center gap-2 pt-3">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
+            paddingTop: 12,
+          }}
+        >
           <button
             onClick={onNew}
-            className="p-2 rounded-xl hover:bg-surface-2 text-ink-ghost hover:text-brand-600 transition-colors"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: 8,
+              borderRadius: 8,
+              color: TEXT3,
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
             title="New chat"
           >
             <Plus size={16} />
           </button>
         </div>
       )}
+
+      <style>{`.delete-btn:hover { opacity: 1 !important; }`}</style>
     </div>
   );
 }
 
-/* ── Main Chat Page ───────────────────────────────────────── */
+/* ── Main Chat ────────────────────────────────────────────── */
 export default function Chat() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [sessions, setSessions] = useState([]);
-  const [activeSessionId, setActiveSessionId] = useState(null);
+  const [activeSessionId, setActiveSess] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingSessions, setLoadingSessions] = useState(true);
-  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingSessions, setLoadSess] = useState(true);
+  const [loadingMsgs, setLoadMsgs] = useState(false);
   const [roadmaps, setRoadmaps] = useState([]);
-  const [selectedRoadmap, setSelectedRoadmap] = useState("");
-  const [activeRoadmapTitle, setActiveRoadmapTitle] = useState("");
+  const [selectedRM, setSelectedRM] = useState("");
+  const [rmTitle, setRmTitle] = useState("");
   const [showRmPicker, setShowRmPicker] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
@@ -343,9 +579,9 @@ export default function Chat() {
       .then(([s, r]) => {
         setSessions(s.data);
         setRoadmaps(r.data);
-        setLoadingSessions(false);
+        setLoadSess(false);
       })
-      .catch(() => setLoadingSessions(false));
+      .catch(() => setLoadSess(false));
   }, []);
 
   useEffect(() => {
@@ -353,7 +589,6 @@ export default function Chat() {
     const promptParam = searchParams.get("prompt");
     const roadmapParam = searchParams.get("roadmap");
     const sessionParam = searchParams.get("session");
-
     if (sessionParam && !promptParam) {
       setSearchParams({});
       handleSelectSession(sessionParam);
@@ -384,16 +619,14 @@ export default function Chat() {
         roadmap_id: roadmapId || null,
       });
       setSessions((prev) => [data, ...prev]);
-      setActiveSessionId(data.id);
+      setActiveSess(data.id);
       setMessages([]);
       if (roadmapId) {
-        setSelectedRoadmap(roadmapId);
-        setActiveRoadmapTitle(
-          roadmaps.find((r) => r.id === roadmapId)?.title || "",
-        );
+        setSelectedRM(roadmapId);
+        setRmTitle(roadmaps.find((r) => r.id === roadmapId)?.title || "");
       } else {
-        setSelectedRoadmap("");
-        setActiveRoadmapTitle("");
+        setSelectedRM("");
+        setRmTitle("");
       }
       return data;
     } catch {
@@ -404,29 +637,27 @@ export default function Chat() {
 
   const handleNewChat = () => {
     autoSent.current = false;
-    setActiveSessionId(null);
+    setActiveSess(null);
     setMessages([]);
     setInput("");
-    setSelectedRoadmap("");
-    setActiveRoadmapTitle("");
+    setSelectedRM("");
+    setRmTitle("");
     inputRef.current?.focus();
   };
 
   const handleSelectSession = async (id) => {
     if (id === activeSessionId) return;
-    setLoadingMessages(true);
-    setActiveSessionId(id);
+    setLoadMsgs(true);
+    setActiveSess(id);
     try {
       const { data } = await api.get(`/chat/session/${id}`);
       setMessages(data.messages || []);
-      setSelectedRoadmap(data.roadmap_id || "");
-      setActiveRoadmapTitle(
-        roadmaps.find((r) => r.id === data.roadmap_id)?.title || "",
-      );
+      setSelectedRM(data.roadmap_id || "");
+      setRmTitle(roadmaps.find((r) => r.id === data.roadmap_id)?.title || "");
     } catch {
       toast.error("Failed to load chat");
     } finally {
-      setLoadingMessages(false);
+      setLoadMsgs(false);
     }
   };
 
@@ -434,7 +665,7 @@ export default function Chat() {
     await api.delete(`/chat/session/${id}`);
     setSessions((prev) => prev.filter((s) => s.id !== id));
     if (activeSessionId === id) {
-      setActiveSessionId(null);
+      setActiveSess(null);
       setMessages([]);
     }
     toast.success("Chat deleted");
@@ -444,21 +675,19 @@ export default function Chat() {
     const userMsg = text || input.trim();
     if (!userMsg || loading) return;
     setInput("");
-
     let sid = activeSessionId;
     if (!sid) {
-      const sess = await createNewSession(selectedRoadmap || null);
+      const sess = await createNewSession(selectedRM || null);
       if (!sess) return;
       sid = sess.id;
     }
-
     setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setLoading(true);
     try {
       const { data } = await api.post("/chat/message", {
         message: userMsg,
         history: messages.slice(-12),
-        roadmap_id: selectedRoadmap || null,
+        roadmap_id: selectedRM || null,
         session_id: sid,
       });
       setMessages((prev) => [
@@ -486,73 +715,175 @@ export default function Chat() {
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   return (
-    <div className="flex w-full h-full" style={{ height: "calc(100vh)" }}>
-      {/* History sidebar — hidden on mobile by default, shown on md+ */}
-      <div className="hidden sm:flex h-full">
-        <HistorySidebar
-          sessions={sessions}
-          activeId={activeSessionId}
-          onSelect={handleSelectSession}
-          onDelete={handleDeleteSession}
-          onNew={handleNewChat}
-          roadmaps={roadmaps}
-          loading={loadingSessions}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed((c) => !c)}
-        />
-      </div>
+    <div
+      style={{ display: "flex", width: "100%", height: "100%", background: BG }}
+    >
+      {/* History sidebar */}
+      <HistorySidebar
+        sessions={sessions}
+        activeId={activeSessionId}
+        onSelect={handleSelectSession}
+        onDelete={handleDeleteSession}
+        onNew={handleNewChat}
+        roadmaps={roadmaps}
+        loading={loadingSessions}
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((c) => !c)}
+      />
 
       {/* Chat main */}
-      <div className="flex-1 flex flex-col min-w-0 bg-surface-1 h-full overflow-hidden">
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
         {/* Top bar */}
-        <div className="bg-white border-b border-surface-3 px-4 sm:px-5 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <Bot size={18} className="text-brand-600 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-ink-primary truncate">
-                {activeRoadmapTitle || "AI Assistant"}
+        <div
+          style={{
+            background: SIDEBAR,
+            borderBottom: `1px solid ${BORDER}`,
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              minWidth: 0,
+            }}
+          >
+            <Bot size={18} color={BRAND} />
+            <div style={{ minWidth: 0 }}>
+              <p
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: TEXT1,
+                  margin: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {rmTitle || "AI Assistant"}
               </p>
-              <p className="text-xs text-ink-ghost truncate hidden sm:block">
+              <p style={{ fontSize: 11, color: TEXT3, margin: 0 }}>
                 {activeSession?.title || "Start a new conversation"}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={handleNewChat}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 bg-surface-1 hover:bg-surface-2 border border-surface-4 text-ink-secondary rounded-xl text-xs font-medium transition-all"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 14px",
+                background: INPUT_BG,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 10,
+                color: TEXT2,
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = BORDER)}
             >
-              <PenSquare size={13} />{" "}
-              <span className="hidden sm:inline">New chat</span>
+              <PenSquare size={13} /> New chat
             </button>
 
             {/* Roadmap picker */}
-            <div className="relative">
+            <div style={{ position: "relative" }}>
               <button
                 onClick={() => setShowRmPicker(!showRmPicker)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-medium transition-all ${selectedRoadmap ? "bg-brand-50 border-brand-300 text-brand-700" : "bg-white border-surface-4 text-ink-secondary hover:border-brand-200"}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "7px 14px",
+                  background: selectedRM ? "rgba(99,102,241,0.12)" : INPUT_BG,
+                  border: `1px solid ${selectedRM ? "rgba(99,102,241,0.3)" : BORDER}`,
+                  borderRadius: 10,
+                  color: selectedRM ? "#818cf8" : TEXT2,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
               >
                 <Map size={13} />
-                <span className="hidden sm:inline truncate max-w-[120px]">
-                  {selectedRoadmap
+                <span
+                  style={{
+                    maxWidth: 130,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {selectedRM
                     ? roadmaps
-                        .find((r) => r.id === selectedRoadmap)
+                        .find((r) => r.id === selectedRM)
                         ?.title?.slice(0, 18) + "…"
                     : "Roadmap context"}
                 </span>
                 <ChevronDown size={12} />
               </button>
               {showRmPicker && (
-                <div className="absolute right-0 top-full mt-1 w-72 bg-white border border-surface-3 rounded-xl shadow-xl z-50 overflow-hidden">
-                  <div className="p-2">
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: "calc(100% + 6px)",
+                    width: 280,
+                    background: CARD,
+                    border: `1px solid ${BORDER}`,
+                    borderRadius: 14,
+                    boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+                    zIndex: 50,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ padding: 8 }}>
                     <button
                       onClick={() => {
-                        setSelectedRoadmap("");
-                        setActiveRoadmapTitle("");
+                        setSelectedRM("");
+                        setRmTitle("");
                         setShowRmPicker(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-ink-tertiary hover:bg-surface-1 rounded-lg"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        background: "transparent",
+                        border: "none",
+                        borderRadius: 8,
+                        color: TEXT3,
+                        fontSize: 13,
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background =
+                          "rgba(255,255,255,0.04)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
                     >
                       No context (general chat)
                     </button>
@@ -560,14 +891,53 @@ export default function Chat() {
                       <button
                         key={r.id}
                         onClick={() => {
-                          setSelectedRoadmap(r.id);
-                          setActiveRoadmapTitle(r.title);
+                          setSelectedRM(r.id);
+                          setRmTitle(r.title);
                           setShowRmPicker(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-surface-1 transition-colors ${selectedRoadmap === r.id ? "text-brand-700 bg-brand-50" : "text-ink-secondary"}`}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "8px 12px",
+                          background:
+                            selectedRM === r.id
+                              ? "rgba(99,102,241,0.1)"
+                              : "transparent",
+                          border: "none",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedRM !== r.id)
+                            e.currentTarget.style.background =
+                              "rgba(255,255,255,0.04)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedRM !== r.id)
+                            e.currentTarget.style.background = "transparent";
+                        }}
                       >
-                        <p className="font-medium truncate">{r.title}</p>
-                        <p className="text-xs text-ink-ghost">
+                        <p
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: selectedRM === r.id ? "#818cf8" : TEXT2,
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.title}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 11,
+                            color: TEXT3,
+                            margin: "2px 0 0",
+                          }}
+                        >
                           {r.progress_percent}% complete
                         </p>
                       </button>
@@ -580,32 +950,114 @@ export default function Chat() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 space-y-5">
-          {loadingMessages ? (
-            <div className="flex justify-center pt-16">
-              <Loader2 size={24} className="text-brand-400 animate-spin" />
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "24px 40px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
+          {loadingMsgs ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingTop: 60,
+              }}
+            >
+              <Loader2
+                size={24}
+                color={BRAND}
+                style={{ animation: "spin 1s linear infinite" }}
+              />
             </div>
           ) : isEmpty ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand-50 flex items-center justify-center mb-4">
-                <Sparkles size={26} className="text-brand-500" />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                textAlign: "center",
+                paddingBottom: 40,
+              }}
+            >
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 20,
+                  background: "rgba(99,102,241,0.12)",
+                  border: "1px solid rgba(99,102,241,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 20,
+                }}
+              >
+                <Sparkles size={28} color={BRAND} />
               </div>
-              <h2 className="text-lg font-semibold text-ink-primary mb-1">
-                {activeRoadmapTitle
-                  ? `Chatting about ${activeRoadmapTitle}`
-                  : "SkillForge AI"}
+              <h2
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: TEXT1,
+                  marginBottom: 8,
+                }}
+              >
+                {rmTitle ? `Chatting about ${rmTitle}` : "SkillForge AI"}
               </h2>
-              <p className="text-sm text-ink-tertiary mb-8 max-w-sm">
-                {activeRoadmapTitle
-                  ? `Ask me anything about your ${activeRoadmapTitle} roadmap.`
+              <p
+                style={{
+                  fontSize: 14,
+                  color: TEXT3,
+                  marginBottom: 32,
+                  maxWidth: 400,
+                  lineHeight: 1.6,
+                }}
+              >
+                {rmTitle
+                  ? `Ask me anything about your ${rmTitle} roadmap.`
                   : "Ask me anything about programming, career, or learning resources."}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                  width: "100%",
+                  maxWidth: 560,
+                }}
+              >
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     onClick={() => sendMessage(s)}
-                    className="text-left px-3 py-2.5 bg-white hover:bg-brand-50 hover:border-brand-200 border border-surface-3 rounded-xl text-xs text-ink-secondary transition-all shadow-sm leading-relaxed"
+                    style={{
+                      textAlign: "left",
+                      padding: "12px 16px",
+                      background: CARD,
+                      border: `1px solid ${BORDER}`,
+                      borderRadius: 14,
+                      fontSize: 13,
+                      color: TEXT2,
+                      cursor: "pointer",
+                      lineHeight: 1.5,
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor =
+                        "rgba(99,102,241,0.3)";
+                      e.currentTarget.style.color = TEXT1;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = BORDER;
+                      e.currentTarget.style.color = TEXT2;
+                    }}
                   >
                     {s}
                   </button>
@@ -617,24 +1069,51 @@ export default function Chat() {
               <ChatBubble
                 msg={{
                   role: "assistant",
-                  content: `Hi ${user?.name?.split(" ")[0]}! 👋${activeRoadmapTitle ? ` Let's talk about your **${activeRoadmapTitle}** roadmap.` : " I'm SkillForge AI. Ask me anything!"}`,
+                  content: `Hi ${user?.name?.split(" ")[0]}! 👋${rmTitle ? ` Let's talk about your **${rmTitle}** roadmap.` : " I'm SkillForge AI. Ask me anything!"}`,
                 }}
               />
               {messages.map((m, i) => (
                 <ChatBubble key={i} msg={m} />
               ))}
               {loading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-surface-2 border border-surface-4 flex items-center justify-center shrink-0">
-                    <Bot size={15} className="text-brand-600" />
+                <div style={{ display: "flex", gap: 12 }}>
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 10,
+                      background: INPUT_BG,
+                      border: `1px solid ${BORDER}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Bot size={15} color={BRAND} />
                   </div>
-                  <div className="bg-white border border-surface-3 shadow-sm rounded-2xl rounded-tl-sm px-4 py-3">
-                    <div className="flex gap-1.5 items-center h-5">
+                  <div
+                    style={{
+                      background: CARD,
+                      border: `1px solid ${BORDER}`,
+                      borderRadius: "4px 18px 18px 18px",
+                      padding: "12px 16px",
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", gap: 6, alignItems: "center" }}
+                    >
                       {[0, 150, 300].map((d) => (
                         <div
                           key={d}
-                          className="w-2 h-2 rounded-full bg-brand-400 animate-bounce"
-                          style={{ animationDelay: `${d}ms` }}
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: BRAND,
+                            animation: `bounce 1s infinite`,
+                            animationDelay: `${d}ms`,
+                          }}
                         />
                       ))}
                     </div>
@@ -646,41 +1125,111 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Input bar */}
-        <div className="shrink-0 bg-white border-t border-surface-3 px-4 sm:px-6 lg:px-10 py-4">
-          {selectedRoadmap && (
-            <p className="text-xs text-brand-600 mb-2 flex items-center gap-1">
-              <Map size={11} /> Context: {activeRoadmapTitle}
+        {/* Input */}
+        <div
+          style={{
+            background: SIDEBAR,
+            borderTop: `1px solid ${BORDER}`,
+            padding: "16px 24px",
+          }}
+        >
+          {selectedRM && (
+            <p
+              style={{
+                fontSize: 11,
+                color: "#818cf8",
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <Map size={11} /> Context: {rmTitle}
             </p>
           )}
-          <div className="flex gap-2 sm:gap-3 bg-surface-1 border border-surface-3 rounded-2xl p-2 focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              background: INPUT_BG,
+              border: `1px solid ${BORDER}`,
+              borderRadius: 16,
+              padding: "8px 8px 8px 16px",
+              transition: "border-color 0.15s",
+            }}
+            onFocus={(e) =>
+              (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")
+            }
+            onBlur={(e) => (e.currentTarget.style.borderColor = BORDER)}
+          >
             <textarea
               ref={inputRef}
               rows={1}
-              className="flex-1 resize-none bg-transparent text-sm text-ink-primary placeholder-ink-ghost px-2 sm:px-3 py-2 focus:outline-none"
-              placeholder="Ask anything… (Enter to send, Shift+Enter for new line)"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
-              style={{ maxHeight: "120px" }}
+              style={{
+                flex: 1,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: TEXT1,
+                fontSize: 14,
+                fontFamily: "DM Sans, system-ui, sans-serif",
+                resize: "none",
+                lineHeight: 1.5,
+                paddingTop: 8,
+                maxHeight: 120,
+              }}
+              placeholder="Ask anything… (Enter to send, Shift+Enter for new line)"
             />
             <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || loading}
-              className="btn-primary px-3 sm:px-4 py-2.5 rounded-xl flex items-center gap-2 self-end shrink-0 disabled:opacity-40"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                background: input.trim() && !loading ? BRAND : "#1e2130",
+                border: "none",
+                cursor: input.trim() && !loading ? "pointer" : "default",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "all 0.15s",
+                alignSelf: "flex-end",
+              }}
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2
+                  size={16}
+                  color="#fff"
+                  style={{ animation: "spin 1s linear infinite" }}
+                />
               ) : (
-                <Send size={16} />
+                <Send size={16} color={input.trim() ? "#fff" : TEXT3} />
               )}
             </button>
           </div>
-          <p className="text-xs text-ink-ghost text-center mt-2">
+          <p
+            style={{
+              fontSize: 11,
+              color: TEXT3,
+              textAlign: "center",
+              marginTop: 8,
+            }}
+          >
             AI can make mistakes — verify important information
           </p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+      `}</style>
     </div>
   );
 }

@@ -1,23 +1,20 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import {
-  LayoutDashboard, Map, PlusCircle, LogOut, Zap,
-  Bot, Code2, Menu, X, Brain, Award, Target
-} from 'lucide-react'
+import { LayoutDashboard, Map, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Brain, Award } from 'lucide-react'
 
 function SidebarContent({ user, onLogout, onNavClick }) {
   return (
     <>
-      <div className="flex items-center gap-2.5 px-3 mb-8">
-        <div className="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center shrink-0">
-          <Zap size={16} className="text-white" strokeWidth={2.5} />
+      <div className="flex items-center gap-3 px-4 mb-10 mt-2">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(124,58,237,0.4)]">
+          <Zap size={18} className="text-white fill-white/20" strokeWidth={2} />
         </div>
-        <span className="font-semibold text-ink-primary text-base tracking-tight">SkillForge</span>
+        <span className="font-bold text-zinc-100 text-lg tracking-tight">SkillForge</span>
       </div>
 
-      <nav className="flex flex-col gap-1 flex-1">
-        <p className="text-[10px] font-semibold text-ink-ghost uppercase tracking-widest px-3 mb-1">Learn</p>
+      <nav className="flex flex-col gap-1.5 flex-1 px-2">
+        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Learn</p>
         {[
           { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
           { to: '/roadmaps',   icon: Map,             label: 'My Roadmaps' },
@@ -25,43 +22,44 @@ function SidebarContent({ user, onLogout, onNavClick }) {
         ].map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to} onClick={onNavClick}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-            <Icon size={18} />{label}
+            <Icon size={18} className="shrink-0" />
+            <span className="truncate">{label}</span>
           </NavLink>
         ))}
 
-        <div className="h-px bg-surface-3 my-3" />
-        <p className="text-[10px] font-semibold text-ink-ghost uppercase tracking-widest px-3 mb-1">Tools</p>
+        <div className="h-px bg-white/5 my-4 mx-2" />
+        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Tools</p>
 
         <NavLink to="/chat" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-          <Bot size={18} />AI Assistant
+          <Bot size={18} className="shrink-0" /><span className="truncate">AI Assistant</span>
         </NavLink>
         <NavLink to="/practice" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-          <Code2 size={18} />Practice
+          <Code2 size={18} className="shrink-0" /><span className="truncate">Practice IDE</span>
         </NavLink>
         <NavLink to="/interview" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-          <Brain size={18} />Interview Prep
+          <Brain size={18} className="shrink-0" /><span className="truncate">Interview Prep</span>
         </NavLink>
 
-        <div className="h-px bg-surface-3 my-3" />
-        <p className="text-[10px] font-semibold text-ink-ghost uppercase tracking-widest px-3 mb-1">Progress</p>
-
+        <div className="h-px bg-white/5 my-4 mx-2" />
+        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Progress</p>
         <NavLink to="/badges" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-          <Award size={18} />Badges
+          <Award size={18} className="shrink-0" /><span className="truncate">Badges</span>
         </NavLink>
       </nav>
 
-      <div className="border-t border-surface-3 pt-4 mt-4">
-        <div className="px-3 mb-3">
-          <p className="text-sm font-medium text-ink-primary truncate">{user?.name}</p>
-          <p className="text-xs text-ink-ghost truncate">{user?.email}</p>
+      <div className="mt-6 p-4 mx-2 rounded-2xl bg-surface-800/30 border border-white/5 backdrop-blur-md">
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-zinc-200 truncate">{user?.name}</p>
+          <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
         </div>
         <button onClick={onLogout}
-          className="sidebar-link w-full text-left text-red-500 hover:text-red-600 hover:bg-red-50">
-          <LogOut size={18} />Sign out
+          className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-300">
+          <LogOut size={16} />
+          <span>Sign out</span>
         </button>
       </div>
     </>
@@ -78,47 +76,52 @@ export default function AppLayout({ children }) {
   const handleLogout = () => { logout(); navigate('/') }
 
   return (
-    <div className="flex min-h-screen bg-surface-1">
+    <div className="flex min-h-screen relative">
+      {/* Decorative background glows */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-600/30 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/30 blur-[120px] pointer-events-none" />
+
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 shrink-0 bg-white border-r border-surface-3 flex-col py-6 px-3 fixed top-0 left-0 h-full z-30 overflow-y-auto">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col py-6 fixed top-0 left-0 h-full z-30 overflow-y-auto bg-surface-900/50 backdrop-blur-2xl border-r border-white/5">
         <SidebarContent user={user} onLogout={handleLogout} onNavClick={() => {}} />
       </aside>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setMobileOpen(false)}>
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-white shadow-2xl flex flex-col py-6 px-3 overflow-y-auto"
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
+          <aside className="absolute left-0 top-0 h-full w-72 shadow-2xl flex flex-col py-6 overflow-y-auto bg-surface-900/90 backdrop-blur-2xl border-r border-white/10" 
             onClick={e => e.stopPropagation()}>
             <button onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 p-1.5 text-ink-ghost hover:text-ink-primary rounded-lg hover:bg-surface-2">
-              <X size={18} />
+              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-200 rounded-xl hover:bg-white/10 transition-colors">
+              <X size={20} />
             </button>
             <SidebarContent user={user} onLogout={handleLogout} onNavClick={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen md:ml-60">
+      <div className="flex-1 flex flex-col min-h-screen md:ml-64 relative z-10">
         {/* Mobile header */}
-        <header className="md:hidden sticky top-0 z-20 bg-white border-b border-surface-3 flex items-center gap-3 px-4 py-3">
-          <button onClick={() => setMobileOpen(true)}
-            className="p-2 -ml-1 rounded-xl text-ink-secondary hover:bg-surface-2 transition-colors">
-            <Menu size={20} />
+        <header className="md:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-4 bg-surface-900/70 backdrop-blur-xl border-b border-white/5">
+          <button onClick={() => setMobileOpen(true)} className="p-2 -ml-2 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/10 transition-colors">
+            <Menu size={22} />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center">
-              <Zap size={13} className="text-white" strokeWidth={2.5} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_15px_rgba(124,58,237,0.3)]">
+              <Zap size={14} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-semibold text-sm text-ink-primary">SkillForge</span>
+            <span className="font-bold text-base text-zinc-100 tracking-tight">SkillForge</span>
           </div>
         </header>
 
         {isChatPage ? (
-          <div className="flex-1 flex overflow-hidden">{children}</div>
+          <div className="flex-1 flex overflow-hidden p-4 lg:p-6">{children}</div>
         ) : (
-          <main className="flex-1">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">{children}</div>
+          <main className="flex-1 overflow-x-hidden">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+              {children}
+            </div>
           </main>
         )}
       </div>
