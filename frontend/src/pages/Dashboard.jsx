@@ -5,33 +5,55 @@ import { useAuth } from '../context/AuthContext'
 import {
   Flame, Map, CheckCircle2, ArrowRight, PlusCircle,
   Loader2, Star, Brain, Target, Award, BookOpen, Code2,
-  ChevronDown, ChevronUp, Send, Sparkles, CheckCircle, XCircle, Zap
+  ChevronDown, ChevronUp, Send, Sparkles, CheckCircle, XCircle, Zap,
+  Bot
 } from 'lucide-react'
 
 /* ── GitHub-style Activity Graph ─────────────────────────────── */
 function ActivityGraph({ dates }) {
-  const today = new Date()
+  // Use local date to avoid UTC offset issues (e.g. IST = UTC+5:30)
+  const toLocalDateStr = (date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
 
-  // Build 52 weeks × 7 days grid (364 days back)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayStr = toLocalDateStr(today)
+  const todayDow = today.getDay() // 0=Sun … 6=Sat
+
+  // Anchor to the Sunday of the current week, then go back 51 more weeks
+  const startDate = new Date(today)
+  startDate.setDate(today.getDate() - todayDow - 51 * 7)
+
+  // Build 52 weeks × 7 days grid (Sun→Sat, null for future days)
   const WEEKS = 52
   const cells = []
-  for (let w = WEEKS - 1; w >= 0; w--) {
+  for (let w = 0; w < WEEKS; w++) {
     const week = []
-    for (let d = 6; d >= 0; d--) {
-      const date = new Date(today)
-      date.setDate(today.getDate() - (w * 7 + d))
-      week.push(date.toISOString().split('T')[0])
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(startDate)
+      date.setDate(startDate.getDate() + w * 7 + d)
+      if (date > today) {
+        week.push(null) // future — render as empty
+      } else {
+        week.push(toLocalDateStr(date))
+      }
     }
-    cells.push(week.reverse()) // Sun→Sat
+    cells.push(week)
   }
 
   // Month labels
   const months = []
   let lastMonth = -1
   cells.forEach((week, wi) => {
-    const m = new Date(week[0]).getMonth()
+    const firstDate = week.find(d => d !== null)
+    if (!firstDate) return
+    const m = new Date(firstDate).getMonth()
     if (m !== lastMonth) {
-      months.push({ index: wi, label: new Date(week[0]).toLocaleString('default', { month: 'short' }) })
+      months.push({ index: wi, label: new Date(firstDate).toLocaleString('default', { month: 'short' }) })
       lastMonth = m
     }
   })
@@ -47,7 +69,6 @@ function ActivityGraph({ dates }) {
 
   const getColor = (dateStr) => {
     if (!dateSet.has(dateStr)) return '#1e2130'
-    // Could add intensity later; for now active = colored
     return '#4f4fe8'
   }
 
@@ -79,8 +100,7 @@ function ActivityGraph({ dates }) {
             {/* Day labels */}
             <div className="flex flex-col mr-2" style={{ gap: '3px' }}>
               {DAY_LABELS.map((d, i) => (
-                <div key={d} style={{ height: '14px', width: '28px' }}
-                  className="flex items-center">
+                <div key={d} style={{ height: '14px', width: '28px' }} className="flex items-center">
                   {(i === 1 || i === 3 || i === 5) &&
                     <span className="text-[10px] text-slate-500 leading-none">{d}</span>}
                 </div>
@@ -91,9 +111,18 @@ function ActivityGraph({ dates }) {
             <div className="flex" style={{ gap: '3px' }}>
               {cells.map((week, wi) => (
                 <div key={wi} className="flex flex-col" style={{ gap: '3px' }}>
-                  {week.map(dateStr => {
+                  {week.map((dateStr, di) => {
+                    if (dateStr === null) {
+                      // Future cell — render blank spacer
+                      return (
+                        <div
+                          key={`future-${wi}-${di}`}
+                          style={{ width: '14px', height: '14px', flexShrink: 0 }}
+                        />
+                      )
+                    }
                     const active = dateSet.has(dateStr)
-                    const isToday = dateStr === today.toISOString().split('T')[0]
+                    const isToday = dateStr === todayStr
                     return (
                       <div
                         key={dateStr}
@@ -133,14 +162,14 @@ function ActivityGraph({ dates }) {
 
 /* ── Daily Challenge ─────────────────────────────────────────── */
 function DailyChallenge() {
-  const [challenge, setChallenge]       = useState(null)
-  const [loading, setLoad]              = useState(true)
-  const [showHints, setHints]           = useState(false)
-  const [showObjective, setObjective]   = useState(false)
-  const [answer, setAnswer]             = useState('')
-  const [submitting, setSubmitting]     = useState(false)
-  const [review, setReview]             = useState(null)
-  const [xpEarned, setXpEarned]         = useState(false)
+  const [challenge, setChallenge] = useState(null)
+  const [loading, setLoad] = useState(true)
+  const [showHints, setHints] = useState(false)
+  const [showObjective, setObjective] = useState(false)
+  const [answer, setAnswer] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [review, setReview] = useState(null)
+  const [xpEarned, setXpEarned] = useState(false)
 
   useEffect(() => {
     api.get('/features/daily-challenge')
@@ -152,7 +181,7 @@ function DailyChallenge() {
         if (ch?.submitted) {
           setXpEarned(true)
           if (ch.submitted_answer) setAnswer(ch.submitted_answer)
-          if (ch.review_result)    setReview({ ...ch.review_result, xp_awarded: 20 })
+          if (ch.review_result) setReview({ ...ch.review_result, xp_awarded: 20 })
         }
       })
       .catch(() => setLoad(false))
@@ -179,9 +208,9 @@ function DailyChallenge() {
   }
 
   const DIFF = {
-    Easy:   'bg-green-500/10 text-green-400 border border-green-500/20',
+    Easy: 'bg-green-500/10 text-green-400 border border-green-500/20',
     Medium: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-    Hard:   'bg-red-500/10 text-red-400 border border-red-500/20',
+    Hard: 'bg-red-500/10 text-red-400 border border-red-500/20',
   }
 
   // Locked if: XP earned this session, OR challenge already submitted (persisted in DB)
@@ -392,8 +421,8 @@ function StatCard({ icon: Icon, label, value, iconColor }) {
 /* ── Main Dashboard ──────────────────────────────────────────── */
 export default function Dashboard() {
   const { user } = useAuth()
-  const [data, setData]   = useState(null)
-  const [loading, setL]   = useState(true)
+  const [data, setData] = useState(null)
+  const [loading, setL] = useState(true)
 
   useEffect(() => {
     api.get('/dashboard/').then(r => { setData(r.data); setL(false) }).catch(() => setL(false))
@@ -405,11 +434,11 @@ export default function Dashboard() {
     </div>
   )
 
-  const stats      = data?.stats || {}
-  const dashUser   = data?.user || user
-  const activeRM   = data?.active_roadmap
-  const hour       = new Date().getHours()
-  const greeting   = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const stats = data?.stats || {}
+  const dashUser = data?.user || user
+  const activeRM = data?.active_roadmap
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -428,10 +457,10 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={Flame}        label="Day streak"    value={dashUser?.streak_days || 0}          iconColor="text-orange-400" />
-        <StatCard icon={Star}         label="XP points"     value={dashUser?.xp_points || 0}            iconColor="text-yellow-400" />
-        <StatCard icon={Map}          label="Roadmaps"       value={stats.total_roadmaps || 0}           iconColor="text-brand-400" />
-        <StatCard icon={CheckCircle2} label="Topics done"   value={stats.total_topics_completed || 0}   iconColor="text-green-400" />
+        <StatCard icon={Flame} label="Day streak" value={dashUser?.streak_days || 0} iconColor="text-orange-400" />
+        <StatCard icon={Star} label="XP points" value={dashUser?.xp_points || 0} iconColor="text-yellow-400" />
+        <StatCard icon={Map} label="Roadmaps" value={stats.total_roadmaps || 0} iconColor="text-brand-400" />
+        <StatCard icon={CheckCircle2} label="Topics done" value={stats.total_topics_completed || 0} iconColor="text-green-400" />
       </div>
 
       {/* Active Roadmap */}
@@ -485,10 +514,10 @@ export default function Dashboard() {
           <h2 className="font-semibold text-slate-100 mb-4">Quick Access</h2>
           <div className="space-y-2">
             {[
-              { to: '/interview', icon: Brain,  label: 'Interview Prep',      sub: 'Practice mock interviews',    color: 'text-purple-400', bg: 'rgba(168,85,247,0.1)' },
-              { to: '/badges',    icon: Award,  label: 'Badges & Achievements', sub: 'View your earned badges',    color: 'text-yellow-400', bg: 'rgba(234,179,8,0.1)' },
-              { to: '/practice',  icon: Code2,  label: 'Practice IDE',          sub: 'Write and run code',         color: 'text-green-400',  bg: 'rgba(34,197,94,0.1)' },
-              { to: '/chat',      icon: Brain,  label: 'AI Assistant',          sub: 'Ask learning questions',     color: 'text-brand-400',  bg: 'rgba(99,102,241,0.1)' },
+              { to: '/interview', icon: Brain, label: 'Interview Prep', sub: 'Practice mock interviews', color: 'text-purple-400', bg: 'rgba(168,85,247,0.1)' },
+              { to: '/badges', icon: Award, label: 'Badges & Achievements', sub: 'View your earned badges', color: 'text-yellow-400', bg: 'rgba(234,179,8,0.1)' },
+              { to: '/practice', icon: Code2, label: 'Practice IDE', sub: 'Write and run code', color: 'text-green-400', bg: 'rgba(34,197,94,0.1)' },
+              { to: '/chat', icon: Bot, label: 'AI Assistant', sub: 'Ask learning questions', color: 'text-brand-400', bg: 'rgba(99,102,241,0.1)' },
             ].map(({ to, icon: Icon, label, sub, color, bg }) => (
               <Link key={to} to={to}
                 className="flex items-center gap-3 p-3 rounded-xl transition-all group border border-white/10 hover:border-white/20 hover:bg-white/5 bg-surface-800/30 backdrop-blur-sm">
