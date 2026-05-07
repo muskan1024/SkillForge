@@ -148,11 +148,14 @@ function ActivityGraph({ dates }) {
 
           {/* Legend */}
           <div className="flex items-center gap-2 mt-3 ml-8 justify-end">
-            <span className="text-[11px] text-slate-500">Less</span>
-            {['#1e2130', '#312d8a', '#4338ca', '#4f4fe8', '#818cf8'].map(c => (
+            <span className="text-[11px] text-slate-400">Inactive</span>
+            <div className="w-[14px] h-[14px] rounded-[2px] bg-[#1e2130]" />
+
+            <div className="w-[14px] h-[14px] rounded-[2px] bg-indigo-500" />
+            {/* {['#1e2130','#312d8a', '#4338ca', '#4f4fe8', '#818cf8'].map(c => (
               <div key={c} style={{ width: '12px', height: '12px', borderRadius: '2px', background: c }} />
-            ))}
-            <span className="text-[11px] text-slate-500">More</span>
+            ))} */}
+            <span className="text-[11px] text-slate-400">Active</span>
           </div>
         </div>
       </div>

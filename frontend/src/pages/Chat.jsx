@@ -32,14 +32,14 @@ const SUGGESTIONS = [
   "Explain REST API vs GraphQL",
 ];
 
-const BG = "#0f1117";
-const SIDEBAR = "#12141c";
-const CARD = "#16181f";
-const BORDER = "rgba(255,255,255,0.06)";
-const INPUT_BG = "#1e2130";
-const TEXT1 = "#e8eaf0";
+const BG = "#09090b";
+const SIDEBAR = "rgba(15,17,23,0.7)";
+const CARD = "rgba(255,255,255,0.04)";
+const BORDER = "rgba(255,255,255,0.08)";
+const INPUT_BG = "rgba(255,255,255,0.05)";
+const TEXT1 = "#e4e4e7";
 const TEXT2 = "#94a3b8";
-const TEXT3 = "#475569";
+const TEXT3 = "#52525b";
 const BRAND = "#6366f1";
 
 /* ── Message renderer ─────────────────────────────────────── */
@@ -230,7 +230,8 @@ function HistorySidebar({
       style={{
         width: collapsed ? 48 : 256,
         flexShrink: 0,
-        background: SIDEBAR,
+        background: "rgba(12,13,18,0.8)",
+        backdropFilter: "blur(20px)",
         borderRight: `1px solid ${BORDER}`,
         display: "flex",
         flexDirection: "column",
@@ -716,7 +717,7 @@ export default function Chat() {
 
   return (
     <div
-      style={{ display: "flex", width: "100%", height: "100%", background: BG }}
+      style={{ display: "flex", width: "100%", height: "100%", background: "transparent", borderRadius: 20, overflow: "hidden", border: `1px solid ${BORDER}`, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
     >
       {/* History sidebar */}
       <HistorySidebar
@@ -738,14 +739,15 @@ export default function Chat() {
           display: "flex",
           flexDirection: "column",
           minWidth: 0,
-          height: "100%",
+          minHeight: 0,
           overflow: "hidden",
         }}
       >
         {/* Top bar */}
         <div
           style={{
-            background: SIDEBAR,
+            background: "rgba(12,13,18,0.9)",
+            backdropFilter: "blur(20px)",
             borderBottom: `1px solid ${BORDER}`,
             padding: "12px 20px",
             display: "flex",
@@ -953,8 +955,9 @@ export default function Chat() {
         <div
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: "auto",
-            padding: "24px 40px",
+            padding: "24px 32px",
             display: "flex",
             flexDirection: "column",
             gap: 20,
@@ -1128,9 +1131,11 @@ export default function Chat() {
         {/* Input */}
         <div
           style={{
-            background: SIDEBAR,
+            background: "rgba(12,13,18,0.9)",
+            backdropFilter: "blur(20px)",
             borderTop: `1px solid ${BORDER}`,
             padding: "16px 24px",
+            flexShrink: 0,
           }}
         >
           {selectedRM && (

@@ -76,7 +76,7 @@ export default function AppLayout({ children }) {
   const handleLogout = () => { logout(); navigate('/') }
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex h-screen overflow-hidden relative">
       {/* Decorative background glows */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-600/30 blur-[120px] pointer-events-none" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/30 blur-[120px] pointer-events-none" />
@@ -90,7 +90,7 @@ export default function AppLayout({ children }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setMobileOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
-          <aside className="absolute left-0 top-0 h-full w-72 shadow-2xl flex flex-col py-6 overflow-y-auto bg-surface-900/90 backdrop-blur-2xl border-r border-white/10" 
+          <aside className="absolute left-0 top-0 h-full w-72 shadow-2xl flex flex-col py-6 overflow-y-auto bg-surface-900/90 backdrop-blur-2xl border-r border-white/10"
             onClick={e => e.stopPropagation()}>
             <button onClick={() => setMobileOpen(false)}
               className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-200 rounded-xl hover:bg-white/10 transition-colors">
@@ -101,9 +101,10 @@ export default function AppLayout({ children }) {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen md:ml-64 relative z-10">
+      {/* Right of sidebar — scrolls only for non-chat pages */}
+      <div className="flex-1 flex flex-col h-full md:ml-64 relative z-10 overflow-hidden">
         {/* Mobile header */}
-        <header className="md:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-4 bg-surface-900/70 backdrop-blur-xl border-b border-white/5">
+        <header className="md:hidden flex-shrink-0 flex items-center gap-3 px-4 py-4 bg-surface-900/70 backdrop-blur-xl border-b border-white/5">
           <button onClick={() => setMobileOpen(true)} className="p-2 -ml-2 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/10 transition-colors">
             <Menu size={22} />
           </button>
@@ -116,9 +117,11 @@ export default function AppLayout({ children }) {
         </header>
 
         {isChatPage ? (
-          <div className="flex-1 flex overflow-hidden p-4 lg:p-6">{children}</div>
+          /* Chat: fixed height, internal scroll only */
+          <div className="flex-1 flex overflow-hidden min-h-0 p-4 lg:p-6">{children}</div>
         ) : (
-          <main className="flex-1 overflow-x-hidden">
+          /* All other pages: normal vertical scroll */
+          <main className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
               {children}
             </div>
