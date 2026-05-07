@@ -10,24 +10,24 @@ import {
 } from 'lucide-react'
 
 const RESOURCE_ICONS = {
-  youtube:  { icon: Youtube,     color: 'text-red-500 bg-red-500/10' },
-  docs:     { icon: BookOpen,    color: 'text-blue-500 bg-blue-50' },
-  course:   { icon: PlayCircle,  color: 'text-purple-500 bg-purple-500/10' },
-  practice: { icon: Code2,       color: 'text-green-500 bg-green-500/10' },
+  youtube: { icon: Youtube, color: 'text-red-500 bg-red-500/10' },
+  docs: { icon: BookOpen, color: 'text-blue-500 bg-blue-50' },
+  course: { icon: PlayCircle, color: 'text-purple-500 bg-purple-500/10' },
+  practice: { icon: Code2, color: 'text-green-500 bg-green-500/10' },
 }
 const DIFF_COLORS = {
-  Beginner:     'bg-green-500/10 text-green-400',
+  Beginner: 'bg-green-500/10 text-green-400',
   Intermediate: 'bg-yellow-500/10 text-yellow-400',
-  Advanced:     'bg-red-500/10 text-red-400',
+  Advanced: 'bg-red-500/10 text-red-400',
 }
 
 /* ── Quiz Modal ──────────────────────────────────────────────── */
 function QuizModal({ topic, roadmapId, onClose, onPassed }) {
   const [questions, setQuestions] = useState([])
-  const [answers, setAnswers]     = useState({})
-  const [loading, setLoading]     = useState(true)
+  const [answers, setAnswers] = useState({})
+  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [result, setResult]       = useState(null)
+  const [result, setResult] = useState(null)
 
   useEffect(() => {
     api.post('/quiz/generate', {
@@ -63,24 +63,24 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
             <h2 className="font-semibold text-slate-100">Quiz: {topic.name}</h2>
             <p className="text-xs text-slate-500 mt-0.5">Score 60%+ to auto-complete this topic</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#1e2130] rounded-xl text-slate-500"><X size={18}/></button>
+          <button onClick={onClose} className="p-2 hover:bg-[#1e2130] rounded-xl text-slate-500"><X size={18} /></button>
         </div>
 
         <div className="p-6">
           {loading ? (
             <div className="flex flex-col items-center py-12">
-              <Loader2 size={32} className="text-brand-500 animate-spin mb-3"/>
+              <Loader2 size={32} className="text-brand-500 animate-spin mb-3" />
               <p className="text-sm text-slate-400">Generating quiz questions…</p>
             </div>
           ) : result ? (
             <div className="text-center py-8">
               <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${result.passed ? 'bg-green-100' : 'bg-red-100'}`}>
-                {result.passed ? <Check size={36} className="text-green-600"/> : <X size={36} className="text-red-500"/>}
+                {result.passed ? <Check size={36} className="text-green-600" /> : <X size={36} className="text-red-500" />}
               </div>
               <h3 className="text-2xl font-bold text-slate-100 mb-1">{result.score}%</h3>
               <p className="text-slate-400 mb-2">{result.correct}/{result.total} correct</p>
               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium mb-6 ${result.passed ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                {result.passed ? <><Check size={15}/> Topic completed! +15 XP</> : <><AlertCircle size={15}/> Need 60% to pass — try again</>}
+                {result.passed ? <><Check size={15} /> Topic completed! +15 XP</> : <><AlertCircle size={15} /> Need 60% to pass — try again</>}
               </div>
               {/* Answer review */}
               <div className="text-left space-y-4 mt-6">
@@ -90,7 +90,7 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
                   const isRight = userAns === correct
                   return (
                     <div key={i} className={`p-4 rounded-xl border ${isRight ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-200'}`}>
-                      <p className="text-sm font-medium text-slate-100 mb-2">{i+1}. {q.question}</p>
+                      <p className="text-sm font-medium text-slate-100 mb-2">{i + 1}. {q.question}</p>
                       <p className={`text-xs mb-1 ${isRight ? 'text-green-400' : 'text-red-400'}`}>
                         Your answer: {q.options[userAns] || 'Not answered'}
                       </p>
@@ -106,13 +106,13 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
             <div className="space-y-6">
               {questions.map((q, qi) => (
                 <div key={qi} className="p-4 bg-[#0f1117] rounded-xl">
-                  <p className="text-sm font-semibold text-slate-100 mb-3">{qi+1}. {q.question}</p>
+                  <p className="text-sm font-semibold text-slate-100 mb-3">{qi + 1}. {q.question}</p>
                   <div className="space-y-2">
                     {q.options.map((opt, oi) => (
                       <label key={oi} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${answers[qi] === oi ? 'bg-brand-500/10 border-brand-500' : 'bg-white border-white/5 hover:border-brand-500/20'}`}>
-                        <input type="radio" name={`q${qi}`} className="hidden" onChange={() => setAnswers(p => ({...p, [qi]: oi}))}/>
+                        <input type="radio" name={`q${qi}`} className="hidden" onChange={() => setAnswers(p => ({ ...p, [qi]: oi }))} />
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[qi] === oi ? 'border-brand-500 bg-brand-500/100' : 'border-white/8'}`}>
-                          {answers[qi] === oi && <div className="w-2 h-2 rounded-full bg-white"/>}
+                          {answers[qi] === oi && <div className="w-2 h-2 rounded-full bg-white" />}
                         </div>
                         <span className="text-sm text-slate-300">{opt}</span>
                       </label>
@@ -122,7 +122,7 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
               ))}
               <button onClick={handleSubmit} disabled={submitting || Object.keys(answers).length < questions.length}
                 className="btn-primary w-full justify-center">
-                {submitting ? <><Loader2 size={16} className="animate-spin"/> Submitting…</> : 'Submit Quiz'}
+                {submitting ? <><Loader2 size={16} className="animate-spin" /> Submitting…</> : 'Submit Quiz'}
               </button>
             </div>
           )}
@@ -134,7 +134,7 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
 
 /* ── Study Notes Modal ───────────────────────────────────────── */
 function NotesModal({ topic, onClose }) {
-  const [notes, setNotes]   = useState('')
+  const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -154,7 +154,7 @@ function NotesModal({ topic, onClose }) {
   h1 { color: #4f4fe8; } code { background: #f0f4ff; padding: 2px 6px; border-radius: 4px; }
   pre { background: #1e1e2e; color: #4ade80; padding: 16px; border-radius: 8px; overflow-x: auto; }
 </style></head>
-<body>${notes.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`
+<body>${notes.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body></html>`
     printWindow.document.write(html)
     printWindow.document.close()
     setTimeout(() => printWindow.print(), 400)
@@ -169,14 +169,14 @@ function NotesModal({ topic, onClose }) {
             <p className="text-xs text-slate-500 mt-0.5">AI-generated comprehensive notes</p>
           </div>
           <div className="flex items-center gap-2">
-            {!loading && <button onClick={downloadPDF} className="btn-secondary flex items-center gap-2 text-xs py-2"><Download size={14}/> Download</button>}
-            <button onClick={onClose} className="p-2 hover:bg-[#1e2130] rounded-xl text-slate-500"><X size={18}/></button>
+            {!loading && <button onClick={downloadPDF} className="btn-secondary flex items-center gap-2 text-xs py-2"><Download size={14} /> Download</button>}
+            <button onClick={onClose} className="p-2 hover:bg-[#1e2130] rounded-xl text-slate-500"><X size={18} /></button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex flex-col items-center py-16">
-              <Loader2 size={32} className="text-brand-500 animate-spin mb-3"/>
+              <Loader2 size={32} className="text-brand-500 animate-spin mb-3" />
               <p className="text-sm text-slate-400">Generating study notes…</p>
             </div>
           ) : (
@@ -190,7 +190,7 @@ function NotesModal({ topic, onClose }) {
 
 /* ── Per-Topic User Notes ─────────────────────────────────────── */
 function TopicNotes({ topicId, roadmapId }) {
-  const [note, setNote]   = useState('')
+  const [note, setNote] = useState('')
   const [saved, setSaved] = useState(true)
   const timer = useRef(null)
 
@@ -215,7 +215,7 @@ function TopicNotes({ topicId, roadmapId }) {
       </div>
       <textarea value={note} onChange={e => handleChange(e.target.value)} rows={3}
         className="w-full input text-xs resize-none"
-        placeholder="Write your personal notes for this topic…"/>
+        placeholder="Write your personal notes for this topic…" />
     </div>
   )
 }
@@ -231,21 +231,19 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
           return (
             <div key={topic.id} className="flex flex-col items-center">
               <div onClick={() => onTopicClick(topic)}
-                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${
-                  isDone ? 'bg-green-500/10 border-green-500' :
-                  isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-100' :
-                  'bg-white border-white/5 hover:border-brand-500/30'
-                }`}>
+                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${isDone ? 'bg-green-500/10 border-green-500' :
+                    isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-100' :
+                      'bg-white border-white/5 hover:border-brand-500/30'
+                  }`}>
                 {isCurrent && (
                   <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[10px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <MapPin size={9}/> You are here
+                    <MapPin size={9} /> You are here
                   </div>
                 )}
                 <div className="flex items-start gap-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                    isDone ? 'bg-green-500/100 text-white' : isCurrent ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-slate-500'
-                  }`}>
-                    {isDone ? <Check size={13}/> : i + 1}
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${isDone ? 'bg-green-500/100 text-white' : isCurrent ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-slate-500'
+                    }`}>
+                    {isDone ? <Check size={13} /> : i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-brand-300' : isDone ? 'text-green-400' : 'text-slate-100'}`}>{topic.name}</p>
@@ -254,7 +252,7 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
                 </div>
               </div>
               {i < topics.length - 1 && (
-                <div className={`w-0.5 h-6 ${topics[i+1]?.completed ? 'bg-green-400' : i < currentIndex ? 'bg-green-300' : 'bg-[#2a2d3e]'}`}/>
+                <div className={`w-0.5 h-6 ${topics[i + 1]?.completed ? 'bg-green-400' : i < currentIndex ? 'bg-green-300' : 'bg-[#2a2d3e]'}`} />
               )}
             </div>
           )
@@ -265,26 +263,24 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
 }
 
 /* ── Topic Card ──────────────────────────────────────────────── */
-function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapId }) {
+function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapId, onLearn }) {
   const [open, setOpen] = useState(isCurrent)
   useEffect(() => { if (isCurrent) setOpen(true) }, [isCurrent])
 
   return (
-    <div id={`topic-${topic.id}`} className={`rounded-2xl border transition-all duration-200 ${
-      isCurrent ? 'border-brand-500 shadow-md shadow-brand-100 bg-white' :
-      topic.completed ? 'border-white/5 bg-[#0f1117]' : 'border-white/5 bg-white'
-    }`}>
+    <div id={`topic-${topic.id}`} className={`rounded-2xl border transition-all duration-200 ${isCurrent ? 'border-brand-500 shadow-md shadow-brand-100 bg-white' :
+        topic.completed ? 'border-white/5 bg-[#0f1117]' : 'border-white/5 bg-white'
+      }`}>
       {isCurrent && (
         <div className="bg-brand-600 text-white px-4 py-2 rounded-t-2xl flex items-center gap-2 text-xs font-medium">
-          <MapPin size={13}/> You are here <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-1"/>
+          <MapPin size={13} /> You are here <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-1" />
         </div>
       )}
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3 sm:gap-4">
-          <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-            topic.completed ? 'bg-green-500/100 text-white' : isCurrent ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-slate-500'
-          }`}>
-            {topic.completed ? <Check size={13}/> : index + 1}
+          <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${topic.completed ? 'bg-green-500/100 text-white' : isCurrent ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-slate-500'
+            }`}>
+            {topic.completed ? <Check size={13} /> : index + 1}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
@@ -299,9 +295,9 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
                 <h3 className={`font-semibold text-sm sm:text-base ${topic.completed ? 'text-slate-500 line-through' : isCurrent ? 'text-brand-300' : 'text-slate-100'}`}>{topic.name}</h3>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="flex items-center gap-1 text-xs text-slate-500"><Clock size={11}/>{topic.estimated_hours}h</span>
+                <span className="flex items-center gap-1 text-xs text-slate-500"><Clock size={11} />{topic.estimated_hours}h</span>
                 <button onClick={() => setOpen(!open)} className="text-slate-500 hover:text-slate-300 p-1">
-                  {open ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                  {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
               </div>
             </div>
@@ -315,7 +311,7 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
                     <ul className="space-y-1">
                       {topic.subtopics.map((s, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
-                          <div className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0"/>{s}
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />{s}
                         </li>
                       ))}
                     </ul>
@@ -331,28 +327,33 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
                         return (
                           <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80`}>
-                            <Icon size={12}/>{r.title}<ExternalLink size={10}/>
+                            <Icon size={12} />{r.title}<ExternalLink size={10} />
                           </a>
                         )
                       })}
                     </div>
                   </div>
                 )}
-                <TopicNotes topicId={topic.id} roadmapId={roadmapId}/>
+                <TopicNotes topicId={topic.id} roadmapId={roadmapId} />
                 <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5">
+                  <button onClick={() => onLearn(topic, index)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white transition-all"
+                    style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                    <BookOpen size={13} /> Learn
+                  </button>
                   {!topic.completed && (
                     <button onClick={() => onQuiz(topic)}
                       className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-medium transition-all">
-                      <Star size={13}/> Take Quiz to Complete
+                      <Star size={13} /> Take Quiz to Complete
                     </button>
                   )}
                   <button onClick={() => onNotes(topic)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-purple-500/10 hover:bg-purple-100 border border-purple-500/20 text-purple-400 rounded-xl text-xs font-medium transition-all">
-                    <FileText size={13}/> Study Notes
+                    <FileText size={13} /> Study Notes
                   </button>
                   <button onClick={() => onAskAI(topic)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-brand-500/10 hover:bg-brand-500/15 border border-brand-500/20 text-brand-300 rounded-xl text-xs font-medium transition-all">
-                    <Bot size={13}/> Ask AI
+                    <Bot size={13} /> Ask AI
                   </button>
                 </div>
               </div>
@@ -368,12 +369,12 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
 export default function RoadmapView() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [roadmap, setRoadmap]     = useState(null)
-  const [loading, setLoading]     = useState(true)
-  const [deleting, setDeleting]   = useState(false)
+  const [roadmap, setRoadmap] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
   const [quizTopic, setQuizTopic] = useState(null)
   const [notesTopic, setNotesTopic] = useState(null)
-  const [viewMode, setViewMode]   = useState('list') // 'list' | 'graph'
+  const [viewMode, setViewMode] = useState('list') // 'list' | 'graph'
 
   useEffect(() => {
     api.get(`/roadmaps/${id}`)
@@ -408,26 +409,26 @@ export default function RoadmapView() {
     if (!roadmap) return
     let content = `${roadmap.title}\n${'='.repeat(60)}\nGoal: ${roadmap.learning_goal}\nLevel: ${roadmap.skill_level} | Timeline: ${roadmap.timeline}\nProgress: ${roadmap.progress_percent}%\n\n`
     roadmap.topics.forEach((t, i) => {
-      content += `${i+1}. ${t.name} [${t.completed ? '✓ Done' : 'Pending'}]\n   Week ${t.week} | ${t.estimated_hours}h | ${t.difficulty}\n   Subtopics: ${t.subtopics?.join(', ')}\n\n`
+      content += `${i + 1}. ${t.name} [${t.completed ? '✓ Done' : 'Pending'}]\n   Week ${t.week} | ${t.estimated_hours}h | ${t.difficulty}\n   Subtopics: ${t.subtopics?.join(', ')}\n\n`
     })
     const blob = new Blob([content], { type: 'text/plain' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
-    a.download = `${roadmap.title.replace(/\s+/g,'-')}-roadmap.txt`; a.click()
+    a.download = `${roadmap.title.replace(/\s+/g, '-')}-roadmap.txt`; a.click()
     toast.success('Roadmap exported!')
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 size={28} className="text-brand-500 animate-spin"/></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 size={28} className="text-brand-500 animate-spin" /></div>
   if (!roadmap) return null
 
-  const weeks = [...new Set(roadmap.topics.map(t => t.week))].sort((a,b) => a-b)
+  const weeks = [...new Set(roadmap.topics.map(t => t.week))].sort((a, b) => a - b)
 
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
-      {quizTopic && <QuizModal topic={quizTopic} roadmapId={id} onClose={() => setQuizTopic(null)} onPassed={(r) => { handleQuizPassed(r); setQuizTopic(null) }}/>}
-      {notesTopic && <NotesModal topic={notesTopic} onClose={() => setNotesTopic(null)}/>}
+      {quizTopic && <QuizModal topic={quizTopic} roadmapId={id} onClose={() => setQuizTopic(null)} onPassed={(r) => { handleQuizPassed(r); setQuizTopic(null) }} />}
+      {notesTopic && <NotesModal topic={notesTopic} onClose={() => setNotesTopic(null)} />}
 
       <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2 text-sm mb-6 -ml-2">
-        <ArrowLeft size={16}/> Back
+        <ArrowLeft size={16} /> Back
       </button>
 
       {/* Header */}
@@ -444,10 +445,10 @@ export default function RoadmapView() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={exportPDF} title="Export" className="p-2 text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 rounded-xl transition-colors">
-              <Download size={18}/>
+              <Download size={18} />
             </button>
             <button onClick={handleDelete} disabled={deleting} className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors">
-              {deleting ? <Loader2 size={18} className="animate-spin"/> : <Trash2 size={18}/>}
+              {deleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
             </button>
           </div>
         </div>
@@ -456,12 +457,12 @@ export default function RoadmapView() {
           <span className="text-sm font-semibold text-brand-400">{roadmap.progress_percent}%</span>
         </div>
         <div className="h-3 bg-[#1e2130] rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-700" style={{ width: `${roadmap.progress_percent}%` }}/>
+          <div className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-700" style={{ width: `${roadmap.progress_percent}%` }} />
         </div>
         {/* View toggle */}
         <div className="flex gap-2 mt-4">
-          <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode==='list' ? 'bg-brand-600 text-white' : 'bg-[#1e2130] text-slate-300 hover:bg-[#2a2d3e]'}`}>List View</button>
-          <button onClick={() => setViewMode('graph')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode==='graph' ? 'bg-brand-600 text-white' : 'bg-[#1e2130] text-slate-300 hover:bg-[#2a2d3e]'}`}>Visual Map</button>
+          <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'list' ? 'bg-brand-600 text-white' : 'bg-[#1e2130] text-slate-300 hover:bg-[#2a2d3e]'}`}>List View</button>
+          <button onClick={() => setViewMode('graph')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'graph' ? 'bg-brand-600 text-white' : 'bg-[#1e2130] text-slate-300 hover:bg-[#2a2d3e]'}`}>Visual Map</button>
         </div>
       </div>
 
@@ -482,7 +483,7 @@ export default function RoadmapView() {
         <div key={week} className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Week {week}</span>
-            <div className="flex-1 h-px bg-[#2a2d3e]"/>
+            <div className="flex-1 h-px bg-[#2a2d3e]" />
           </div>
           <div className="space-y-3">
             {roadmap.topics.filter(t => t.week === week).map(topic => {
@@ -491,7 +492,8 @@ export default function RoadmapView() {
               return (
                 <TopicCard key={topic.id} topic={topic} index={globalIndex}
                   isCurrent={isCurrent} roadmapId={id}
-                  onQuiz={setQuizTopic} onNotes={setNotesTopic} onAskAI={handleAskAI}/>
+                  onQuiz={setQuizTopic} onNotes={setNotesTopic} onAskAI={handleAskAI}
+                  onLearn={(t, i) => navigate(`/learn/${id}/${i}`)} />
               )
             })}
           </div>
@@ -503,7 +505,7 @@ export default function RoadmapView() {
           <div className="text-4xl mb-3">🎉</div>
           <h2 className="text-lg font-semibold text-slate-100 mb-1">Roadmap complete!</h2>
           <p className="text-sm text-slate-400 mb-4">You've mastered all topics. Ready for the next challenge?</p>
-          <button onClick={() => navigate('/onboarding')} className="btn-primary inline-flex items-center gap-2"><Star size={16}/> New roadmap</button>
+          <button onClick={() => navigate('/onboarding')} className="btn-primary inline-flex items-center gap-2"><Star size={16} /> New roadmap</button>
         </div>
       )}
     </div>

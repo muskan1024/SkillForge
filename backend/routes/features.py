@@ -335,3 +335,177 @@ Return ONLY valid JSON:
         return json.loads(text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
+
+
+# ── Generate Lesson (with MongoDB caching) ────────────────────────
+class LessonRequest(BaseModel):
+    roadmap_id: str
+    topic_index: int
+    topic_name: str
+    subtopics: List[str] = []
+    difficulty: str = "Beginner"
+    skill: str = "Programming"
+
+LESSON_PROMPT = """You are an expert programming tutor creating a structured lesson for a student.
+
+Topic: "{topic}"
+Subtopics to cover: {subtopics}
+Difficulty level: {difficulty}
+Skill area: {skill}
+
+Generate ONE lesson page for EACH subtopic listed above. Each page should deeply cover that single subtopic.
+
+Return ONLY valid JSON in this exact structure (no markdown, no extra text):
+{{
+  "topic_name": "{topic}",
+  "pages": [
+    {{
+      "subtopic": "Subtopic name",
+      "concept_explanation": "A clear, beginner-friendly explanation (3-5 paragraphs). Use \\n\\n to separate paragraphs.",
+      "key_points": [
+        "Key point 1 — most important thing to remember",
+        "Key point 2",
+        "Key point 3",
+        "Key point 4",
+        "Key point 5"
+      ],
+      "real_world_example": "A practical, relatable example of how this is used in real industry projects (2-3 sentences).",
+      "code_example": {{
+        "is_code": true,
+        "language": "python",
+        "snippet": "# Working code snippet here\\nprint('hello world')",
+        "explanation": "Line-by-line explanation of what each part does."
+      }},
+      "common_mistakes": [
+        "Mistake 1: description of what beginners commonly do wrong",
+        "Mistake 2: another common mistake",
+        "Mistake 3: third common error"
+      ],
+      "quick_check": "One simple comprehension question the student should be able to answer after reading this page."
+    }}
+  ]
+}}
+
+Rules:
+- Create exactly one page per subtopic
+- For non-technical subtopics (theory, concepts, DevOps), set is_code=false and use a step-by-step process or diagram description in the snippet field
+- Keep explanations beginner-friendly but thorough
+- Make code examples complete and runnable
+- quick_check should be a simple factual question, NOT a multiple-choice quiz
+"""
+
+@router.post("/generate-lesson")
+async def generate_lesson(req: LessonRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+    # Check cache first
+    cache_key = {
+        "user_id": current_user["id"],
+        "roadmap_id": req.roadmap_id,
+        "topic_index": req.topic_index,
+    }
+    cached = await db.lessons.find_one(cache_key)
+    if cached:
+        cached["id"] = str(cached["_id"])
+        cached.pop("_id", None)
+        return cached
+
+    try:
+        client = get_groq()
+        subtopics_str = ", ".join(req.subtopics) if req.subtopics else req.topic_name
+        prompt = LESSON_PROMPT.format(
+            topic=req.topic_name,
+            subtopics=subtopics_str,
+            difficulty=req.difficulty,
+            skill=req.skill
+        )
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.5,
+            max_tokens=6000
+        )
+        text = resp.choices[0].message.content.strip()
+        text = re.sub(r'^```(?:json)?\s*', '', text)
+        text = re.sub(r'\s*```$', '', text)
+        lesson = json.loads(text)
+
+        # Save to cache
+        doc = {
+            **cache_key,
+            "topic_name": req.topic_name,
+            "lesson": lesson,
+            "created_at": datetime.utcnow(),
+        }
+        result = await db.lessons.insert_one(doc)
+        return {**doc, "id": str(result.inserted_id), "_id": None}
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Lesson JSON parse failed: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lesson generation failed: {str(e)}")
+
+
+# ── Generate Topic Quiz (for lesson flow, one-at-a-time) ──────────
+class LessonQuizRequest(BaseModel):
+    roadmap_id: str
+    topic_index: int
+    topic_name: str
+    subtopics: List[str] = []
+    difficulty: str = "Beginner"
+
+LESSON_QUIZ_PROMPT = """Generate exactly 5 multiple choice questions that comprehensively test understanding of:
+
+Topic: "{topic}"
+All subtopics: {subtopics}
+Difficulty: {difficulty}
+
+Return ONLY a JSON array, no markdown, no extra text:
+[
+  {{
+    "question": "Clear question text?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correct": 0,
+    "explanation": "Why this answer is correct and the others are not."
+  }}
+]
+Rules:
+- correct is the 0-based index of the correct option
+- Cover different subtopics across the 5 questions
+- Make distractors plausible
+- Test understanding, not just memorization"""
+
+@router.post("/generate-lesson-quiz")
+async def generate_lesson_quiz(req: LessonQuizRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+    # Check cache
+    cache_key = {
+        "user_id": current_user["id"],
+        "roadmap_id": req.roadmap_id,
+        "topic_index": req.topic_index,
+        "type": "lesson_quiz",
+    }
+    cached = await db.lesson_quizzes.find_one(cache_key)
+    if cached:
+        cached.pop("_id", None)
+        return {"questions": cached["questions"]}
+
+    try:
+        client = get_groq()
+        subtopics_str = ", ".join(req.subtopics) if req.subtopics else req.topic_name
+        prompt = LESSON_QUIZ_PROMPT.format(
+            topic=req.topic_name,
+            subtopics=subtopics_str,
+            difficulty=req.difficulty
+        )
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7, max_tokens=2000
+        )
+        text = resp.choices[0].message.content.strip()
+        text = re.sub(r'^```(?:json)?\s*', '', text)
+        text = re.sub(r'\s*```$', '', text)
+        questions = json.loads(text)
+
+        # Cache it
+        await db.lesson_quizzes.insert_one({**cache_key, "questions": questions, "created_at": datetime.utcnow()})
+        return {"questions": questions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Quiz generation failed: {str(e)}")

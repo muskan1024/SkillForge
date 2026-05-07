@@ -12,6 +12,7 @@ import Practice from './pages/Practice'
 import InterviewPrep from './pages/InterviewPrep'
 import Badges from './pages/Badges'
 import AppLayout from './components/AppLayout'
+import LessonView from './pages/LessonView'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/onboarding" element={<ProtectedRoute><AppLayout><Onboarding /></AppLayout></ProtectedRoute>} />
         <Route path="/roadmaps" element={<ProtectedRoute><AppLayout><MyRoadmaps /></AppLayout></ProtectedRoute>} />
         <Route path="/roadmaps/:id" element={<ProtectedRoute><AppLayout><RoadmapView /></AppLayout></ProtectedRoute>} />
+        <Route path="/learn/:roadmapId/:topicIndex" element={<ProtectedRoute><LessonView /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><AppLayout><Chat /></AppLayout></ProtectedRoute>} />
         <Route path="/practice" element={<ProtectedRoute><AppLayout><Practice /></AppLayout></ProtectedRoute>} />
         <Route path="/interview" element={<ProtectedRoute><AppLayout><InterviewPrep /></AppLayout></ProtectedRoute>} />
