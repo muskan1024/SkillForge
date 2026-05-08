@@ -57,8 +57,8 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-white/5 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+      <div className="bg-[#1a1c26] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/10">
+        <div className="sticky top-0 bg-[#1a1c26] border-b border-white/5 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <div>
             <h2 className="font-semibold text-slate-100">Quiz: {topic.name}</h2>
             <p className="text-xs text-slate-500 mt-0.5">Score 60%+ to auto-complete this topic</p>
@@ -109,7 +109,7 @@ function QuizModal({ topic, roadmapId, onClose, onPassed }) {
                   <p className="text-sm font-semibold text-slate-100 mb-3">{qi + 1}. {q.question}</p>
                   <div className="space-y-2">
                     {q.options.map((opt, oi) => (
-                      <label key={oi} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${answers[qi] === oi ? 'bg-brand-500/10 border-brand-500' : 'bg-white border-white/5 hover:border-brand-500/20'}`}>
+                      <label key={oi} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${answers[qi] === oi ? 'bg-brand-500/10 border-brand-500' : 'bg-[#1e2130] border-white/5 hover:border-brand-500/20'}`}>
                         <input type="radio" name={`q${qi}`} className="hidden" onChange={() => setAnswers(p => ({ ...p, [qi]: oi }))} />
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[qi] === oi ? 'border-brand-500 bg-brand-500/100' : 'border-white/8'}`}>
                           {answers[qi] === oi && <div className="w-2 h-2 rounded-full bg-white" />}
@@ -162,7 +162,7 @@ function NotesModal({ topic, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-[#1a1c26] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-white/10">
         <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-slate-100">Study Notes: {topic.name}</h2>
@@ -231,9 +231,9 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
           return (
             <div key={topic.id} className="flex flex-col items-center">
               <div onClick={() => onTopicClick(topic)}
-                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${isDone ? 'bg-green-500/10 border-green-500' :
-                    isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-100' :
-                      'bg-white border-white/5 hover:border-brand-500/30'
+                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${isDone ? 'bg-green-500/10 border-green-500/30 hover:border-green-500' :
+                    isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-500/20' :
+                      'bg-[#1e2130] border-white/5 hover:border-brand-500/30'
                   }`}>
                 {isCurrent && (
                   <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[10px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -268,8 +268,8 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
   useEffect(() => { if (isCurrent) setOpen(true) }, [isCurrent])
 
   return (
-    <div id={`topic-${topic.id}`} className={`rounded-2xl border transition-all duration-200 ${isCurrent ? 'border-brand-500 shadow-md shadow-brand-100 bg-white' :
-        topic.completed ? 'border-white/5 bg-[#0f1117]' : 'border-white/5 bg-white'
+    <div id={`topic-${topic.id}`} className={`rounded-2xl border-2 transition-all duration-200 ${isCurrent ? 'border-brand-500 shadow-md shadow-brand-500/10 bg-[#1e2130]' :
+        topic.completed ? 'border-transparent bg-[#0f1117]' : 'border-white/5 bg-[#1e2130]'
       }`}>
       {isCurrent && (
         <div className="bg-brand-600 text-white px-4 py-2 rounded-t-2xl flex items-center gap-2 text-xs font-medium">

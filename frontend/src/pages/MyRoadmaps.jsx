@@ -51,12 +51,11 @@ export default function MyRoadmaps() {
         <div className="grid gap-4">
           {roadmaps.map(r => (
             <Link key={r.id} to={`/roadmaps/${r.id}`}
-              className="card p-5 hover:border-brand-500/20 hover:shadow-md hover:shadow-brand-50 transition-all group">
+              className="card p-5 transition-all group">
               <div className="flex items-start gap-4">
                 {/* Icon */}
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                  r.progress_percent >= 100 ? 'bg-green-500/10' : 'bg-brand-500/100/10'
-                }`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${r.progress_percent >= 100 ? 'bg-green-500/10' : 'bg-brand-500/10'
+                  }`}>
                   {r.progress_percent >= 100
                     ? <CheckCircle2 size={22} className="text-green-500" />
                     : <Map size={22} className="text-brand-500" />
@@ -84,16 +83,14 @@ export default function MyRoadmaps() {
                   {/* Progress */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-1.5 bg-[#1e2130] rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-500 ${
-                        r.progress_percent >= 100 ? 'bg-green-500/100' : 'bg-brand-500/100/100'
-                      }`} style={{ width: `${r.progress_percent}%` }} />
+                      <div className={`h-full rounded-full transition-all duration-500 ${r.progress_percent >= 100 ? 'bg-green-500' : 'bg-brand-500'
+                        }`} style={{ width: `${r.progress_percent}%` }} />
                     </div>
                     <span className="text-xs font-medium text-slate-400 shrink-0">
                       {r.completed_topics}/{r.total_topics} topics
                     </span>
-                    <span className={`text-xs font-semibold shrink-0 ${
-                      r.progress_percent >= 100 ? 'text-green-600' : 'text-brand-400'
-                    }`}>
+                    <span className={`text-xs font-semibold shrink-0 ${r.progress_percent >= 100 ? 'text-green-600' : 'text-brand-400'
+                      }`}>
                       {r.progress_percent}%
                     </span>
                   </div>
