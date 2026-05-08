@@ -265,6 +265,7 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
 /* ── Topic Card ──────────────────────────────────────────────── */
 function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapId, onLearn }) {
   const [open, setOpen] = useState(isCurrent)
+  const [showResources, setShowResources] = useState(false)
   useEffect(() => { if (isCurrent) setOpen(true) }, [isCurrent])
 
   return (
@@ -317,39 +318,35 @@ function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapI
                     </ul>
                   </div>
                 )}
+                <TopicNotes topicId={topic.id} roadmapId={roadmapId} />
+                
                 {topic.resources?.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Resources</p>
-                    <div className="flex flex-wrap gap-2">
-                      {topic.resources.map((r, i) => {
-                        const meta = RESOURCE_ICONS[r.type] || RESOURCE_ICONS.docs
-                        const Icon = meta.icon
-                        return (
-                          <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80`}>
-                            <Icon size={12} />{r.title}<ExternalLink size={10} />
-                          </a>
-                        )
-                      })}
-                    </div>
+                    <button onClick={() => setShowResources(!showResources)} className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-brand-400 transition-colors mb-2">
+                      <ExternalLink size={14} /> {showResources ? 'Hide Additional Resources' : 'Show Additional Resources'}
+                    </button>
+                    {showResources && (
+                      <div className="flex flex-wrap gap-2 mt-2 animate-fade-in">
+                        {topic.resources.map((r, i) => {
+                          const meta = RESOURCE_ICONS[r.type] || RESOURCE_ICONS.docs
+                          const Icon = meta.icon
+                          return (
+                            <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium ${meta.color} hover:opacity-80`}>
+                              <Icon size={12} />{r.title}<ExternalLink size={10} />
+                            </a>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
-                <TopicNotes topicId={topic.id} roadmapId={roadmapId} />
+                
                 <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5">
                   <button onClick={() => onLearn(topic, index)}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                     style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
                     <BookOpen size={13} /> Learn
-                  </button>
-                  {!topic.completed && (
-                    <button onClick={() => onQuiz(topic)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-medium transition-all">
-                      <Star size={13} /> Take Quiz to Complete
-                    </button>
-                  )}
-                  <button onClick={() => onNotes(topic)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-purple-500/10 hover:bg-purple-100 border border-purple-500/20 text-purple-400 rounded-xl text-xs font-medium transition-all">
-                    <FileText size={13} /> Study Notes
                   </button>
                   <button onClick={() => onAskAI(topic)}
                     className="flex items-center gap-1.5 px-3 py-2 bg-brand-500/10 hover:bg-brand-500/15 border border-brand-500/20 text-brand-300 rounded-xl text-xs font-medium transition-all">

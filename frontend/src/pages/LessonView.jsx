@@ -5,7 +5,8 @@ import toast from 'react-hot-toast'
 import {
   ArrowLeft, ArrowRight, BookOpen, Loader2, CheckCircle,
   XCircle, ChevronDown, ChevronUp, Star, Trophy, RotateCcw,
-  Lightbulb, Code2, AlertTriangle, HelpCircle, MapPin
+  Lightbulb, Code2, AlertTriangle, HelpCircle, MapPin,
+  FileText, Download, X
 } from 'lucide-react'
 
 /* ── Code Block ── */
@@ -138,6 +139,173 @@ function LessonPage({ page }) {
           )}
         </section>
       )}
+    </div>
+  )
+}
+
+/* ── Study Notes Modal ── */
+function NotesModal({ topic, onClose }) {
+  const [notes, setNotes] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.post('/features/study-notes', {
+      topic_name: topic.name, subtopics: topic.subtopics || [], difficulty: topic.difficulty
+    }).then(r => { setNotes(r.data.notes); setLoading(false) })
+      .catch(() => { toast.error('Notes generation failed'); onClose() })
+  }, [])
+
+  const parseSimpleMarkdown = (text) => {
+    if (!text) return { __html: '' };
+    let html = text
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") 
+      .replace(/```[\w]*\n([\s\S]*?)```/g, '<pre class="bg-[#0f1117] border border-white/10 p-4 rounded-xl my-3 overflow-x-auto text-cyan-300 text-[13px] font-mono whitespace-pre">$1</pre>')
+      .replace(/^### (.*$)/gim, '<h4 class="text-slate-100 font-bold mt-5 mb-2 text-base">$1</h4>')
+      .replace(/^## (.*$)/gim, '<h3 class="text-brand-300 font-bold mt-6 mb-2 text-lg border-b border-white/10 pb-2">$1</h3>')
+      .replace(/^# (.*$)/gim, '<h2 class="text-brand-400 font-bold mt-6 mb-3 text-xl border-b border-white/10 pb-2">$1</h2>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-100 font-semibold">$1</strong>')
+      .replace(/`(.*?)`/g, '<code class="bg-[#1e2130] text-pink-400 px-1.5 py-0.5 rounded text-[13px] font-mono">$1</code>')
+    return { __html: html }
+  }
+
+  const downloadPDF = () => {
+    const printWindow = window.open('', '_blank')
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>${topic.name} - Study Notes</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { 
+      font-family: 'Inter', -apple-system, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 40px; 
+      color: #1e293b; 
+      line-height: 1.7; 
+      background: #ffffff;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .header h1 {
+      color: #4f46e5;
+      margin: 0 0 10px 0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .header p {
+      color: #64748b;
+      margin: 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+    #content { font-size: 15px; }
+    h1, h2, h3 { color: #0f172a; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.75em; }
+    h1 { font-size: 24px; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 18px; color: #334155; }
+    p { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 24px; margin-top: 0; margin-bottom: 16px; color: #334155; }
+    li { margin-bottom: 8px; }
+    li::marker { color: #4f46e5; font-weight: 600; }
+    code { 
+      background-color: #f1f5f9; 
+      color: #db2777;
+      padding: 3px 6px; 
+      border-radius: 6px; 
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace; 
+      font-size: 13px; 
+    }
+    pre { 
+      background-color: #0f172a; 
+      border-radius: 12px; 
+      padding: 20px; 
+      overflow-x: auto; 
+      margin: 24px 0;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    pre code { 
+      background-color: transparent; 
+      color: #38bdf8;
+      padding: 0; 
+      font-size: 13px;
+    }
+    blockquote { 
+      border-left: 4px solid #4f46e5; 
+      background: #f8fafc;
+      padding: 16px 20px; 
+      margin: 24px 0; 
+      border-radius: 0 8px 8px 0;
+      color: #475569; 
+      font-style: italic;
+    }
+    strong { color: #0f172a; font-weight: 600; }
+    
+    @media print {
+      body { padding: 0; }
+      pre { break-inside: avoid; border: 1px solid #e2e8f0; }
+      h2, h3 { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>${topic.name}</h1>
+    <p>SkillForge Study Notes</p>
+  </div>
+  <div id="content">Loading notes...</div>
+  
+  <script>
+    const markdownText = ${JSON.stringify(notes)};
+    window.onload = function() {
+      if(window.marked) {
+        document.getElementById('content').innerHTML = marked.parse(markdownText);
+      } else {
+        document.getElementById('content').innerText = markdownText;
+      }
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>`
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#1a1c26] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-white/10">
+        <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-slate-100">Study Notes: {topic.name}</h2>
+            <p className="text-xs text-slate-500 mt-0.5">AI-generated comprehensive notes</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!loading && <button onClick={downloadPDF} className="flex items-center gap-2 text-xs py-2 px-3 bg-brand-500/10 text-brand-400 hover:bg-brand-500/20 rounded-xl transition-all"><Download size={14} /> Download PDF</button>}
+            <button onClick={onClose} className="p-2 hover:bg-[#1e2130] rounded-xl text-slate-500"><X size={18} /></button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex flex-col items-center py-16">
+              <Loader2 size={32} className="text-brand-500 animate-spin mb-3" />
+              <p className="text-sm text-slate-400">Generating study notes…</p>
+            </div>
+          ) : (
+            <div className="text-sm text-slate-300 font-sans leading-relaxed whitespace-pre-wrap" dangerouslySetInnerHTML={parseSimpleMarkdown(notes)} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -325,6 +493,7 @@ export default function LessonView() {
   const [pageIdx, setPageIdx] = useState(0)
   const [phase, setPhase] = useState('lesson') // 'lesson' | 'quiz' | 'result'
   const [quizResult, setQuizResult] = useState(null)
+  const [showNotes, setShowNotes] = useState(false)
 
   const topic = roadmap?.topics?.[idx]
   const prevTopic = roadmap?.topics?.[idx - 1]
@@ -380,6 +549,7 @@ export default function LessonView() {
 
   return (
     <div className="min-h-screen" style={{ background: '#16181f', color: '#e8eaf0' }}>
+      {showNotes && <NotesModal topic={topic} onClose={() => setShowNotes(false)} />}
       {/* Top nav bar */}
       <div className="sticky top-0 z-40 border-b border-white/8" style={{ background: 'rgba(22,24,31,0.95)', backdropFilter: 'blur(12px)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
@@ -438,11 +608,18 @@ export default function LessonView() {
                   style={{ background: 'rgba(99,102,241,0.9)' }}>
                   Next <ArrowRight size={15} />
                 </button>
-                : <button onClick={() => setPhase('quiz')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                  <Star size={15} /> Take Quiz
-                </button>
+                : <div className="flex items-center gap-2">
+                    <button onClick={() => setShowNotes(true)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+                      style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)' }}>
+                      <FileText size={15} /> Study Notes
+                    </button>
+                    <button onClick={() => setPhase('quiz')}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                      style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                      <Star size={15} /> Take Quiz
+                    </button>
+                  </div>
               }
             </div>
 
