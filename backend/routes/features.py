@@ -154,85 +154,165 @@ async def get_badges(current_user=Depends(get_current_user), db=Depends(get_db))
         "all": [{**b, "earned": b["id"] in earned_ids} for b in all_badges]
     }
 
-# ── Daily Challenge Submit ────────────────────────────────────────
-class ChallengeSubmitRequest(BaseModel):
+# # ── Daily Challenge Submit ────────────────────────────────────────
+# class ChallengeSubmitRequest(BaseModel):
+#     challenge_id: str
+#     answer: str
+#     task: str
+#     title: str
+#     category: Optional[str] = None
+
+# @router.post("/daily-challenge/submit")
+# async def submit_daily_challenge(req: ChallengeSubmitRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+#     try:
+#         # Idempotency: check if already submitted
+#         existing = await db.daily_challenges.find_one({"_id": ObjectId(req.challenge_id), "user_id": current_user["id"]})
+#         already_submitted = existing.get("submitted", False) if existing else False
+
+#         client = get_groq()
+#         prompt = f"""You are an expert programming tutor evaluating a learner's answer to a daily challenge.
+
+# Challenge Title: {req.title}
+# Category: {req.category or "Programming"}
+# Task: {req.task}
+
+# Learner's Answer:
+# {req.answer}
+
+# Evaluate whether the learner has correctly understood and answered the challenge. Be encouraging and constructive.
+
+# Return ONLY valid JSON:
+# {{
+#   "correct": true or false,
+#   "score": <integer 0-100>,
+#   "feedback": "2-3 sentences of specific, constructive feedback on their answer",
+#   "strengths": ["what they got right"],
+#   "improvements": ["what could be better or what was missing"],
+#   "xp_awarded": <20 if correct else 0>
+# }}
+
+# Be generous: if the answer shows good understanding (score >= 60), mark it as correct."""
+
+#         resp = client.chat.completions.create(
+#             model="llama-3.3-70b-versatile",
+#             messages=[{"role": "user", "content": prompt}],
+#             temperature=0.3, max_tokens=600
+#         )
+#         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
+#         text = re.sub(r'\s*```$', '', text)
+#         result = json.loads(text)
+
+#         # Award XP only if correct and not already submitted
+#         xp_awarded = 0
+#         if result.get("correct") and not already_submitted:
+#             xp_awarded = 20
+#             await db.users.update_one(
+#                 {"_id": ObjectId(current_user["id"])},
+#                 {"$inc": {"xp_points": xp_awarded}, "$set": {"last_active": datetime.utcnow()}}
+#             )
+
+#         # Always persist the answer + review so the UI can restore on refresh
+#         try:
+#             update_fields = {
+#                 "submitted_answer": req.answer,
+#                 "review_result": result,
+#                 "submitted_at": datetime.utcnow(),
+#             }
+#             if result.get("correct") and not already_submitted:
+#                 update_fields["submitted"] = True  # lock XP gate only on first correct
+
+#             await db.daily_challenges.update_one(
+#                 {"_id": ObjectId(req.challenge_id)},
+#                 {"$set": update_fields}
+#             )
+#         except Exception:
+#             pass
+
+#         result["xp_awarded"] = xp_awarded
+#         result["already_submitted"] = already_submitted
+#         return result
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Answer evaluation failed: {str(e)}")
+
+
+# ── Daily Challenge Answer Review ────────────────────────────────
+class ChallengeAnswerRequest(BaseModel):
     challenge_id: str
-    answer: str
+    challenge_title: str
     task: str
-    title: str
-    category: Optional[str] = None
+    answer: str
+    skill: str
+    difficulty: str
 
-@router.post("/daily-challenge/submit")
-async def submit_daily_challenge(req: ChallengeSubmitRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+@router.post("/daily-challenge/review")
+async def review_challenge_answer(req: ChallengeAnswerRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
     try:
-        # Idempotency: check if already submitted
-        existing = await db.daily_challenges.find_one({"_id": ObjectId(req.challenge_id), "user_id": current_user["id"]})
-        already_submitted = existing.get("submitted", False) if existing else False
-
         client = get_groq()
-        prompt = f"""You are an expert programming tutor evaluating a learner's answer to a daily challenge.
+        prompt = f"""You are a friendly senior developer reviewing a student's answer. Talk directly TO them using "you/your", never say "the learner" or "the student".
 
-Challenge Title: {req.title}
-Category: {req.category or "Programming"}
-Task: {req.task}
+Challenge: "{req.challenge_title}"
+Task given: {req.task}
+Skill: {req.skill}
+Difficulty: {req.difficulty}
 
-Learner's Answer:
+Their answer:
+---
 {req.answer}
+---
 
-Evaluate whether the learner has correctly understood and answered the challenge. Be encouraging and constructive.
+Analyze their SPECIFIC answer above. Reference exactly what they wrote — quote specific parts, point out specific lines, mention specific words they used. Do NOT give generic feedback that could apply to anyone.
 
 Return ONLY valid JSON:
 {{
-  "correct": true or false,
-  "score": <integer 0-100>,
-  "feedback": "2-3 sentences of specific, constructive feedback on their answer",
-  "strengths": ["what they got right"],
-  "improvements": ["what could be better or what was missing"],
-  "xp_awarded": <20 if correct else 0>
+  "passed": true or false,
+  "score": 78,
+  "verdict": "Excellent" or "Good" or "Partial" or "Incorrect",
+  "feedback": "2 sentences MAX. Talk directly to them. Reference something SPECIFIC from their answer. Example: 'Your explanation of CI/CD as... is spot on. You nailed the core idea.' NOT 'The answer demonstrates understanding.'",
+  "strengths": ["Specific strength referencing their actual words/code", "Another specific strength"],
+  "improvements": ["One precise thing missing or wrong in their answer", "Another specific gap if any"],
+  "xp_awarded": 20 or 10 or 0
 }}
 
-Be generous: if the answer shows good understanding (score >= 60), mark it as correct."""
+Scoring rules:
+- passed = true if they genuinely understand the concept (not just listed keywords without understanding)
+- score: 90-100 = nailed it, 70-89 = solid with minor gaps, 40-69 = partial, 0-39 = missed the point
+- xp_awarded: 20 if score >= 70, 10 if score 40-69, 0 if score < 40
+- verdict matches score range: Excellent/Good/Partial/Incorrect
+- strengths: reference their EXACT words/code, not generic praise
+- improvements: be specific about what exactly is missing from THEIR answer, not general advice
+- Keep everything short and punchy — no corporate language, no "the learner", no passive voice"""
 
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.3, max_tokens=600
+            temperature=0.3, max_tokens=500
         )
-        text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
-        text = re.sub(r'\s*```$', '', text)
+        import re as re2
+        text = re2.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
+        text = re2.sub(r'\s*```$', '', text)
         result = json.loads(text)
 
-        # Award XP only if correct and not already submitted
-        xp_awarded = 0
-        if result.get("correct") and not already_submitted:
-            xp_awarded = 20
+        # Award XP if passed
+        xp = result.get("xp_awarded", 0)
+        if xp > 0:
             await db.users.update_one(
                 {"_id": ObjectId(current_user["id"])},
-                {"$inc": {"xp_points": xp_awarded}, "$set": {"last_active": datetime.utcnow()}}
+                {"$inc": {"xp_points": xp}, "$set": {"last_active": datetime.utcnow()}}
             )
+            # Mark challenge as answered
+            try:
+                await db.daily_challenges.update_one(
+                    {"_id": ObjectId(req.challenge_id)},
+                    {"$set": {"answered": True, "xp_awarded": xp, "answered_at": datetime.utcnow()}}
+                )
+            except Exception:
+                pass
 
-        # Always persist the answer + review so the UI can restore on refresh
-        try:
-            update_fields = {
-                "submitted_answer": req.answer,
-                "review_result": result,
-                "submitted_at": datetime.utcnow(),
-            }
-            if result.get("correct") and not already_submitted:
-                update_fields["submitted"] = True  # lock XP gate only on first correct
-
-            await db.daily_challenges.update_one(
-                {"_id": ObjectId(req.challenge_id)},
-                {"$set": update_fields}
-            )
-        except Exception:
-            pass
-
-        result["xp_awarded"] = xp_awarded
-        result["already_submitted"] = already_submitted
+        result["xp_awarded"] = xp
         return result
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Answer evaluation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Review failed: {str(e)}")
 
 # ── Code Review ───────────────────────────────────────────────────
 class CodeReviewRequest(BaseModel):
@@ -279,7 +359,7 @@ class InterviewAnswer(BaseModel):
     question: str
     answer: str
     skill: str
-    level: str
+    level: str 
 
 @router.post("/interview/question")
 async def get_interview_question(req: InterviewRequest, current_user=Depends(get_current_user)):
