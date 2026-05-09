@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../utils/api'
-import { Loader2, PlusCircle, Map, ArrowRight, CheckCircle2, Clock } from 'lucide-react'
+import { Loader2, PlusCircle, Map, ArrowRight, CheckCircle2, Clock, Route } from 'lucide-react'
 
 const SKILL_COLORS = {
   Python: 'bg-blue-50 text-blue-700',
@@ -58,7 +58,7 @@ export default function MyRoadmaps() {
                   }`}>
                   {r.progress_percent >= 100
                     ? <CheckCircle2 size={22} className="text-green-500" />
-                    : <Map size={22} className="text-brand-500" />
+                    : <Route size={22} className="text-brand-500" />
                   }
                 </div>
 

@@ -263,9 +263,13 @@ class ChallengeAnswerRequest(BaseModel):
     skill: str
     difficulty: str
 
-@router.post("/daily-challenge/review")
+@router.post("/daily-challenge/submit")
 async def review_challenge_answer(req: ChallengeAnswerRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
     try:
+        # ── Idempotency: check if already answered ──────────────────
+        existing_doc = await db.daily_challenges.find_one({"_id": ObjectId(req.challenge_id)})
+        already_answered = existing_doc.get("answered", False) if existing_doc else False
+
         client = get_groq()
         prompt = f"""You are a friendly senior developer reviewing a student's answer. Talk directly TO them using "you/your", never say "the learner" or "the student".
 
@@ -311,27 +315,38 @@ Scoring rules:
         text = re2.sub(r'\s*```$', '', text)
         result = json.loads(text)
 
-        # Award XP if passed
+        # ── Award XP only on first submission ──────────────────────
         xp = result.get("xp_awarded", 0)
-        if xp > 0:
+        if xp > 0 and not already_answered:
             await db.users.update_one(
                 {"_id": ObjectId(current_user["id"])},
                 {"$inc": {"xp_points": xp}, "$set": {"last_active": datetime.utcnow()}}
             )
-            # Mark challenge as answered
-            try:
-                await db.daily_challenges.update_one(
-                    {"_id": ObjectId(req.challenge_id)},
-                    {"$set": {"answered": True, "xp_awarded": xp, "answered_at": datetime.utcnow()}}
-                )
-            except Exception:
-                pass
+        elif already_answered:
+            xp = 0  # no double XP
+
+        # ── Always persist answer + review so UI can restore on reload ──
+        try:
+            await db.daily_challenges.update_one(
+                {"_id": ObjectId(req.challenge_id)},
+                {"$set": {
+                    "answered": True,
+                    "submitted_answer": req.answer,
+                    "review_result": result,
+                    "xp_awarded": xp,
+                    "answered_at": datetime.utcnow(),
+                }}
+            )
+        except Exception:
+            pass
 
         result["xp_awarded"] = xp
+        result["already_answered"] = already_answered
         return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Review failed: {str(e)}")
+
 
 # ── Code Review ───────────────────────────────────────────────────
 class CodeReviewRequest(BaseModel):

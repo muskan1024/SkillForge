@@ -166,7 +166,7 @@ function HistorySidebar({
   sessions,
   activeId,
   onSelect,
-  onDelete,
+  onTriggerDelete,
   onNew,
   roadmaps,
   loading,
@@ -380,6 +380,7 @@ function HistorySidebar({
                       gs.map((s) => (
                         <div
                           key={s.id}
+                          className="group"
                           onClick={() => onSelect(s.id)}
                           style={{
                             display: "flex",
@@ -448,29 +449,26 @@ function HistorySidebar({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onDelete(s.id);
+                              onTriggerDelete(s.id);
                             }}
+                            className="opacity-0 group-hover:opacity-100 transition-all"
                             style={{
-                              opacity: 0,
                               background: "transparent",
                               border: "none",
                               cursor: "pointer",
                               padding: 4,
                               borderRadius: 4,
                               color: TEXT3,
-                              transition: "all 0.15s",
                               flexShrink: 0,
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.opacity = "1";
                               e.currentTarget.style.color = "#f87171";
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.opacity = "0";
+                              e.currentTarget.style.color = TEXT3;
                             }}
-                            className="delete-btn"
                           >
-                            <X size={11} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       ))}
@@ -527,6 +525,7 @@ export default function Chat() {
 
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSess] = useState(null);
+  const [chatToDelete, setChatToDelete] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -683,13 +682,13 @@ export default function Chat() {
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   return (
-    <div className="flex w-full h-full rounded-2xl border-2 border-[#6b27d9] bg-[#1e2130] overflow-hidden shadow-[0_0_15px_rgba(107,39,217,0.15)]">
+    <div className="flex w-full h-full rounded-2xl border-2 border-[#6b27d9] bg-[#1e2130] overflow-hidden shadow-[0_0_15px_rgba(107,39,217,0.15)] relative">
       {/* History sidebar */}
       <HistorySidebar
         sessions={sessions}
         activeId={activeSessionId}
         onSelect={handleSelectSession}
-        onDelete={handleDeleteSession}
+        onTriggerDelete={setChatToDelete}
         onNew={handleNewChat}
         roadmaps={roadmaps}
         loading={loadingSessions}
@@ -811,7 +810,7 @@ export default function Chat() {
                     right: 0,
                     top: "calc(100% + 6px)",
                     width: 280,
-                    background: CARD,
+                    background: "#1e2130",
                     border: `1px solid ${BORDER}`,
                     borderRadius: 14,
                     boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
@@ -1064,7 +1063,7 @@ export default function Chat() {
               <Map size={11} /> Context: {rmTitle}
             </p>
           )}
-          <div className="flex items-end gap-3 bg-[#1e2130] border-2 border-white/5 rounded-2xl p-2 pl-4 focus-within:border-brand-500/50 transition-colors">
+          <div className="flex items-center gap-3 bg-[#1e2130] border-2 border-white/5 rounded-2xl p-2 pl-4 focus-within:border-brand-500/50 transition-colors">
             <textarea
               ref={inputRef}
               rows={1}
@@ -1081,7 +1080,6 @@ export default function Chat() {
                 fontFamily: "DM Sans, system-ui, sans-serif",
                 resize: "none",
                 lineHeight: 1.5,
-                paddingTop: 8,
                 maxHeight: 120,
               }}
               placeholder="Ask anything… (Enter to send, Shift+Enter for new line)"
@@ -1101,7 +1099,6 @@ export default function Chat() {
                 justifyContent: "center",
                 flexShrink: 0,
                 transition: "all 0.15s",
-                alignSelf: "flex-end",
               }}
             >
               {loading ? (
@@ -1133,6 +1130,76 @@ export default function Chat() {
         @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
       `}</style>
+
+      {chatToDelete && (
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(4px)",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16
+        }}>
+          <div className="animate-slide-up" style={{
+            background: "#1a1c26",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 16,
+            padding: 24,
+            width: "100%",
+            maxWidth: 400,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.4)"
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: "#e4e4e7", marginBottom: 8, marginTop: 0 }}>Delete Chat</h3>
+            <p style={{ fontSize: 14, color: "#94a3b8", marginBottom: 24, lineHeight: 1.5 }}>
+              Are you sure you want to delete this chat? This action cannot be undone.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+              <button 
+                onClick={() => setChatToDelete(null)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "#e4e4e7",
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  handleDeleteSession(chatToDelete);
+                  setChatToDelete(null);
+                }}
+                style={{
+                  background: "#ef4444",
+                  border: "none",
+                  color: "#fff",
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "#dc2626"}
+                onMouseLeave={e => e.currentTarget.style.background = "#ef4444"}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

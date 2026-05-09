@@ -6,7 +6,7 @@ import {
   CheckCircle2, Circle, Clock, ChevronDown, ChevronUp,
   ExternalLink, Youtube, BookOpen, Code2, PlayCircle,
   Loader2, Trash2, ArrowLeft, MapPin, Star, Bot,
-  FileText, StickyNote, Download, X, Check, AlertCircle
+  FileText, StickyNote, Download, X, Check, AlertCircle, Lock
 } from 'lucide-react'
 
 const RESOURCE_ICONS = {
@@ -230,28 +230,32 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
         {topics.map((topic, i) => {
           const isCurrent = i === currentIndex
           const isDone = topic.completed
+          const isLocked = !isDone && !isCurrent
           
           return (
-            <div key={topic.id} className="relative flex flex-col sm:flex-row items-start sm:items-center w-full group sm:even:flex-row-reverse">
-              <div className={`absolute left-[35px] sm:left-1/2 w-10 h-10 rounded-full border-4 border-[#1a1c26] z-10 flex items-center justify-center -translate-x-[17px] sm:-translate-x-1/2 transition-colors duration-300 ${isDone ? 'bg-green-500' : isCurrent ? 'bg-brand-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-[#2a2d3e] group-hover:bg-[#3b3f54]'}`}>
-                {isDone ? <Check size={16} className="text-white" /> : <span className="text-sm font-bold text-white">{i + 1}</span>}
+            <div key={topic.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center w-full group sm:even:flex-row-reverse ${isLocked ? 'opacity-50' : ''}`}>
+              <div className={`absolute left-[35px] sm:left-1/2 w-10 h-10 rounded-full border-4 border-[#1a1c26] z-10 flex items-center justify-center -translate-x-[17px] sm:-translate-x-1/2 transition-colors duration-300 ${isDone ? 'bg-green-500' : isCurrent ? 'bg-brand-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-[#1e2130]'}`}>
+                {isDone ? <Check size={16} className="text-white" /> : isLocked ? <Lock size={14} className="text-slate-600" /> : <span className="text-sm font-bold text-white">{i + 1}</span>}
               </div>
 
               <div className="hidden sm:block sm:w-1/2" />
 
               <div className="w-full pl-[70px] sm:pl-0 sm:w-1/2 sm:px-8">
-                <div onClick={() => onTopicClick(topic)}
-                  className={`relative cursor-pointer rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isDone ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/50' : isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-500/20' : 'bg-[#1e2130] border-transparent hover:border-brand-500/30'}`}>
+                <div onClick={() => !isLocked && onTopicClick(topic)}
+                  className={`relative rounded-2xl border-2 p-5 transition-all duration-300 ${isLocked ? 'bg-[#0d0f14] border-white/5 cursor-not-allowed' : isDone ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/50 hover:-translate-y-1 hover:shadow-xl cursor-pointer' : 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-500/20 hover:-translate-y-1 hover:shadow-xl cursor-pointer'}`}>
                   {isCurrent && (
                     <div className="absolute -top-3 right-4 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg">
                       <MapPin size={10} /> You are here
                     </div>
                   )}
-                  <h3 className={`text-base font-bold mb-1 leading-tight ${isCurrent ? 'text-brand-300' : isDone ? 'text-green-400' : 'text-slate-100'}`}>{topic.name}</h3>
-                  <div className="flex items-center gap-3 text-xs text-slate-500 leading-none">
-                    <span className="flex items-center gap-1"><Clock size={12} /> {topic.estimated_hours}h</span>
-                    <span className="flex items-center gap-1">Week {topic.week}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${isDone ? 'bg-green-500/20 text-green-400' : isCurrent ? 'bg-brand-500/20 text-brand-300' : 'bg-[#2a2d3e] text-slate-400'}`}>{topic.difficulty}</span>
+                  <h3 className={`text-base font-bold mb-1 leading-tight ${isCurrent ? 'text-brand-300' : isDone ? 'text-green-400' : 'text-slate-600'}`}>{topic.name}</h3>
+                  <div className="flex items-center gap-3 text-xs leading-none">
+                    <span className={`flex items-center gap-1 ${isLocked ? 'text-slate-700' : 'text-slate-500'}`}><Clock size={12} /> {topic.estimated_hours}h</span>
+                    <span className={isLocked ? 'text-slate-700' : 'text-slate-500'}>Week {topic.week}</span>
+                    {isLocked
+                      ? <span className="flex items-center gap-1 text-slate-600 text-[10px] font-semibold"><Lock size={10} /> Locked</span>
+                      : <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${isDone ? 'bg-green-500/20 text-green-400' : 'bg-brand-500/20 text-brand-300'}`}>{topic.difficulty}</span>
+                    }
                   </div>
                 </div>
               </div>
@@ -264,11 +268,65 @@ function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
 }
 
 /* ── Topic Card ──────────────────────────────────────────────── */
-function TopicCard({ topic, index, isCurrent, onQuiz, onAskAI, onNotes, roadmapId, onLearn }) {
+function TopicCard({ topic, index, isCurrent, isLocked, onQuiz, onAskAI, onNotes, roadmapId, onLearn }) {
   const [open, setOpen] = useState(isCurrent)
   const [showResources, setShowResources] = useState(false)
   useEffect(() => { if (isCurrent) setOpen(true) }, [isCurrent])
 
+  // ── Locked state (future topics) ──────────────────────────────
+  if (isLocked) {
+    return (
+      <div id={`topic-${topic.id}`} className="rounded-2xl border border-white/5 bg-[#0d0f14] opacity-60 transition-all duration-200">
+        <div className="p-4 sm:p-5">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 bg-[#1e2130] text-slate-600">
+              {index + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-xs font-mono text-slate-600">Week {topic.week} · {topic.day_range}</span>
+                    <span className={`badge text-[10px] opacity-50 ${DIFF_COLORS[topic.difficulty] || 'bg-[#1e2130] text-slate-400'}`}>{topic.difficulty}</span>
+                  </div>
+                  <h3 className="font-semibold text-sm sm:text-base text-slate-600">{topic.name}</h3>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Lock size={14} className="text-slate-600" />
+                  <button onClick={() => setOpen(!open)} className="text-slate-600 hover:text-slate-500 p-1">
+                    {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                </div>
+              </div>
+              {open && (
+                <div className="mt-3 pt-3 border-t border-white/5">
+                  {topic.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{topic.description}</p>}
+                  {topic.subtopics?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Subtopics</p>
+                      <ul className="space-y-1">
+                        {topic.subtopics.map((s, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-700 shrink-0" />{s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-600">
+                    <Lock size={12} />
+                    <span>Complete the current topic to unlock this</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Normal / completed state ──────────────────────────────────
   return (
     <div id={`topic-${topic.id}`} className={`rounded-2xl border-2 transition-all duration-200 ${isCurrent ? 'border-brand-500 shadow-md shadow-brand-500/10 bg-[#1e2130]' :
         topic.completed ? 'border-transparent bg-[#0f1117]' : 'border-white/5 bg-[#1e2130]'
@@ -583,9 +641,10 @@ export default function RoadmapView() {
             {roadmap.topics.filter(t => t.week === week).map(topic => {
               const globalIndex = roadmap.topics.findIndex(t => t.id === topic.id)
               const isCurrent = globalIndex === roadmap.current_topic_index && roadmap.progress_percent < 100
+              const isLocked = !topic.completed && !isCurrent
               return (
                 <TopicCard key={topic.id} topic={topic} index={globalIndex}
-                  isCurrent={isCurrent} roadmapId={id}
+                  isCurrent={isCurrent} isLocked={isLocked} roadmapId={id}
                   onQuiz={setQuizTopic} onNotes={setNotesTopic} onAskAI={handleAskAI}
                   onLearn={(t, i) => navigate(`/learn/${id}/${i}`)} />
               )

@@ -6,7 +6,8 @@ import {
   Flame, Map, CheckCircle2, ArrowRight, PlusCircle,
   Loader2, Star, Brain, Target, Award, BookOpen, Code2,
   ChevronDown, ChevronUp, Send, Sparkles, CheckCircle, XCircle, Zap,
-  Bot
+  Bot, Route,
+  MessagesSquare
 } from 'lucide-react'
 
 /* ── GitHub-style Activity Graph ─────────────────────────────── */
@@ -181,10 +182,12 @@ function DailyChallenge() {
         setChallenge(ch)
         setLoad(false)
         // Restore completed state from persisted DB fields
-        if (ch?.submitted) {
-          setXpEarned(true)
+        if (ch?.answered) {
           if (ch.submitted_answer) setAnswer(ch.submitted_answer)
-          if (ch.review_result) setReview({ ...ch.review_result, xp_awarded: 20 })
+          if (ch.review_result) {
+            setReview(ch.review_result)
+            if ((ch.xp_awarded ?? 0) > 0) setXpEarned(true)
+          }
         }
       })
       .catch(() => setLoad(false))
@@ -198,11 +201,12 @@ function DailyChallenge() {
         challenge_id: challenge.id,
         answer: answer.trim(),
         task: challenge.task,
-        title: challenge.title,
-        category: challenge.category,
+        challenge_title: challenge.title,
+        skill: challenge.skill || challenge.category || 'Programming',
+        difficulty: challenge.difficulty || 'Easy',
       })
       setReview(res.data)
-      if (res.data.correct && !res.data.already_submitted) setXpEarned(true)
+      if (res.data.xp_awarded > 0 && !res.data.already_answered) setXpEarned(true)
     } catch {
       setReview({ error: 'Could not evaluate your answer. Please try again.' })
     } finally {
@@ -217,7 +221,7 @@ function DailyChallenge() {
   }
 
   // Locked if: XP earned this session, OR challenge already submitted (persisted in DB)
-  const alreadyDone = (xpEarned && review?.correct) || (challenge?.submitted === true)
+  const alreadyDone = (challenge?.answered === true)
 
   return (
     <div className="card p-5 h-full flex flex-col">
@@ -345,17 +349,17 @@ function DailyChallenge() {
               <div
                 className="rounded-xl p-4 space-y-2.5"
                 style={{
-                  background: review.correct ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
-                  border: `1px solid ${review.correct ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                  background: review.passed ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
+                  border: `1px solid ${review.passed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
                 }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {review.correct
+                    {review.passed
                       ? <CheckCircle size={15} className="text-green-400" />
                       : <XCircle size={15} className="text-red-400" />}
-                    <span className={`text-sm font-semibold ${review.correct ? 'text-green-400' : 'text-red-400'}`}>
-                      {review.correct ? 'Correct! Well done.' : 'Not quite right.'}
+                    <span className={`text-sm font-semibold ${review.passed ? 'text-green-400' : 'text-red-400'}`}>
+                      {review.passed ? 'Correct! Well done.' : 'Not quite right.'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -462,7 +466,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard icon={Flame} label="Day streak" value={dashUser?.streak_days || 0} iconColor="text-orange-400" />
         <StatCard icon={Star} label="XP points" value={dashUser?.xp_points || 0} iconColor="text-yellow-400" />
-        <StatCard icon={Map} label="Roadmaps" value={stats.total_roadmaps || 0} iconColor="text-brand-400" />
+        <StatCard icon={Route} label="Roadmaps" value={stats.total_roadmaps || 0} iconColor="text-brand-400" />
         <StatCard icon={CheckCircle2} label="Topics done" value={stats.total_topics_completed || 0} iconColor="text-green-400" />
       </div>
 
@@ -517,7 +521,7 @@ export default function Dashboard() {
           <h2 className="font-semibold text-slate-100 mb-4">Quick Access</h2>
           <div className="space-y-2">
             {[
-              { to: '/interview', icon: Brain, label: 'Interview Prep', sub: 'Practice mock interviews', color: 'text-purple-400', bg: 'rgba(168,85,247,0.1)' },
+              { to: '/interview', icon: MessagesSquare, label: 'Interview Prep', sub: 'Practice mock interviews', color: 'text-purple-400', bg: 'rgba(168,85,247,0.1)' },
               { to: '/badges', icon: Award, label: 'Badges & Achievements', sub: 'View your earned badges', color: 'text-yellow-400', bg: 'rgba(234,179,8,0.1)' },
               { to: '/practice', icon: Code2, label: 'Practice IDE', sub: 'Write and run code', color: 'text-green-400', bg: 'rgba(34,197,94,0.1)' },
               { to: '/chat', icon: Bot, label: 'AI Assistant', sub: 'Ask learning questions', color: 'text-brand-400', bg: 'rgba(99,102,241,0.1)' },

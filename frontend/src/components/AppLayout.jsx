@@ -1,24 +1,24 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Map, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Brain, Award } from 'lucide-react'
+import { LayoutDashboard, Map, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Brain, Award, Route, MessageSquare, MessagesSquare } from 'lucide-react'
 
 function SidebarContent({ user, onLogout, onNavClick }) {
   return (
     <>
-      <div className="flex items-center gap-3 px-4 mb-10 mt-2">
+      <div className="flex items-center gap-3 px-4 mb-5">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(124,58,237,0.4)]">
           <Zap size={18} className="text-white fill-white/20" strokeWidth={2} />
         </div>
         <span className="font-bold text-zinc-100 text-lg tracking-tight">SkillForge</span>
       </div>
 
-      <nav className="flex flex-col gap-1.5 flex-1 px-2">
+      <nav className="flex flex-col gap-1 flex-1 px-2">
         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Learn</p>
         {[
-          { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
-          { to: '/roadmaps',   icon: Map,             label: 'My Roadmaps' },
-          { to: '/onboarding', icon: PlusCircle,      label: 'New Roadmap' },
+          { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+          { to: '/roadmaps', icon: Route, label: 'My Roadmaps' },
+          { to: '/onboarding', icon: PlusCircle, label: 'New Roadmap' },
         ].map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to} onClick={onNavClick}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
@@ -27,7 +27,7 @@ function SidebarContent({ user, onLogout, onNavClick }) {
           </NavLink>
         ))}
 
-        <div className="h-px bg-white/5 my-4 mx-2" />
+        <div className="h-px bg-white/5 my-2 mx-2" />
         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Tools</p>
 
         <NavLink to="/chat" onClick={onNavClick}
@@ -40,10 +40,10 @@ function SidebarContent({ user, onLogout, onNavClick }) {
         </NavLink>
         <NavLink to="/interview" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-          <Brain size={18} className="shrink-0" /><span className="truncate">Interview Prep</span>
+          <MessagesSquare size={18} className="shrink-0" /><span className="truncate">Interview Prep</span>
         </NavLink>
 
-        <div className="h-px bg-white/5 my-4 mx-2" />
+        <div className="h-px bg-white/5 my-2 mx-2" />
         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Progress</p>
         <NavLink to="/badges" onClick={onNavClick}
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
@@ -83,7 +83,7 @@ export default function AppLayout({ children }) {
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 shrink-0 flex-col py-6 fixed top-0 left-0 h-full z-30 overflow-y-auto bg-surface-900/50 backdrop-blur-2xl border-r border-white/5">
-        <SidebarContent user={user} onLogout={handleLogout} onNavClick={() => {}} />
+        <SidebarContent user={user} onLogout={handleLogout} onNavClick={() => { }} />
       </aside>
 
       {/* Mobile overlay */}
