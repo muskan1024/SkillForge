@@ -33,12 +33,27 @@ export default {
         'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
         'bounce':     'bounce 1s infinite',
         'float':      'float 6s ease-in-out infinite',
+        'scroll-y':   'scrollY 20s linear infinite',
+        'scroll-y-reverse': 'scrollYReverse 20s linear infinite',
+        'scroll-x':   'scrollX 30s linear infinite',
       },
       keyframes: {
         fadeIn:    { from: { opacity: 0 },                              to: { opacity: 1 } },
         slideUp:   { from: { opacity: 0, transform: 'translateY(20px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
         pulseSoft: { '0%,100%': { opacity: 1 },                        '50%': { opacity: 0.8 } },
         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+        scrollY: {
+          '0%': { transform: 'translateY(0)' },
+          '100%': { transform: 'translateY(-50%)' },
+        },
+        scrollYReverse: {
+          '0%': { transform: 'translateY(-50%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+        scrollX: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
     },
   },
