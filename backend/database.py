@@ -31,6 +31,15 @@ async def connect_db():
     db_instance.db = db_instance.client[settings.db_name]
     print(f"Connected to MongoDB: {settings.db_name}")
 
+    # TTL index: auto-delete daily_challenge docs after 5 days (432000 seconds)
+    await db_instance.db.daily_challenges.create_index(
+        "created_at",
+        expireAfterSeconds=432000,
+        name="daily_challenges_ttl_5d"
+    )
+    print("TTL index ensured on daily_challenges (5 days)")
+
+
 async def close_db():
     if db_instance.client:
         db_instance.client.close()
