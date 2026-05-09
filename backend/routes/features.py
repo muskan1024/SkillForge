@@ -15,12 +15,24 @@ def get_groq():
 
 # ── Study Notes ──────────────────────────────────────────────────
 class NotesRequest(BaseModel):
+    roadmap_id: str
+    topic_id: str
+    roadmap_title: str
     topic_name: str
     subtopics: List[str] = []
     difficulty: str = "Beginner"
 
 @router.post("/study-notes")
-async def generate_study_notes(req: NotesRequest, current_user=Depends(get_current_user)):
+async def generate_study_notes(req: NotesRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
+    cache_key = {
+        "user_id": current_user["id"],
+        "roadmap_id": req.roadmap_id,
+        "topic_id": req.topic_id
+    }
+    cached = await db.study_notes.find_one(cache_key)
+    if cached:
+        return {"notes": cached["notes"]}
+
     try:
         client = get_groq()
         prompt = f"""Create comprehensive study notes for the topic: "{req.topic_name}"
@@ -28,7 +40,7 @@ Subtopics: {", ".join(req.subtopics)}
 Level: {req.difficulty}
 
 Format as structured markdown:
-# {req.topic_name} - Study Notes
+# {req.topic_name} - {req.roadmap_title}
 ## Key Concepts
 ## Detailed Explanations (with examples)
 ## Code Examples (if applicable, use proper code blocks)
@@ -42,7 +54,14 @@ Make it comprehensive but concise."""
             messages=[{"role": "user", "content": prompt}],
             temperature=0.6, max_tokens=3000
         )
-        return {"notes": resp.choices[0].message.content.strip()}
+        notes = resp.choices[0].message.content.strip()
+        
+        await db.study_notes.insert_one({
+            **cache_key,
+            "notes": notes,
+            "created_at": datetime.utcnow()
+        })
+        return {"notes": notes}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Notes generation failed: {str(e)}")
 

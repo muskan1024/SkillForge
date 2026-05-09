@@ -144,13 +144,18 @@ function LessonPage({ page }) {
 }
 
 /* ── Study Notes Modal ── */
-function NotesModal({ topic, onClose }) {
+function NotesModal({ topic, roadmap, onClose }) {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.post('/features/study-notes', {
-      topic_name: topic.name, subtopics: topic.subtopics || [], difficulty: topic.difficulty
+      roadmap_id: roadmap.id,
+      topic_id: topic.id,
+      roadmap_title: roadmap.title,
+      topic_name: topic.name, 
+      subtopics: topic.subtopics || [], 
+      difficulty: topic.difficulty
     }).then(r => { setNotes(r.data.notes); setLoading(false) })
       .catch(() => { toast.error('Notes generation failed'); onClose() })
   }, [])
@@ -168,14 +173,26 @@ function NotesModal({ topic, onClose }) {
     return { __html: html }
   }
 
-  const downloadPDF = () => {
-    const printWindow = window.open('', '_blank')
+  const downloadPDF = async () => {
+    toast.loading('Preparing document...', { id: 'pdf' });
+    if (!window.marked) {
+      await new Promise(resolve => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+        script.onload = resolve;
+        document.body.appendChild(script);
+      });
+    }
+
+    toast.dismiss('pdf');
+    const printWindow = window.open('', '_blank');
+    const parsedNotes = window.marked.parse(notes);
+    
     const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>${topic.name} - Study Notes</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <title>${topic.name} - ${roadmap?.title}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body { 
@@ -208,78 +225,43 @@ function NotesModal({ topic, onClose }) {
       font-weight: 500;
     }
     #content { font-size: 15px; }
-    h1, h2, h3 { color: #0f172a; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.75em; }
-    h1 { font-size: 24px; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-    h2 { font-size: 20px; }
-    h3 { font-size: 18px; color: #334155; }
-    p { margin-top: 0; margin-bottom: 16px; }
-    ul, ol { padding-left: 24px; margin-top: 0; margin-bottom: 16px; color: #334155; }
-    li { margin-bottom: 8px; }
-    li::marker { color: #4f46e5; font-weight: 600; }
-    code { 
-      background-color: #f1f5f9; 
-      color: #db2777;
-      padding: 3px 6px; 
-      border-radius: 6px; 
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace; 
-      font-size: 13px; 
-    }
-    pre { 
-      background-color: #0f172a; 
-      border-radius: 12px; 
-      padding: 20px; 
-      overflow-x: auto; 
-      margin: 24px 0;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    }
-    pre code { 
-      background-color: transparent; 
-      color: #38bdf8;
-      padding: 0; 
-      font-size: 13px;
-    }
-    blockquote { 
-      border-left: 4px solid #4f46e5; 
-      background: #f8fafc;
-      padding: 16px 20px; 
-      margin: 24px 0; 
-      border-radius: 0 8px 8px 0;
-      color: #475569; 
-      font-style: italic;
-    }
-    strong { color: #0f172a; font-weight: 600; }
-    
+    #content h1, #content h2, #content h3 { color: #0f172a; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.75em; page-break-after: avoid; }
+    #content h1 { font-size: 24px; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: none; }
+    #content h2 { font-size: 20px; }
+    #content h3 { font-size: 18px; color: #334155; }
+    #content p { margin-top: 0; margin-bottom: 16px; }
+    #content ul, #content ol { padding-left: 24px; margin-top: 0; margin-bottom: 16px; color: #334155; }
+    #content li { margin-bottom: 8px; }
+    #content li::marker { color: #4f46e5; font-weight: 600; }
+    #content code { background-color: #f1f5f9; color: #db2777; padding: 3px 6px; border-radius: 6px; font-family: monospace; font-size: 13px; }
+    #content pre { background-color: #0f172a; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 24px 0; page-break-inside: avoid; }
+    #content pre code { background-color: transparent; color: #38bdf8; padding: 0; }
+    #content blockquote { border-left: 4px solid #4f46e5; background: #f8fafc; padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0; color: #475569; font-style: italic; page-break-inside: avoid; }
+    #content strong { color: #0f172a; font-weight: 600; }
     @media print {
       body { padding: 0; }
-      pre { break-inside: avoid; border: 1px solid #e2e8f0; }
-      h2, h3 { break-after: avoid; }
     }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>${topic.name}</h1>
-    <p>SkillForge Study Notes</p>
+    <p>${roadmap?.title}</p>
   </div>
-  <div id="content">Loading notes...</div>
-  
+  <div id="content">
+    ${parsedNotes}
+  </div>
   <script>
-    const markdownText = ${JSON.stringify(notes)};
     window.onload = function() {
-      if(window.marked) {
-        document.getElementById('content').innerHTML = marked.parse(markdownText);
-      } else {
-        document.getElementById('content').innerText = markdownText;
-      }
       setTimeout(() => {
         window.print();
       }, 500);
     };
   </script>
 </body>
-</html>`
-    printWindow.document.write(html)
-    printWindow.document.close()
+</html>`;
+    printWindow.document.write(html);
+    printWindow.document.close();
   }
 
   return (
@@ -549,7 +531,7 @@ export default function LessonView() {
 
   return (
     <div className="min-h-screen" style={{ background: '#16181f', color: '#e8eaf0' }}>
-      {showNotes && <NotesModal topic={topic} onClose={() => setShowNotes(false)} />}
+      {showNotes && <NotesModal topic={topic} roadmap={roadmap} onClose={() => setShowNotes(false)} />}
       {/* Top nav bar */}
       <div className="sticky top-0 z-40 border-b border-white/8" style={{ background: 'rgba(22,24,31,0.95)', backdropFilter: 'blur(12px)' }}>
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">

@@ -223,37 +223,38 @@ function TopicNotes({ topicId, roadmapId }) {
 /* ── Graphical Roadmap View ──────────────────────────────────── */
 function GraphicalRoadmap({ topics, currentIndex, onTopicClick }) {
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex flex-col items-center gap-0 min-w-max mx-auto">
+    <div className="relative max-w-4xl mx-auto py-8 px-4 sm:px-0">
+      <div className="absolute top-8 bottom-8 left-[35px] sm:left-1/2 sm:-translate-x-1/2 w-1.5 bg-[#1e2130] rounded-full" />
+      
+      <div className="space-y-8 sm:space-y-12">
         {topics.map((topic, i) => {
           const isCurrent = i === currentIndex
           const isDone = topic.completed
+          
           return (
-            <div key={topic.id} className="flex flex-col items-center">
-              <div onClick={() => onTopicClick(topic)}
-                className={`relative cursor-pointer w-56 sm:w-64 rounded-2xl border-2 p-4 transition-all hover:shadow-lg ${isDone ? 'bg-green-500/10 border-green-500/30 hover:border-green-500' :
-                    isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-500/20' :
-                      'bg-[#1e2130] border-white/5 hover:border-brand-500/30'
-                  }`}>
-                {isCurrent && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-[10px] font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <MapPin size={9} /> You are here
-                  </div>
-                )}
-                <div className="flex items-start gap-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${isDone ? 'bg-green-500/100 text-white' : isCurrent ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-slate-500'
-                    }`}>
-                    {isDone ? <Check size={13} /> : i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-brand-300' : isDone ? 'text-green-400' : 'text-slate-100'}`}>{topic.name}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Week {topic.week} · {topic.estimated_hours}h</p>
+            <div key={topic.id} className="relative flex flex-col sm:flex-row items-start sm:items-center w-full group sm:even:flex-row-reverse">
+              <div className={`absolute left-[35px] sm:left-1/2 w-10 h-10 rounded-full border-4 border-[#1a1c26] z-10 flex items-center justify-center -translate-x-[17px] sm:-translate-x-1/2 transition-colors duration-300 ${isDone ? 'bg-green-500' : isCurrent ? 'bg-brand-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-[#2a2d3e] group-hover:bg-[#3b3f54]'}`}>
+                {isDone ? <Check size={16} className="text-white" /> : <span className="text-sm font-bold text-white">{i + 1}</span>}
+              </div>
+
+              <div className="hidden sm:block sm:w-1/2" />
+
+              <div className="w-full pl-[70px] sm:pl-0 sm:w-1/2 sm:px-8">
+                <div onClick={() => onTopicClick(topic)}
+                  className={`relative cursor-pointer rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isDone ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/50' : isCurrent ? 'bg-brand-500/10 border-brand-500 shadow-lg shadow-brand-500/20' : 'bg-[#1e2130] border-transparent hover:border-brand-500/30'}`}>
+                  {isCurrent && (
+                    <div className="absolute -top-3 right-4 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg">
+                      <MapPin size={10} /> You are here
+                    </div>
+                  )}
+                  <h3 className={`text-base font-bold mb-1 leading-tight ${isCurrent ? 'text-brand-300' : isDone ? 'text-green-400' : 'text-slate-100'}`}>{topic.name}</h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-500 leading-none">
+                    <span className="flex items-center gap-1"><Clock size={12} /> {topic.estimated_hours}h</span>
+                    <span className="flex items-center gap-1">Week {topic.week}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${isDone ? 'bg-green-500/20 text-green-400' : isCurrent ? 'bg-brand-500/20 text-brand-300' : 'bg-[#2a2d3e] text-slate-400'}`}>{topic.difficulty}</span>
                   </div>
                 </div>
               </div>
-              {i < topics.length - 1 && (
-                <div className={`w-0.5 h-6 ${topics[i + 1]?.completed ? 'bg-green-400' : i < currentIndex ? 'bg-green-300' : 'bg-[#2a2d3e]'}`} />
-              )}
             </div>
           )
         })}
@@ -402,16 +403,108 @@ export default function RoadmapView() {
     catch { toast.error('Delete failed'); setDeleting(false) }
   }
 
-  const exportPDF = () => {
-    if (!roadmap) return
-    let content = `${roadmap.title}\n${'='.repeat(60)}\nGoal: ${roadmap.learning_goal}\nLevel: ${roadmap.skill_level} | Timeline: ${roadmap.timeline}\nProgress: ${roadmap.progress_percent}%\n\n`
-    roadmap.topics.forEach((t, i) => {
-      content += `${i + 1}. ${t.name} [${t.completed ? '✓ Done' : 'Pending'}]\n   Week ${t.week} | ${t.estimated_hours}h | ${t.difficulty}\n   Subtopics: ${t.subtopics?.join(', ')}\n\n`
-    })
-    const blob = new Blob([content], { type: 'text/plain' })
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
-    a.download = `${roadmap.title.replace(/\s+/g, '-')}-roadmap.txt`; a.click()
-    toast.success('Roadmap exported!')
+  const exportRoadmapImage = () => {
+    const printWindow = window.open('', '_blank');
+
+    const topicsHTML = roadmap.topics.map((topic, i) => {
+      const isDone = topic.completed;
+      const isCurrent = i === roadmap.current_topic_index && roadmap.progress_percent < 100;
+      const isEven = i % 2 === 0;
+
+      const dotColor = isDone ? '#22c55e' : isCurrent ? '#6366f1' : '#374151';
+      const cardBg = isDone ? '#052e16' : isCurrent ? '#1e1b4b' : '#1e2130';
+      const cardBorder = isDone ? '#166534' : isCurrent ? '#6366f1' : '#374151';
+      const titleColor = isCurrent ? '#a5b4fc' : isDone ? '#4ade80' : '#f1f5f9';
+      const badgeBg = isDone ? 'rgba(34,197,94,0.15)' : isCurrent ? 'rgba(99,102,241,0.2)' : '#374151';
+      const badgeColor = isDone ? '#4ade80' : isCurrent ? '#a5b4fc' : '#94a3b8';
+
+      return `
+        <div style="display:flex; align-items:center; margin-bottom:36px; position:relative; flex-direction:${isEven ? 'row' : 'row-reverse'};">
+          <div style="flex:1;">&nbsp;</div>
+          <div style="width:44px; display:flex; justify-content:center; flex-shrink:0;">
+            <div style="width:40px; height:40px; border-radius:50%; background:${dotColor}; color:white; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; border:4px solid #0f1117; position:relative; z-index:2; box-shadow:${isCurrent ? '0 0 12px rgba(99,102,241,0.6)' : 'none'};">
+              ${isDone ? '✓' : i + 1}
+            </div>
+          </div>
+          <div style="flex:1; padding:0 28px;">
+            <div style="background:${cardBg}; border:2px solid ${cardBorder}; border-radius:16px; padding:18px 20px; position:relative;">
+              ${isCurrent ? `<div style="position:absolute; top:-12px; right:14px; background:#6366f1; color:white; font-size:9px; font-weight:700; padding:3px 10px; border-radius:999px; letter-spacing:0.5px; text-transform:uppercase;">📍 You are here</div>` : ''}
+              <div style="font-size:15px; font-weight:700; color:${titleColor}; margin-bottom:8px; line-height:1.3;">${topic.name}</div>
+              <div style="display:flex; align-items:center; gap:12px; font-size:12px; color:#64748b;">
+                <span>⏱ ${topic.estimated_hours}h</span>
+                <span>Week ${topic.week}</span>
+                <span style="background:${badgeBg}; color:${badgeColor}; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">${topic.difficulty}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>${roadmap.title} - Roadmap</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; padding: 40px 20px; margin: 0; }
+    .header { text-align: center; margin-bottom: 48px; }
+    .timeline { position: relative; max-width: 780px; margin: 0 auto; }
+    .spine { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; background: #1e2130; transform: translateX(-50%); border-radius: 9px; }
+    @media print {
+      body { background: #0f1117 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { size: A4 portrait; margin: 1.5cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 style="font-size:26px; font-weight:700; color:#a5b4fc; margin:0 0 8px 0;">${roadmap.title}</h1>
+    <p style="font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin:0 0 6px 0;">${roadmap.skill_level} · ${roadmap.timeline}</p>
+    <p style="font-size:13px; color:#94a3b8; margin:0;">${roadmap.learning_goal}</p>
+  </div>
+  <div class="timeline">
+    <div class="spine"></div>
+    ${topicsHTML}
+  </div>
+  <script>
+    window.onload = function() {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = function() {
+        // Wait for fonts to paint
+        setTimeout(function() {
+          var W = document.body.scrollWidth;
+          var H = document.body.scrollHeight;
+          html2canvas(document.body, {
+            scale: 2,
+            backgroundColor: '#0f1117',
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: W,
+            windowHeight: H,
+            width: W,
+            height: H
+          }).then(function(canvas) {
+            var link = document.createElement('a');
+            link.download = '${roadmap.title.replace(/\\s+/g, '-')}-Roadmap.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            setTimeout(function() { window.close(); }, 1500);
+          });
+        }, 800);
+      };
+      document.head.appendChild(s);
+    };
+  <\/script>
+</body>
+</html>`;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 size={28} className="text-brand-500 animate-spin" /></div>
@@ -441,9 +534,6 @@ export default function RoadmapView() {
             <p className="text-sm text-slate-400 mt-1">Goal: {roadmap.learning_goal}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button onClick={exportPDF} title="Export" className="p-2 text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 rounded-xl transition-colors">
-              <Download size={18} />
-            </button>
             <button onClick={handleDelete} disabled={deleting} className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors">
               {deleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
             </button>
@@ -466,12 +556,19 @@ export default function RoadmapView() {
       {/* Graphical View */}
       {viewMode === 'graph' && (
         <div className="card p-6 mb-6">
-          <h2 className="text-sm font-semibold text-slate-100 mb-6 text-center">Your Learning Journey</h2>
-          <GraphicalRoadmap
-            topics={roadmap.topics}
-            currentIndex={roadmap.current_topic_index}
-            onTopicClick={(t) => { setViewMode('list'); setTimeout(() => document.getElementById(`topic-${t.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100) }}
-          />
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-sm font-semibold text-slate-100">Your Learning Journey</h2>
+            <button onClick={exportRoadmapImage} className="btn-secondary flex items-center gap-2 text-xs py-1.5 px-3">
+              <Download size={14} /> Download Map
+            </button>
+          </div>
+          <div id="graphical-roadmap-export-container" className="bg-[#1a1c26] p-6 rounded-xl border border-white/5">
+            <GraphicalRoadmap
+              topics={roadmap.topics}
+              currentIndex={roadmap.current_topic_index}
+              onTopicClick={(t) => { setViewMode('list'); setTimeout(() => document.getElementById(`topic-${t.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100) }}
+            />
+          </div>
         </div>
       )}
 

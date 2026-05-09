@@ -142,50 +142,17 @@ function MessageContent({ text }) {
 function ChatBubble({ msg }) {
   const isUser = msg.role === "user";
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 12,
-        flexDirection: isUser ? "row-reverse" : "row",
-        animationName: "slideUp",
-        animationDuration: "0.3s",
-      }}
-    >
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 10,
-          background: isUser ? BRAND : INPUT_BG,
-          border: isUser ? "none" : `1px solid ${BORDER}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          marginTop: 2,
-        }}
-      >
-        {isUser ? (
-          <User size={15} color="#fff" />
-        ) : (
-          <Bot size={15} color={BRAND} />
-        )}
+    <div className={`flex gap-3 sm:gap-4 w-full animate-slide-up ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isUser ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-brand-400'
+        }`}>
+        {isUser ? <User size={16} /> : <Bot size={18} />}
       </div>
-      <div
-        style={{
-          maxWidth: "76%",
-          borderRadius: isUser ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
-          padding: "12px 16px",
-          background: isUser ? BRAND : CARD,
-          border: isUser ? "none" : `1px solid ${BORDER}`,
-        }}
-      >
+      <div className={`max-w-[85%] sm:max-w-[80%] ${isUser
+        ? 'rounded-[20px_4px_20px_20px] bg-brand-600 px-5 py-3 text-white shadow-md shadow-brand-500/20'
+        : 'rounded-2xl border-2 border-white/5 bg-[#0f1117] p-5 shadow-sm'
+        }`}>
         {isUser ? (
-          <p
-            style={{ fontSize: 14, color: "#fff", lineHeight: 1.6, margin: 0 }}
-          >
-            {msg.content}
-          </p>
+          <p className="text-[15px] leading-relaxed m-0">{msg.content}</p>
         ) : (
           <MessageContent text={msg.content} />
         )}
@@ -232,7 +199,7 @@ function HistorySidebar({
         flexShrink: 0,
         background: "rgba(12,13,18,0.8)",
         backdropFilter: "blur(20px)",
-        borderRight: `1px solid ${BORDER}`,
+        borderRight: `1px solid rgba(107,39,217,0.3)`,
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -297,20 +264,20 @@ function HistorySidebar({
               alignItems: "center",
               gap: 8,
               padding: "8px 12px",
-              background: "rgba(99,102,241,0.1)",
-              border: "1px solid rgba(99,102,241,0.2)",
+              background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+              border: "none",
               borderRadius: 10,
-              color: "#818cf8",
+              color: "#fff",
               fontSize: 12,
               fontWeight: 500,
               cursor: "pointer",
-              transition: "all 0.15s",
+              transition: "opacity 0.15s",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(99,102,241,0.18)")
+              (e.currentTarget.style.opacity = "0.85")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "rgba(99,102,241,0.1)")
+              (e.currentTarget.style.opacity = "1")
             }
           >
             <Plus size={13} /> New chat
@@ -360,8 +327,8 @@ function HistorySidebar({
                         color: TEXT2,
                       }}
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.03)")
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.03)")
                       }
                       onMouseLeave={(e) =>
                         (e.currentTarget.style.background = "transparent")
@@ -716,9 +683,7 @@ export default function Chat() {
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   return (
-    <div
-      style={{ display: "flex", width: "100%", height: "100%", background: "transparent", borderRadius: 20, overflow: "hidden", border: `1px solid ${BORDER}`, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
-    >
+    <div className="flex w-full h-full rounded-2xl border-2 border-[#6b27d9] bg-[#1e2130] overflow-hidden shadow-[0_0_15px_rgba(107,39,217,0.15)]">
       {/* History sidebar */}
       <HistorySidebar
         sessions={sessions}
@@ -744,18 +709,7 @@ export default function Chat() {
         }}
       >
         {/* Top bar */}
-        <div
-          style={{
-            background: "rgba(12,13,18,0.9)",
-            backdropFilter: "blur(20px)",
-            borderBottom: `1px solid ${BORDER}`,
-            padding: "12px 20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
+        <div className="bg-[#0f1117] border-b-2 border-[#6b27d9]/30 px-5 py-4 flex items-center justify-between shrink-0">
           <div
             style={{
               display: "flex",
@@ -793,19 +747,19 @@ export default function Chat() {
                 alignItems: "center",
                 gap: 6,
                 padding: "7px 14px",
-                background: INPUT_BG,
-                border: `1px solid ${BORDER}`,
+                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                border: "none",
                 borderRadius: 10,
-                color: TEXT2,
+                color: "#fff",
                 fontSize: 12,
                 fontWeight: 500,
                 cursor: "pointer",
-                transition: "all 0.15s",
+                transition: "opacity 0.15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")
+                (e.currentTarget.style.opacity = "0.85")
               }
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = BORDER)}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
               <PenSquare size={13} /> New chat
             </button>
@@ -819,15 +773,19 @@ export default function Chat() {
                   alignItems: "center",
                   gap: 6,
                   padding: "7px 14px",
-                  background: selectedRM ? "rgba(99,102,241,0.12)" : INPUT_BG,
-                  border: `1px solid ${selectedRM ? "rgba(99,102,241,0.3)" : BORDER}`,
+                  background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                  border: "none",
                   borderRadius: 10,
-                  color: selectedRM ? "#818cf8" : TEXT2,
+                  color: "#fff",
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: "pointer",
-                  transition: "all 0.15s",
+                  transition: "opacity 0.15s",
                 }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.opacity = "0.85")
+                }
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 <Map size={13} />
                 <span
@@ -840,8 +798,8 @@ export default function Chat() {
                 >
                   {selectedRM
                     ? roadmaps
-                        .find((r) => r.id === selectedRM)
-                        ?.title?.slice(0, 18) + "…"
+                      .find((r) => r.id === selectedRM)
+                      ?.title?.slice(0, 18) + "…"
                     : "Roadmap context"}
                 </span>
                 <ChevronDown size={12} />
@@ -880,8 +838,8 @@ export default function Chat() {
                         cursor: "pointer",
                       }}
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.04)")
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.04)")
                       }
                       onMouseLeave={(e) =>
                         (e.currentTarget.style.background = "transparent")
@@ -952,17 +910,7 @@ export default function Chat() {
         </div>
 
         {/* Messages */}
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            padding: "24px 32px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-          }}
-        >
+        <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8 flex flex-col gap-5">
           {loadingMsgs ? (
             <div
               style={{
@@ -1079,30 +1027,11 @@ export default function Chat() {
                 <ChatBubble key={i} msg={m} />
               ))}
               {loading && (
-                <div style={{ display: "flex", gap: 12 }}>
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 10,
-                      background: INPUT_BG,
-                      border: `1px solid ${BORDER}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Bot size={15} color={BRAND} />
+                <div className="flex gap-3 sm:gap-4 w-full">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-[#2a2d3e] text-brand-400">
+                    <Bot size={18} />
                   </div>
-                  <div
-                    style={{
-                      background: CARD,
-                      border: `1px solid ${BORDER}`,
-                      borderRadius: "4px 18px 18px 18px",
-                      padding: "12px 16px",
-                    }}
-                  >
+                  <div className="rounded-2xl border-2 border-white/5 bg-[#0f1117] p-5 shadow-sm">
                     <div
                       style={{ display: "flex", gap: 6, alignItems: "center" }}
                     >
@@ -1129,44 +1058,13 @@ export default function Chat() {
         </div>
 
         {/* Input */}
-        <div
-          style={{
-            background: "rgba(12,13,18,0.9)",
-            backdropFilter: "blur(20px)",
-            borderTop: `1px solid ${BORDER}`,
-            padding: "16px 24px",
-            flexShrink: 0,
-          }}
-        >
+        <div className="bg-[#0f1117] border-t-2 border-white/5 p-4 sm:p-6 shrink-0">
           {selectedRM && (
-            <p
-              style={{
-                fontSize: 11,
-                color: "#818cf8",
-                marginBottom: 8,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
+            <p className="text-[11px] text-brand-400 mb-2 flex items-center gap-1">
               <Map size={11} /> Context: {rmTitle}
             </p>
           )}
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              background: INPUT_BG,
-              border: `1px solid ${BORDER}`,
-              borderRadius: 16,
-              padding: "8px 8px 8px 16px",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) =>
-              (e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)")
-            }
-            onBlur={(e) => (e.currentTarget.style.borderColor = BORDER)}
-          >
+          <div className="flex items-end gap-3 bg-[#1e2130] border-2 border-white/5 rounded-2xl p-2 pl-4 focus-within:border-brand-500/50 transition-colors">
             <textarea
               ref={inputRef}
               rows={1}
