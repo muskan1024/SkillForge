@@ -136,8 +136,8 @@ export default function Landing() {
       {/* ── Fixed Navbar ────────────────────────── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled
-            ? "bg-surface-900/80 backdrop-blur-xl border-white/10 shadow-lg"
-            : "bg-transparent border-transparent"
+          ? "bg-surface-900/80 backdrop-blur-xl border-white/10 shadow-lg"
+          : "bg-transparent border-transparent"
           }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
@@ -166,7 +166,7 @@ export default function Landing() {
       </header>
 
       {/* ── Hero ───────────────────────────────── */}
-      <section className="pt-32 md:pt-48 pb-20 px-6 text-center relative overflow-hidden">
+      <section className="pt-32 md:pt-40 pb-20 px-6 text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-xs font-medium text-brand-300 mb-8 backdrop-blur-md animate-fade-in shadow-[0_0_15px_rgba(124,58,237,0.15)]">
             <Zap size={14} className="text-brand-400 fill-brand-400/20" /> AI-Powered · Learn · Practice · Get Hired

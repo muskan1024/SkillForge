@@ -327,15 +327,19 @@ Scoring rules:
 
         # ── Always persist answer + review so UI can restore on reload ──
         try:
+            update_data = {
+                "submitted_answer": req.answer,
+                "review_result": result,
+                "xp_awarded": xp,
+                "answered_at": datetime.utcnow(),
+            }
+            # Only mark it definitively answered if they pass
+            if result.get("passed", False) or result.get("score", 0) >= 60:
+                update_data["answered"] = True
+                
             await db.daily_challenges.update_one(
                 {"_id": ObjectId(req.challenge_id)},
-                {"$set": {
-                    "answered": True,
-                    "submitted_answer": req.answer,
-                    "review_result": result,
-                    "xp_awarded": xp,
-                    "answered_at": datetime.utcnow(),
-                }}
+                {"$set": update_data}
             )
         except Exception:
             pass

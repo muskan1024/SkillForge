@@ -182,7 +182,7 @@ function DailyChallenge() {
         setChallenge(ch)
         setLoad(false)
         // Restore completed state from persisted DB fields
-        if (ch?.answered) {
+        if (ch?.answered || ch?.review_result) {
           if (ch.submitted_answer) setAnswer(ch.submitted_answer)
           if (ch.review_result) {
             setReview(ch.review_result)
@@ -220,8 +220,8 @@ function DailyChallenge() {
     Hard: 'bg-red-500/10 text-red-400 border border-red-500/20',
   }
 
-  // Locked if: XP earned this session, OR challenge already submitted (persisted in DB)
-  const alreadyDone = (challenge?.answered === true)
+  // Locked if: Challenge already completely passed/answered (persisted in DB), or review passed
+  const alreadyDone = (challenge?.answered === true) || (review?.passed === true) || (review?.score >= 60)
 
   return (
     <div className="card p-5 h-full flex flex-col">
@@ -341,7 +341,9 @@ function DailyChallenge() {
                 ? <><Loader2 size={14} className="animate-spin" /> Reviewing…</>
                 : alreadyDone
                   ? <><CheckCircle size={14} /> Submitted ✓</>
-                  : <><Send size={14} /> Submit for AI Review</>}
+                  : review && (!review.passed || review.score < 60)
+                    ? <><Send size={14} /> Try Again</>
+                    : <><Send size={14} /> Submit for AI Review</>}
             </button>
 
             {/* AI Review Result */}
