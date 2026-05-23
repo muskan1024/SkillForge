@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
-import { Loader2, Award, Lock } from 'lucide-react'
+import { Loader2, Lock, Award } from 'lucide-react'
+import * as Icons from 'lucide-react'
 
 export default function Badges() {
   const [data, setData]   = useState(null)
@@ -38,34 +39,44 @@ export default function Badges() {
 
           {earned.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-sm font-semibold text-slate-300 mb-4">✅ Earned ({earned.length})</h2>
+              <h2 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2"><Icons.CheckCircle2 size={16} className="text-green-400" /> Earned ({earned.length})</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {earned.map(b => (
-                  <div key={b.id} className="card p-5 text-center hover:shadow-md hover:border-brand-500/20 transition-all">
-                    <div className="text-4xl mb-3">{b.icon}</div>
-                    <p className="font-semibold text-slate-100 text-sm">{b.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">{b.desc}</p>
-                    {b.earned_at && <p className="text-[10px] text-brand-500 mt-2">Earned ✓</p>}
-                  </div>
-                ))}
+                {earned.map(b => {
+                  const IconComp = Icons[b.icon] || Icons.Award
+                  return (
+                    <div key={b.id} className="card p-5 text-center group hover:shadow-lg hover:shadow-brand-500/10 hover:border-brand-500/30 transition-all cursor-default">
+                      <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400/20 to-brand-600/5 border border-brand-500/20 flex items-center justify-center mb-4 text-brand-400 group-hover:scale-110 group-hover:text-brand-300 transition-all duration-300 shadow-[inset_0_0_20px_rgba(139,92,246,0.1)]">
+                        <IconComp size={28} strokeWidth={1.5} />
+                      </div>
+                      <p className="font-semibold text-slate-100 text-sm">{b.name}</p>
+                      <p className="text-xs text-slate-500 mt-1.5">{b.desc}</p>
+                      {b.earned_at && <p className="text-[10px] text-brand-500 mt-3 font-medium bg-brand-500/10 py-1 px-2 rounded-lg inline-block">Earned ✓</p>}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
 
           {locked.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-300 mb-4">🔒 Locked ({locked.length})</h2>
+              <h2 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2"><Icons.Lock size={16} className="text-slate-500" /> Locked ({locked.length})</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {locked.map(b => (
-                  <div key={b.id} className="card p-5 text-center opacity-50 grayscale">
-                    <div className="text-4xl mb-3">{b.icon}</div>
-                    <p className="font-semibold text-slate-100 text-sm">{b.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">{b.desc}</p>
-                    <div className="flex items-center justify-center gap-1 mt-2">
-                      <Lock size={10} className="text-slate-500"/><p className="text-[10px] text-slate-500">Locked</p>
+                {locked.map(b => {
+                  const IconComp = Icons[b.icon] || Icons.Award
+                  return (
+                    <div key={b.id} className="card p-5 text-center opacity-60">
+                      <div className="mx-auto w-14 h-14 rounded-2xl bg-surface-800/50 border border-white/5 flex items-center justify-center mb-4 text-slate-500">
+                        <IconComp size={28} strokeWidth={1.5} />
+                      </div>
+                      <p className="font-semibold text-slate-300 text-sm">{b.name}</p>
+                      <p className="text-xs text-slate-500 mt-1.5">{b.desc}</p>
+                      <div className="flex items-center justify-center gap-1.5 mt-3 bg-white/5 py-1 px-2 rounded-lg inline-flex">
+                        <Lock size={10} className="text-slate-400"/><p className="text-[10px] text-slate-400 font-medium">Locked</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
