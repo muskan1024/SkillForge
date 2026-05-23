@@ -1,13 +1,8 @@
-import google.generativeai as genai
+import httpx
 import json
 import re
 from database import get_settings
 from typing import List
-
-def init_gemini():
-    settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
-    return genai.GenerativeModel("gemini-2.0-flash")
 
 ROADMAP_PROMPT = """You are SkillForge, an expert learning path designer. Generate a detailed, structured learning roadmap.
 
@@ -56,7 +51,10 @@ RULES:
 
 async def generate_roadmap(skills: List[str], skill_level: str, learning_goal: str, timeline: str) -> dict:
     try:
-        model = init_gemini()
+        settings = get_settings()
+        if not settings.groq_api_key:
+            raise ValueError("GROQ_API_KEY is not set in environment variables.")
+
         skills_str = ", ".join(skills)
         prompt = ROADMAP_PROMPT.format(
             skills=skills_str,
@@ -64,13 +62,39 @@ async def generate_roadmap(skills: List[str], skill_level: str, learning_goal: s
             learning_goal=learning_goal,
             timeline=timeline
         )
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        # Strip markdown code blocks if present
-        text = re.sub(r'^```(?:json)?\s*', '', text)
-        text = re.sub(r'\s*```$', '', text)
-        data = json.loads(text)
-        return data
+
+        headers = {
+            "Authorization": f"Bearer {settings.groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.5,
+            "response_format": {"type": "json_object"}
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=60.0
+            )
+
+            if response.status_code != 200:
+                raise ValueError(f"Groq API returned an error: {response.text}")
+
+            data = response.json()
+            text = data["choices"][0]["message"]["content"].strip()
+            
+            # Strip markdown code blocks if present
+            text = re.sub(r'^```(?:json)?\s*', '', text)
+            text = re.sub(r'\s*```$', '', text)
+            return json.loads(text)
     except json.JSONDecodeError as e:
         raise ValueError(f"AI returned invalid JSON: {e}")
     except Exception as e:
