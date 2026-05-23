@@ -129,16 +129,23 @@ async def check_and_award_badges(user_id: str, db):
         streak = user.get("streak_days", 0)
         xp = user.get("xp_points", 0)
 
+        total_interviews = await db.interview_history.count_documents({"user_id": user_id})
+
         badge_rules = [
-            {"id": "first_roadmap", "name": "Pathfinder", "icon": "🗺️", "desc": "Created your first roadmap", "condition": total_roadmaps >= 1},
-            {"id": "first_complete", "name": "Topic Master", "icon": "✅", "desc": "Completed your first topic", "condition": total_completed >= 1},
-            {"id": "ten_topics", "name": "Dedicated Learner", "icon": "📚", "desc": "Completed 10 topics", "condition": total_completed >= 10},
-            {"id": "fifty_topics", "name": "Knowledge Seeker", "icon": "🔥", "desc": "Completed 50 topics", "condition": total_completed >= 50},
-            {"id": "roadmap_complete", "name": "Roadmap Champion", "icon": "🏆", "desc": "Finished a complete roadmap", "condition": completed_roadmaps >= 1},
-            {"id": "streak_7", "name": "Week Warrior", "icon": "⚡", "desc": "7-day learning streak", "condition": streak >= 7},
-            {"id": "streak_30", "name": "Monthly Master", "icon": "🌟", "desc": "30-day learning streak", "condition": streak >= 30},
-            {"id": "xp_100", "name": "XP Hunter", "icon": "💎", "desc": "Earned 100 XP points", "condition": xp >= 100},
-            {"id": "multi_skill", "name": "Polymath", "icon": "🧠", "desc": "Learning 3+ different skills", "condition": total_roadmaps >= 3},
+            {"id": "first_roadmap", "name": "Pathfinder", "icon": "Map", "desc": "Created your first roadmap", "condition": total_roadmaps >= 1},
+            {"id": "first_complete", "name": "Topic Master", "icon": "CheckCircle", "desc": "Completed your first topic", "condition": total_completed >= 1},
+            {"id": "ten_topics", "name": "Dedicated Learner", "icon": "BookOpen", "desc": "Completed 10 topics", "condition": total_completed >= 10},
+            {"id": "fifty_topics", "name": "Knowledge Seeker", "icon": "Flame", "desc": "Completed 50 topics", "condition": total_completed >= 50},
+            {"id": "roadmap_complete", "name": "Roadmap Champion", "icon": "Trophy", "desc": "Finished a complete roadmap", "condition": completed_roadmaps >= 1},
+            {"id": "streak_3", "name": "Consistent", "icon": "CalendarClock", "desc": "3-day learning streak", "condition": streak >= 3},
+            {"id": "streak_7", "name": "Week Warrior", "icon": "Zap", "desc": "7-day learning streak", "condition": streak >= 7},
+            {"id": "streak_30", "name": "Monthly Master", "icon": "Star", "desc": "30-day learning streak", "condition": streak >= 30},
+            {"id": "xp_100", "name": "XP Hunter", "icon": "Gem", "desc": "Earned 100 XP points", "condition": xp >= 100},
+            {"id": "xp_500", "name": "XP Collector", "icon": "Crown", "desc": "Earned 500 XP points", "condition": xp >= 500},
+            {"id": "xp_1000", "name": "XP Legend", "icon": "Diamond", "desc": "Earned 1000 XP points", "condition": xp >= 1000},
+            {"id": "multi_skill", "name": "Polymath", "icon": "Brain", "desc": "Learning 3+ different skills", "condition": total_roadmaps >= 3},
+            {"id": "interview_ready", "name": "Interview Ready", "icon": "Mic", "desc": "Completed first interview practice", "condition": total_interviews >= 1},
+            {"id": "interview_pro", "name": "Interview Pro", "icon": "MessagesSquare", "desc": "Completed 5 interview practices", "condition": total_interviews >= 5},
         ]
 
         for badge in badge_rules:

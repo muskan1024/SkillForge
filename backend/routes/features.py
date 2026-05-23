@@ -6,6 +6,7 @@ from database import get_db, get_settings
 from bson import ObjectId
 from datetime import datetime
 from groq import Groq
+from routes.quiz import check_and_award_badges
 import json, re
 
 router = APIRouter()
@@ -111,19 +112,21 @@ async def get_daily_challenge(current_user=Depends(get_current_user), db=Depends
 - Subtopics being covered: {", ".join(subtopics) if subtopics else "general concepts"}
 {f"- Roadmap: {roadmap_title}" if roadmap_title else ""}
 
-The challenge MUST be directly related to "{current_topic}" so the learner can practice exactly what they are studying today.
+The challenge MUST be directly related to "{current_topic}".
+
+IMPORTANT: Write all user-facing text (description, task, hints, learning_objective) speaking DIRECTLY to the user using "you" and "your". Never say "the learner" or use third-person language.
 
 Return ONLY valid JSON (no markdown):
 {{
   "title": "Short challenge title related to {current_topic}",
   "difficulty": "Easy",
   "category": "{current_topic}",
-  "description": "2-sentence description of what this challenge covers and why it matters for {current_topic}",
-  "task": "The specific hands-on task the learner should complete today (be concrete and actionable)",
-  "hints": ["specific hint 1 related to {current_topic}", "specific hint 2", "specific hint 3"],
+  "description": "2-sentence description speaking directly to the user (use 'you'). E.g. 'In this challenge, you will practice...'",
+  "task": "The specific hands-on task written directly to the user. E.g. 'Your task is to write a function that...'",
+  "hints": ["hint written to the user using you/your", "another hint", "another hint"],
   "example_input": "concrete example input if coding task, else empty string",
   "example_output": "expected output if coding task, else empty string",
-  "learning_objective": "What the learner will understand after completing this challenge",
+  "learning_objective": "What you will understand after completing this challenge (start with 'You will...')",
   "related_topic": "{current_topic}"
 }}"""
 
@@ -155,17 +158,20 @@ async def get_badges(current_user=Depends(get_current_user), db=Depends(get_db))
     user = await db.users.find_one({"_id": ObjectId(current_user["id"])})
     earned = user.get("badges", [])
     all_badges = [
-        {"id": "first_roadmap",   "name": "Pathfinder",        "icon": "🗺️", "desc": "Created your first roadmap"},
-        {"id": "first_complete",  "name": "Topic Master",       "icon": "✅", "desc": "Completed your first topic"},
-        {"id": "ten_topics",      "name": "Dedicated Learner",  "icon": "📚", "desc": "Completed 10 topics"},
-        {"id": "fifty_topics",    "name": "Knowledge Seeker",   "icon": "🔥", "desc": "Completed 50 topics"},
-        {"id": "roadmap_complete","name": "Roadmap Champion",   "icon": "🏆", "desc": "Finished a complete roadmap"},
-        {"id": "streak_7",        "name": "Week Warrior",       "icon": "⚡", "desc": "7-day learning streak"},
-        {"id": "streak_30",       "name": "Monthly Master",     "icon": "🌟", "desc": "30-day learning streak"},
-        {"id": "xp_100",          "name": "XP Hunter",          "icon": "💎", "desc": "Earned 100 XP points"},
-        {"id": "multi_skill",     "name": "Polymath",           "icon": "🧠", "desc": "Learning 3+ different skills"},
-        {"id": "quiz_ace",        "name": "Quiz Ace",           "icon": "🎯", "desc": "Scored 100% on any quiz"},
-        {"id": "speed_learner",   "name": "Speed Learner",      "icon": "🚀", "desc": "Completed 5 topics in one day"},
+        {"id": "first_roadmap", "name": "Pathfinder", "icon": "Map", "desc": "Created your first roadmap"},
+        {"id": "first_complete", "name": "Topic Master", "icon": "CheckCircle", "desc": "Completed your first topic"},
+        {"id": "ten_topics", "name": "Dedicated Learner", "icon": "BookOpen", "desc": "Completed 10 topics"},
+        {"id": "fifty_topics", "name": "Knowledge Seeker", "icon": "Flame", "desc": "Completed 50 topics"},
+        {"id": "roadmap_complete", "name": "Roadmap Champion", "icon": "Trophy", "desc": "Finished a complete roadmap"},
+        {"id": "streak_3", "name": "Consistent", "icon": "CalendarClock", "desc": "3-day learning streak"},
+        {"id": "streak_7", "name": "Week Warrior", "icon": "Zap", "desc": "7-day learning streak"},
+        {"id": "streak_30", "name": "Monthly Master", "icon": "Star", "desc": "30-day learning streak"},
+        {"id": "xp_100", "name": "XP Hunter", "icon": "Gem", "desc": "Earned 100 XP points"},
+        {"id": "xp_500", "name": "XP Collector", "icon": "Crown", "desc": "Earned 500 XP points"},
+        {"id": "xp_1000", "name": "XP Legend", "icon": "Diamond", "desc": "Earned 1000 XP points"},
+        {"id": "multi_skill", "name": "Polymath", "icon": "Brain", "desc": "Learning 3+ different skills"},
+        {"id": "interview_ready", "name": "Interview Ready", "icon": "Mic", "desc": "Completed first interview practice"},
+        {"id": "interview_pro", "name": "Interview Pro", "icon": "MessagesSquare", "desc": "Completed 5 interview practices"},
     ]
     earned_ids = {b["id"] for b in earned}
     return {
@@ -362,22 +368,29 @@ class CodeReviewRequest(BaseModel):
 async def review_code(req: CodeReviewRequest, current_user=Depends(get_current_user)):
     try:
         client = get_groq()
-        prompt = f"""You are an expert code reviewer. Review this {req.language} code:
+        prompt = f"""You are an expert code reviewer giving feedback directly to the developer who wrote this code.
+
+Review this {req.language} code:
 
 ```{req.language}
 {req.code}
 ```
 {f"Context: {req.context}" if req.context else ""}
 
-Provide structured review:
+CRITICAL WRITING RULES:
+- Speak DIRECTLY to the developer using "you" and "your" throughout. NEVER say "the developer", "the code author", or use passive voice.
+- Reference specific parts of THEIR code. Quote line numbers or exact snippets.
+- Example: "Your use of X on line 3 is correct, but your variable naming in the loop could be clearer."
+
+Provide structured review using this exact format:
 ## Overall Assessment
-## ✅ What's Good
-## ⚠️ Issues Found
-## 🔧 Improved Code (show corrected version)
+## ✅ What You Did Well
+## ⚠️ Issues in Your Code
+## 🔧 Improved Version
 ## 📚 Best Practices to Remember
 ## Score: X/10
 
-Be constructive and educational."""
+Be direct, honest, and specific. Don't say "the code" — say "your code"."""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
@@ -391,19 +404,50 @@ Be constructive and educational."""
 class InterviewRequest(BaseModel):
     skill: str
     level: str = "Beginner"
-    question_type: str = "technical"
+    question_type: str = "conceptual"
 
 class InterviewAnswer(BaseModel):
+    # question context
     question: str
+    question_type: str = "conceptual"
+    what_interviewer_looks_for: Optional[str] = None
+    follow_up: Optional[str] = None
+    # answer
     answer: str
     skill: str
-    level: str 
+    level: str
 
 @router.post("/interview/question")
 async def get_interview_question(req: InterviewRequest, current_user=Depends(get_current_user)):
     try:
         client = get_groq()
-        prompt = f"""Generate ONE {req.question_type} interview question for a {req.level} {req.skill} developer.
+        # Map question_type to clear AI instructions
+        type_instructions = {
+            "conceptual": (
+                "a CONCEPTUAL / THEORETICAL interview question. "
+                "The question must test the candidate's understanding of concepts, definitions, and theory — "
+                "NO code writing required. Example styles: 'What is X?', 'Explain the difference between X and Y', "
+                "'How does X work under the hood?', 'Why would you use X over Y?'"
+            ),
+            "coding": (
+                "a CODING / PROBLEM-SOLVING interview question. "
+                "The question must require the candidate to write actual code or an algorithm. "
+                "Example styles: 'Write a function that...', 'Implement...', 'Given an array, find...', "
+                "'Optimize this code snippet...'. Include a concrete problem statement."
+            ),
+            "behavioral": (
+                "a BEHAVIORAL interview question. "
+                "The question must explore the candidate's past experiences, soft skills, and working style. "
+                "Example styles: 'Tell me about a time when...', 'How do you handle...', "
+                "'Describe a situation where...', 'What would you do if...'"
+            ),
+        }
+        type_desc = type_instructions.get(
+            req.question_type,
+            f"a {req.question_type} interview question"
+        )
+
+        prompt = f"""Generate ONE {type_desc} for a {req.level} {req.skill} developer.
 
 Return ONLY valid JSON:
 {{
@@ -425,34 +469,100 @@ Return ONLY valid JSON:
         raise HTTPException(status_code=500, detail=f"Question generation failed: {str(e)}")
 
 @router.post("/interview/evaluate")
-async def evaluate_answer(req: InterviewAnswer, current_user=Depends(get_current_user)):
+async def evaluate_answer(req: InterviewAnswer, current_user=Depends(get_current_user), db=Depends(get_db)):
     try:
         client = get_groq()
-        prompt = f"""You are a senior {req.skill} interviewer evaluating a {req.level} candidate.
+        prompt = f"""You are a strict but fair senior {req.skill} interviewer evaluating a {req.level} candidate's answer.
 
-Question: {req.question}
-Answer: {req.answer}
+Interview Question:
+{req.question}
 
-Return ONLY valid JSON:
+Candidate's Answer:
+---
+{req.answer}
+---
+
+Carefully read the answer above and evaluate it honestly.
+
+SCORING RULES (be strict and realistic — most answers are NOT perfect):
+- 9-10: Exceptional. Covers all key concepts, shows deep understanding, uses precise terminology, includes edge cases or examples.
+- 7-8: Good. Covers the main concepts correctly with minor gaps or imprecision.
+- 5-6: Average. Gets the general idea but misses important concepts or has notable inaccuracies.
+- 3-4: Poor. Shows only surface-level understanding, significant gaps or errors.
+- 1-2: Very poor. Mostly wrong, off-topic, or a one-liner with no real understanding shown.
+
+VERDICT RULES (follow strictly):
+- "Excellent" ONLY for score 9-10
+- "Good" ONLY for score 7-8
+- "Needs Improvement" for score 4-6
+- "Poor" for score 1-3
+
+WRITING RULES (critical):
+- Speak DIRECTLY to the candidate using "you" and "your". NEVER say "the candidate", "the student", or "they".
+- Reference SPECIFIC things from their actual answer — quote or paraphrase what they actually wrote.
+- Do NOT give generic praise. If their answer is weak, say so honestly.
+- Do NOT always give 7. Base the score purely on the scoring rubric above.
+
+Return ONLY valid JSON, no markdown, no extra text:
 {{
-  "score": 7,
-  "verdict": "Good",
-  "strengths": ["strength 1", "strength 2"],
-  "gaps": ["gap 1", "gap 2"],
-  "ideal_answer_points": ["key point 1", "key point 2", "key point 3"],
-  "feedback": "2-3 sentence encouraging overall feedback",
-  "tip": "One specific improvement tip"
+  "score": <integer 1-10 based strictly on the rubric>,
+  "verdict": "<Excellent|Good|Needs Improvement|Poor>",
+  "strengths": ["Specific strength quoting or referencing what they actually wrote"],
+  "gaps": ["Specific concept or detail they missed or got wrong in their answer"],
+  "ideal_answer_points": ["Key concept a strong answer must include", "Another key point", "Another key point"],
+  "feedback": "2-3 sentences directly to them using you/your. Reference something specific from their answer. Be honest, not generically encouraging.",
+  "tip": "One concrete actionable tip specific to the gaps in their answer"
 }}"""
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.4, max_tokens=700
+            temperature=0.3, max_tokens=700
         )
         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
         text = re.sub(r'\s*```$', '', text)
-        return json.loads(text)
+        evaluation = json.loads(text)
+
+        # ── Persist the full session to interview_history ──────────
+        try:
+            await db.interview_history.insert_one({
+                "user_id": current_user["id"],
+                "skill": req.skill,
+                "level": req.level,
+                "question_type": req.question_type,
+                "question": req.question,
+                "what_interviewer_looks_for": req.what_interviewer_looks_for,
+                "follow_up": req.follow_up,
+                "answer": req.answer,
+                "evaluation": evaluation,
+                "practiced_at": datetime.utcnow(),
+            })
+            
+            # Check for interview badges
+            await check_and_award_badges(current_user["id"], db)
+            
+        except Exception:
+            pass  # Don't fail the response if save fails
+
+        return evaluation
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
+
+
+@router.get("/interview/history")
+async def get_interview_history(current_user=Depends(get_current_user), db=Depends(get_db)):
+    """Return all past interview practice sessions for the current user, newest first."""
+    try:
+        cursor = db.interview_history.find(
+            {"user_id": current_user["id"]}
+        ).sort("practiced_at", -1).limit(100)
+        history = []
+        async for doc in cursor:
+            doc["id"] = str(doc["_id"])
+            doc.pop("_id", None)
+            history.append(doc)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
 
 
 # ── Generate Lesson (with MongoDB caching) ────────────────────────
@@ -464,7 +574,7 @@ class LessonRequest(BaseModel):
     difficulty: str = "Beginner"
     skill: str = "Programming"
 
-LESSON_PROMPT = """You are an expert programming tutor creating a structured lesson for a student.
+LESSON_PROMPT = """You are an expert programming tutor creating a structured lesson.
 
 Topic: "{topic}"
 Subtopics to cover: {subtopics}
@@ -473,13 +583,19 @@ Skill area: {skill}
 
 Generate ONE lesson page for EACH subtopic listed above. Each page should deeply cover that single subtopic.
 
+CRITICAL WRITING RULES:
+- Write concept_explanation, real_world_example, and quick_check speaking DIRECTLY to the reader using "you" and "your".
+- NEVER say "the student", "the learner", or use third-person language in any user-facing text field.
+- Example: "You will learn how X works..." NOT "The student will learn..."
+- common_mistakes should address the reader directly: "You might forget to..." NOT "Beginners often forget..."
+
 Return ONLY valid JSON in this exact structure (no markdown, no extra text):
 {{
   "topic_name": "{topic}",
   "pages": [
     {{
       "subtopic": "Subtopic name",
-      "concept_explanation": "A clear, beginner-friendly explanation (3-5 paragraphs). Use \\n\\n to separate paragraphs.",
+      "concept_explanation": "A clear explanation written directly to the reader using you/your (3-5 paragraphs). Use \\n\\n to separate paragraphs.",
       "key_points": [
         "Key point 1 — most important thing to remember",
         "Key point 2",
@@ -487,7 +603,7 @@ Return ONLY valid JSON in this exact structure (no markdown, no extra text):
         "Key point 4",
         "Key point 5"
       ],
-      "real_world_example": "A practical, relatable example of how this is used in real industry projects (2-3 sentences).",
+      "real_world_example": "A practical, relatable example written directly to the reader. E.g. 'When you build a REST API, you will use this to...'",
       "code_example": {{
         "is_code": true,
         "language": "python",
@@ -495,11 +611,11 @@ Return ONLY valid JSON in this exact structure (no markdown, no extra text):
         "explanation": "Line-by-line explanation of what each part does."
       }},
       "common_mistakes": [
-        "Mistake 1: description of what beginners commonly do wrong",
-        "Mistake 2: another common mistake",
-        "Mistake 3: third common error"
+        "Mistake 1: written to the reader — e.g. 'You might forget to close the connection...'",
+        "Mistake 2: another common mistake addressed to the reader",
+        "Mistake 3: third common error addressed to the reader"
       ],
-      "quick_check": "One simple comprehension question the student should be able to answer after reading this page."
+      "quick_check": "One simple comprehension question addressed to the reader. E.g. 'Can you explain what happens when you call X?'"
     }}
   ]
 }}
@@ -509,7 +625,7 @@ Rules:
 - For non-technical subtopics (theory, concepts, DevOps), set is_code=false and use a step-by-step process or diagram description in the snippet field
 - Keep explanations beginner-friendly but thorough
 - Make code examples complete and runnable
-- quick_check should be a simple factual question, NOT a multiple-choice quiz
+- quick_check must NOT be multiple-choice; it should be an open reflection question directed at the reader
 """
 
 @router.post("/generate-lesson")
