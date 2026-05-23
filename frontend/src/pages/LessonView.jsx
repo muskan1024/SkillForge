@@ -6,7 +6,8 @@ import {
   ArrowLeft, ArrowRight, BookOpen, Loader2, CheckCircle,
   XCircle, ChevronDown, ChevronUp, Star, Trophy, RotateCcw,
   Lightbulb, Code2, AlertTriangle, HelpCircle, MapPin,
-  FileText, Download, X
+  FileText, Download, X,
+  MessageCircleQuestion
 } from 'lucide-react'
 
 /* ── Code Block ── */
@@ -153,8 +154,8 @@ function NotesModal({ topic, roadmap, onClose }) {
       roadmap_id: roadmap.id,
       topic_id: topic.id,
       roadmap_title: roadmap.title,
-      topic_name: topic.name, 
-      subtopics: topic.subtopics || [], 
+      topic_name: topic.name,
+      subtopics: topic.subtopics || [],
       difficulty: topic.difficulty
     }).then(r => { setNotes(r.data.notes); setLoading(false) })
       .catch(() => { toast.error('Notes generation failed'); onClose() })
@@ -163,7 +164,7 @@ function NotesModal({ topic, roadmap, onClose }) {
   const parseSimpleMarkdown = (text) => {
     if (!text) return { __html: '' };
     let html = text
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") 
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/```[\w]*\n([\s\S]*?)```/g, '<pre class="bg-[#0f1117] border border-white/10 p-4 rounded-xl my-3 overflow-x-auto text-cyan-300 text-[13px] font-mono whitespace-pre">$1</pre>')
       .replace(/^### (.*$)/gim, '<h4 class="text-slate-100 font-bold mt-5 mb-2 text-base">$1</h4>')
       .replace(/^## (.*$)/gim, '<h3 class="text-brand-300 font-bold mt-6 mb-2 text-lg border-b border-white/10 pb-2">$1</h3>')
@@ -187,7 +188,7 @@ function NotesModal({ topic, roadmap, onClose }) {
     toast.dismiss('pdf');
     const printWindow = window.open('', '_blank');
     const parsedNotes = window.marked.parse(notes);
-    
+
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -591,17 +592,17 @@ export default function LessonView() {
                   Next <ArrowRight size={15} />
                 </button>
                 : <div className="flex items-center gap-2">
-                    <button onClick={() => setShowNotes(true)}
-                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
-                      style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)' }}>
-                      <FileText size={15} /> Study Notes
-                    </button>
-                    <button onClick={() => setPhase('quiz')}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-                      style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                      <Star size={15} /> Take Quiz
-                    </button>
-                  </div>
+                  <button onClick={() => setShowNotes(true)}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+                    style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)' }}>
+                    <FileText size={15} /> Study Notes
+                  </button>
+                  <button onClick={() => setPhase('quiz')}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                    style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                    <MessageCircleQuestion size={17} /> Take Quiz
+                  </button>
+                </div>
               }
             </div>
 

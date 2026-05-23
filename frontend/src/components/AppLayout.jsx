@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Map, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Brain, Award, Route, MessageSquare, MessagesSquare } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Award, Route, MessagesSquare } from 'lucide-react'
 
 function SidebarContent({ user, onLogout, onNavClick }) {
   return (

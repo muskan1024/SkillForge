@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import api from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 import {
-  Flame, Map, CheckCircle2, ArrowRight, PlusCircle,
-  Loader2, Star, Brain, Target, Award, BookOpen, Code2,
+  Flame, CheckCircle2, ArrowRight, PlusCircle,
+  Loader2, Star, Target, Award, BookOpen, Code2,
   ChevronDown, ChevronUp, Send, Sparkles, CheckCircle, XCircle, Zap,
   Bot, Route,
   MessagesSquare
