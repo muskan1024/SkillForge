@@ -21,6 +21,11 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+  select option {
+    background-color: #18181b; /* zinc-900 */
+    color: #e4e4e7; /* zinc-200 */
+  }
 }
 
 @layer components {

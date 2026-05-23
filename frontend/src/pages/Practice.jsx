@@ -6,20 +6,20 @@ import { Code2, Loader2, Send, ChevronDown } from 'lucide-react'
 // ── Embedded IDE configs using Judge0 CE (free, open source) ─────
 // We use the public Judge0 API for code execution
 const LANGUAGES = [
-  { id: 'python',     label: 'Python',      judge0Id: 71,  color: 'bg-blue-50 text-blue-700 border-blue-200',    dot: 'bg-blue-500',    starter: '# Python Playground\n# Write your code below and click Run\n\nprint("Hello, SkillForge!")\n\n# Try variables, loops, functions\nfor i in range(1, 6):\n    print(f"Learning Day {i} 🚀")\n' },
-  { id: 'javascript', label: 'JavaScript',  judge0Id: 63,  color: 'bg-yellow-500/10 text-yellow-400 border-yellow-200', dot: 'bg-yellow-500/100', starter: '// JavaScript Playground\nconsole.log("Hello, SkillForge!");\n\n// Try arrays, functions, loops\nconst skills = ["HTML", "CSS", "JavaScript"];\nskills.forEach((skill, i) => {\n    console.log(`${i+1}. Learning ${skill}`);\n});\n' },
-  { id: 'java',       label: 'Java',        judge0Id: 62,  color: 'bg-orange-50 text-orange-700 border-orange-200', dot: 'bg-orange-500', starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, SkillForge!");\n        \n        // Try loops and arrays\n        String[] skills = {"Java", "OOP", "DSA"};\n        for (int i = 0; i < skills.length; i++) {\n            System.out.println((i+1) + ". " + skills[i]);\n        }\n    }\n}\n' },
-  { id: 'c',          label: 'C',           judge0Id: 50,  color: 'bg-gray-50 text-gray-700 border-gray-200',      dot: 'bg-gray-500',   starter: '#include <stdio.h>\n\nint main() {\n    printf("Hello, SkillForge!\\n");\n    \n    // Try loops\n    for (int i = 1; i <= 5; i++) {\n        printf("Day %d of learning C\\n", i);\n    }\n    return 0;\n}\n' },
-  { id: 'cpp',        label: 'C++',         judge0Id: 54,  color: 'bg-indigo-50 text-indigo-700 border-indigo-200', dot: 'bg-indigo-500', starter: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    cout << "Hello, SkillForge!" << endl;\n    \n    vector<string> skills = {"C++", "STL", "OOP"};\n    for (auto& s : skills) {\n        cout << "Learning: " << s << endl;\n    }\n    return 0;\n}\n' },
-  { id: 'csharp',     label: 'C#',          judge0Id: 51,  color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', dot: 'bg-purple-500/100', starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, SkillForge!");\n        \n        string[] skills = {"C#", ".NET", "OOP"};\n        foreach (var s in skills) {\n            Console.WriteLine($"Learning: {s}");\n        }\n    }\n}\n' },
-  { id: 'go',         label: 'Go',          judge0Id: 60,  color: 'bg-cyan-50 text-cyan-700 border-cyan-200',      dot: 'bg-cyan-500',   starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, SkillForge!")\n    \n    skills := []string{"Go", "Goroutines", "Channels"}\n    for i, s := range skills {\n        fmt.Printf("%d. Learning %s\\n", i+1, s)\n    }\n}\n' },
-  { id: 'rust',       label: 'Rust',        judge0Id: 73,  color: 'bg-red-500/10 text-red-400 border-red-200',         dot: 'bg-red-500/100',    starter: 'fn main() {\n    println!("Hello, SkillForge!");\n    \n    let skills = vec!["Rust", "Ownership", "Borrowing"];\n    for (i, s) in skills.iter().enumerate() {\n        println!("{}. Learning {}", i+1, s);\n    }\n}\n' },
-  { id: 'typescript', label: 'TypeScript',  judge0Id: 74,  color: 'bg-blue-50 text-blue-800 border-blue-300',     dot: 'bg-blue-600',   starter: '// TypeScript Playground\nconst greet = (name: string): string => {\n    return `Hello, ${name}!`;\n};\n\nconsole.log(greet("SkillForge"));\n\ninterface Skill {\n    name: string;\n    level: number;\n}\n\nconst skills: Skill[] = [\n    { name: "TypeScript", level: 1 },\n    { name: "React", level: 2 },\n];\n\nskills.forEach(s => console.log(`${s.name}: Level ${s.level}`));\n' },
-  { id: 'sql',        label: 'SQL',         judge0Id: null, color: 'bg-teal-50 text-teal-700 border-teal-200',    dot: 'bg-teal-500',   starter: '' },
+  { id: 'python',     label: 'Python',      judge0Id: 71,  color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',    dot: 'bg-blue-500',    starter: '# Python Playground\n# Write your code below and click Run\n\nprint("Hello, SkillForge!")\n\n# Try variables, loops, functions\nfor i in range(1, 6):\n    print(f"Learning Day {i} 🚀")\n' },
+  { id: 'javascript', label: 'JavaScript',  judge0Id: 63,  color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', dot: 'bg-yellow-400', starter: '// JavaScript Playground\nconsole.log("Hello, SkillForge!");\n\n// Try arrays, functions, loops\nconst skills = ["HTML", "CSS", "JavaScript"];\nskills.forEach((skill, i) => {\n    console.log(`${i+1}. Learning ${skill}`);\n});\n' },
+  { id: 'java',       label: 'Java',        judge0Id: 62,  color: 'bg-orange-500/10 text-orange-400 border-orange-500/20', dot: 'bg-orange-500', starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, SkillForge!");\n        \n        // Try loops and arrays\n        String[] skills = {"Java", "OOP", "DSA"};\n        for (int i = 0; i < skills.length; i++) {\n            System.out.println((i+1) + ". " + skills[i]);\n        }\n    }\n}\n' },
+  { id: 'c',          label: 'C',           judge0Id: 50,  color: 'bg-gray-500/10 text-gray-300 border-gray-500/20',      dot: 'bg-gray-400',   starter: '#include <stdio.h>\n\nint main() {\n    printf("Hello, SkillForge!\\n");\n    \n    // Try loops\n    for (int i = 1; i <= 5; i++) {\n        printf("Day %d of learning C\\n", i);\n    }\n    return 0;\n}\n' },
+  { id: 'cpp',        label: 'C++',         judge0Id: 54,  color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', dot: 'bg-indigo-500', starter: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    cout << "Hello, SkillForge!" << endl;\n    \n    vector<string> skills = {"C++", "STL", "OOP"};\n    for (auto& s : skills) {\n        cout << "Learning: " << s << endl;\n    }\n    return 0;\n}\n' },
+  { id: 'csharp',     label: 'C#',          judge0Id: 51,  color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', dot: 'bg-purple-500', starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, SkillForge!");\n        \n        string[] skills = {"C#", ".NET", "OOP"};\n        foreach (var s in skills) {\n            Console.WriteLine($"Learning: {s}");\n        }\n    }\n}\n' },
+  { id: 'go',         label: 'Go',          judge0Id: 60,  color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',      dot: 'bg-cyan-500',   starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, SkillForge!")\n    \n    skills := []string{"Go", "Goroutines", "Channels"}\n    for i, s := range skills {\n        fmt.Printf("%d. Learning %s\\n", i+1, s)\n    }\n}\n' },
+  { id: 'rust',       label: 'Rust',        judge0Id: 73,  color: 'bg-red-500/10 text-red-400 border-red-500/20',         dot: 'bg-red-500',    starter: 'fn main() {\n    println!("Hello, SkillForge!");\n    \n    let skills = vec!["Rust", "Ownership", "Borrowing"];\n    for (i, s) in skills.iter().enumerate() {\n        println!("{}. Learning {}", i+1, s);\n    }\n}\n' },
+  { id: 'typescript', label: 'TypeScript',  judge0Id: 74,  color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',     dot: 'bg-blue-500',   starter: '// TypeScript Playground\nconst greet = (name: string): string => {\n    return `Hello, ${name}!`;\n};\n\nconsole.log(greet("SkillForge"));\n\ninterface Skill {\n    name: string;\n    level: number;\n}\n\nconst skills: Skill[] = [\n    { name: "TypeScript", level: 1 },\n    { name: "React", level: 2 },\n];\n\nskills.forEach(s => console.log(`${s.name}: Level ${s.level}`));\n' },
+  { id: 'sql',        label: 'SQL',         judge0Id: null, color: 'bg-teal-500/10 text-teal-400 border-teal-500/20',    dot: 'bg-teal-500',   starter: '' },
 ]
 
 const JUDGE0_URL = 'https://judge0-ce.p.rapidapi.com'
-const RAPIDAPI_KEY = 'DEMO' // Users should get free key from rapidapi.com/judge0-ce
+const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || ''
 
 // ── Code Editor Component ────────────────────────────────────────
 function CodeEditor({ lang }) {
@@ -32,17 +32,22 @@ function CodeEditor({ lang }) {
 
   const runCode = async () => {
     if (!code.trim()) return
+    if (!RAPIDAPI_KEY) {
+      setOutput('⚠️ Judge0 API key not configured.\n\nAdd your RapidAPI key to frontend/.env:\nVITE_RAPIDAPI_KEY=your_key_here\n\nGet a free key at: rapidapi.com/judge0-official/api/judge0-ce')
+      setStatus('error')
+      return
+    }
     setRunning(true)
     setOutput('')
     setStatus(null)
 
     try {
-      // Submit to Judge0 CE public instance (free, no key needed for demo)
-      const submitRes = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
+      // Step 1: Submit code to Judge0
+      const submitRes = await fetch(`${JUDGE0_URL}/submissions?base64_encoded=false`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-RapidAPI-Key': '4f5b8b5b5bmsh4f5b8b5b5bmsh00', // placeholder
+          'X-RapidAPI-Key': RAPIDAPI_KEY,
           'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
         },
         body: JSON.stringify({
@@ -54,8 +59,28 @@ function CodeEditor({ lang }) {
         })
       })
 
-      if (!submitRes.ok) throw new Error('API error')
-      const data = await submitRes.json()
+      if (!submitRes.ok) {
+        const errText = await submitRes.text()
+        throw new Error(`Submission failed: ${errText}`)
+      }
+      const { token } = await submitRes.json()
+
+      // Step 2: Poll for result (max 10 attempts, 1s apart)
+      let data = null
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 1000))
+        const pollRes = await fetch(`${JUDGE0_URL}/submissions/${token}?base64_encoded=false`, {
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+          }
+        })
+        data = await pollRes.json()
+        // Status IDs 1 (In Queue) and 2 (Processing) — keep polling
+        if (data.status?.id !== 1 && data.status?.id !== 2) break
+      }
+
+      if (!data) throw new Error('No response from execution service')
 
       if (data.stdout) {
         setOutput(data.stdout)
@@ -70,30 +95,12 @@ function CodeEditor({ lang }) {
         setOutput('⏱️ Time Limit Exceeded')
         setStatus('timeout')
       } else {
-        setOutput(data.message || 'No output')
+        setOutput(data.message || `Status: ${data.status?.description || 'Unknown'}`)
         setStatus('error')
       }
     } catch (err) {
-      // Fallback: use alternative free Judge0 instance
-      try {
-        const res = await fetch('https://api.judge0.com/submissions?wait=true', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source_code: btoa(code),
-            language_id: lang.judge0Id,
-            stdin: btoa(stdin || ''),
-            base64_encoded: true,
-          })
-        })
-        const d = await res.json()
-        const out = d.stdout ? atob(d.stdout) : d.stderr ? atob(d.stderr) : d.compile_output ? atob(d.compile_output) : 'No output'
-        setOutput(out)
-        setStatus(d.stdout ? 'success' : 'error')
-      } catch {
-        setOutput('⚠️ Execution service temporarily unavailable.\n\nTip: The Judge0 API is a free open-source code execution service.\nFor guaranteed availability, get a free API key at rapidapi.com/judge0-ce\nand add it to your .env as VITE_JUDGE0_KEY')
-        setStatus('error')
-      }
+      setOutput(`⚠️ Error: ${err.message}\n\nMake sure your VITE_RAPIDAPI_KEY in frontend/.env is valid.`)
+      setStatus('error')
     } finally {
       setRunning(false)
     }
@@ -340,11 +347,14 @@ function CodeReview() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-slate-300 mb-1.5">Language</label>
-          <select className="input text-sm" value={lang} onChange={e => setLang(e.target.value)}>
-            {['python','javascript','java','cpp','typescript','sql','c','go','rust','csharp'].map(l =>
-              <option key={l} value={l}>{l}</option>
-            )}
-          </select>
+          <div className="relative">
+            <select className="input text-sm appearance-none cursor-pointer pr-10" value={lang} onChange={e => setLang(e.target.value)}>
+              {['python','javascript','java','cpp','typescript','sql','c','go','rust','csharp'].map(l =>
+                <option key={l} value={l}>{l}</option>
+              )}
+            </select>
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-300 mb-1.5">Context (optional)</label>
@@ -395,7 +405,7 @@ export default function Practice() {
       <div className="flex gap-2 mb-5 flex-wrap">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab===t.id ? 'bg-brand-600 text-white shadow-sm' : 'bg-white border border-white/5 text-slate-300 hover:border-brand-500/20'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab===t.id ? 'bg-brand-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-brand-500' : 'bg-white/5 border border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
             {t.label}
           </button>
         ))}
@@ -408,13 +418,13 @@ export default function Practice() {
           <div className="flex gap-2 mb-4 flex-wrap">
             {LANGUAGES.filter(l => l.id !== 'sql').map(l => (
               <button key={l.id} onClick={() => setActiveLang(l.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang===l.id ? `${l.color} border-current shadow-sm` : 'bg-white border-white/5 text-slate-300 hover:border-brand-500/20'}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang===l.id ? `${l.color} shadow-sm` : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
                 <div className={`w-2 h-2 rounded-full ${l.dot}`}/>
                 {l.label}
               </button>
             ))}
             <button onClick={() => setActiveLang('sql')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang==='sql' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-white border-white/5 text-slate-300 hover:border-brand-500/20'}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang==='sql' ? 'bg-teal-500/10 text-teal-400 border-teal-500/20' : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
               <div className="w-2 h-2 rounded-full bg-teal-500"/>SQL
             </button>
           </div>

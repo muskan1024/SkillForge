@@ -34,12 +34,23 @@ export default function Onboarding() {
     custom_goal: '',
     timeline: '',
   })
+  const [customSkill, setCustomSkill] = useState('')
 
   const toggleSkill = (s) => {
     setForm(p => ({
       ...p,
       skills: p.skills.includes(s) ? p.skills.filter(x => x !== s) : [...p.skills, s]
     }))
+  }
+
+  const handleAddCustomSkill = (e) => {
+    e.preventDefault()
+    if (!customSkill.trim()) return
+    const skill = customSkill.trim()
+    if (!form.skills.includes(skill)) {
+      setForm(p => ({ ...p, skills: [...p.skills, skill] }))
+    }
+    setCustomSkill('')
   }
 
   const canNext = () => {
@@ -73,25 +84,23 @@ export default function Onboarding() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-100">Build your learning roadmap</h1>
-        <p className="text-slate-400 mt-1 text-sm">Answer a few questions and AI will craft your personalized path</p>
+        <h1 className="text-2xl font-semibold text-zinc-100">Build your learning roadmap</h1>
+        <p className="text-zinc-400 mt-1 text-sm">Answer a few questions and AI will craft your personalized path</p>
       </div>
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center gap-2">
-            <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all ${
-              i < step ? 'bg-brand-600 text-white' :
-              i === step ? 'bg-brand-100 text-brand-400 ring-2 ring-brand-400' :
-              'bg-[#2a2d3e] text-slate-500'
-            }`}>
+            <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all ${i < step ? 'bg-brand-500 text-white shadow-[0_0_10px_rgba(124,58,237,0.4)]' :
+                i === step ? 'bg-brand-500/20 text-brand-300 ring-2 ring-brand-500/50' :
+                  'bg-white/5 text-zinc-500 border border-white/10'
+              }`}>
               {i < step ? <Check size={12} /> : i + 1}
             </div>
-            <span className={`text-xs font-medium ${i === step ? 'text-brand-400' : 'text-slate-500'}`}>{s}</span>
-            {i < STEPS.length - 1 && <div className={`w-8 h-px ${i < step ? 'bg-brand-400' : 'bg-surface-4'}`} />}
+            <span className={`text-xs font-medium ${i === step ? 'text-brand-300' : 'text-zinc-500'}`}>{s}</span>
+            {i < STEPS.length - 1 && <div className={`w-8 h-px ${i < step ? 'bg-brand-500/50' : 'bg-white/10'}`} />}
           </div>
         ))}
       </div>
@@ -100,38 +109,49 @@ export default function Onboarding() {
         {/* Step 0 — Skills */}
         {step === 0 && (
           <div className="animate-slide-up">
-            <h2 className="text-lg font-semibold text-slate-100 mb-1">What do you want to learn?</h2>
-            <p className="text-sm text-slate-400 mb-5">Select one or more skills</p>
-            <div className="flex flex-wrap gap-2">
-              {SKILLS.map(s => (
-                <button key={s} onClick={() => toggleSkill(s)}
-                  className={`px-3.5 py-2 rounded-xl text-sm font-medium border transition-all ${
-                    form.skills.includes(s)
-                      ? 'bg-brand-600 text-white border-brand-600 shadow-sm'
-                      : 'bg-white text-slate-300 border-white/8 hover:border-brand-300'
-                  }`}>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">What do you want to learn?</h2>
+            <p className="text-sm text-zinc-400 mb-5">Select one or more skills</p>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {Array.from(new Set([...SKILLS, ...form.skills])).map(s => (
+                <button type="button" key={s} onClick={() => toggleSkill(s)}
+                  className={`px-3.5 py-2 rounded-xl text-sm font-medium border transition-all ${form.skills.includes(s)
+                      ? 'bg-brand-500/20 text-brand-300 border-brand-500/50 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                      : 'bg-white/5 text-zinc-300 border-white/10 hover:border-white/20 hover:bg-white/10'
+                    }`}>
                   {s}
                 </button>
               ))}
             </div>
+
+            <form onSubmit={handleAddCustomSkill}>
+              <label className="block text-xs font-medium text-zinc-500 mb-1.5">Or add a custom skill</label>
+              <div className="flex gap-2">
+                <input className="input text-sm flex-1" placeholder="e.g. Rust, UI/UX Design..."
+                  value={customSkill}
+                  onChange={e => setCustomSkill(e.target.value)} />
+                <button type="submit" disabled={!customSkill.trim()}
+                  className="btn-secondary px-4 py-2 text-sm whitespace-nowrap disabled:opacity-50">
+                  Add
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
         {/* Step 1 — Level */}
         {step === 1 && (
           <div className="animate-slide-up">
-            <h2 className="text-lg font-semibold text-slate-100 mb-1">What's your current level?</h2>
-            <p className="text-sm text-slate-400 mb-5">Be honest — this helps calibrate your roadmap</p>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">What's your current level?</h2>
+            <p className="text-sm text-zinc-400 mb-5">Be honest — this helps calibrate your roadmap</p>
             <div className="space-y-3">
               {LEVELS.map(l => (
                 <button key={l} onClick={() => setForm(p => ({ ...p, skill_level: l }))}
-                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border text-sm font-medium transition-all ${
-                    form.skill_level === l
-                      ? 'bg-brand-500/10 border-brand-500 text-brand-400'
-                      : 'bg-white border-white/8 text-slate-300 hover:border-brand-500/20'
-                  }`}>
+                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border text-sm font-medium transition-all ${form.skill_level === l
+                      ? 'bg-brand-500/10 border-brand-500/50 text-brand-300 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                      : 'bg-white/5 border-white/10 text-zinc-300 hover:border-white/20 hover:bg-white/10'
+                    }`}>
                   <span>{l}</span>
-                  {form.skill_level === l && <Check size={16} className="text-brand-400" />}
+                  {form.skill_level === l && <Check size={16} className="text-brand-300" />}
                 </button>
               ))}
             </div>
@@ -141,22 +161,21 @@ export default function Onboarding() {
         {/* Step 2 — Goal */}
         {step === 2 && (
           <div className="animate-slide-up">
-            <h2 className="text-lg font-semibold text-slate-100 mb-1">What's your goal?</h2>
-            <p className="text-sm text-slate-400 mb-5">Pick one or write your own</p>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">What's your goal?</h2>
+            <p className="text-sm text-zinc-400 mb-5">Pick one or write your own</p>
             <div className="grid grid-cols-2 gap-2 mb-5">
               {GOALS.map(g => (
                 <button key={g} onClick={() => setForm(p => ({ ...p, learning_goal: g, custom_goal: '' }))}
-                  className={`px-4 py-3 rounded-xl text-sm font-medium border text-left transition-all ${
-                    form.learning_goal === g
-                      ? 'bg-brand-500/10 border-brand-500 text-brand-400'
-                      : 'bg-white border-white/8 text-slate-300 hover:border-brand-500/20'
-                  }`}>
+                  className={`px-4 py-3 rounded-xl text-sm font-medium border text-left transition-all ${form.learning_goal === g
+                      ? 'bg-brand-500/10 border-brand-500/50 text-brand-300 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                      : 'bg-white/5 border-white/10 text-zinc-300 hover:border-white/20 hover:bg-white/10'
+                    }`}>
                   {g}
                 </button>
               ))}
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Or describe your own goal</label>
+              <label className="block text-xs font-medium text-zinc-500 mb-1.5">Or describe your own goal</label>
               <input className="input text-sm" placeholder="e.g. Build a full-stack SaaS product..."
                 value={form.custom_goal}
                 onChange={e => setForm(p => ({ ...p, custom_goal: e.target.value, learning_goal: '' }))} />
@@ -167,16 +186,15 @@ export default function Onboarding() {
         {/* Step 3 — Timeline */}
         {step === 3 && (
           <div className="animate-slide-up">
-            <h2 className="text-lg font-semibold text-slate-100 mb-1">How much time do you have?</h2>
-            <p className="text-sm text-slate-400 mb-5">Your roadmap will be structured around this timeline</p>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">How much time do you have?</h2>
+            <p className="text-sm text-zinc-400 mb-5">Your roadmap will be structured around this timeline</p>
             <div className="grid grid-cols-2 gap-3">
               {TIMELINES.map(t => (
                 <button key={t} onClick={() => setForm(p => ({ ...p, timeline: t }))}
-                  className={`px-4 py-4 rounded-xl text-sm font-medium border text-center transition-all ${
-                    form.timeline === t
-                      ? 'bg-brand-500/10 border-brand-500 text-brand-400'
-                      : 'bg-white border-white/8 text-slate-300 hover:border-brand-500/20'
-                  }`}>
+                  className={`px-4 py-4 rounded-xl text-sm font-medium border text-center transition-all ${form.timeline === t
+                      ? 'bg-brand-500/10 border-brand-500/50 text-brand-300 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                      : 'bg-white/5 border-white/10 text-zinc-300 hover:border-white/20 hover:bg-white/10'
+                    }`}>
                   {t}
                 </button>
               ))}
@@ -187,8 +205,8 @@ export default function Onboarding() {
         {/* Step 4 — Confirm */}
         {step === 4 && (
           <div className="animate-slide-up">
-            <h2 className="text-lg font-semibold text-slate-100 mb-1">Ready to generate your roadmap</h2>
-            <p className="text-sm text-slate-400 mb-6">Here's a summary of your learning profile</p>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">Ready to generate your roadmap</h2>
+            <p className="text-sm text-zinc-400 mb-6">Here's a summary of your learning profile</p>
             <div className="space-y-3 mb-6">
               {[
                 { label: 'Skills', value: form.skills.join(', ') },
@@ -197,8 +215,8 @@ export default function Onboarding() {
                 { label: 'Timeline', value: form.timeline },
               ].map(({ label, value }) => (
                 <div key={label} className="flex gap-4 py-2.5 border-b border-white/5 last:border-0">
-                  <span className="text-sm text-slate-500 w-20 shrink-0">{label}</span>
-                  <span className="text-sm font-medium text-slate-100">{value}</span>
+                  <span className="text-sm text-zinc-500 w-20 shrink-0">{label}</span>
+                  <span className="text-sm font-medium text-zinc-100">{value}</span>
                 </div>
               ))}
             </div>
@@ -211,7 +229,7 @@ export default function Onboarding() {
               )}
             </button>
             {loading && (
-              <p className="text-xs text-slate-500 text-center mt-3">This may take 10–20 seconds…</p>
+              <p className="text-xs text-zinc-500 text-center mt-3">This may take 10–20 seconds…</p>
             )}
           </div>
         )}

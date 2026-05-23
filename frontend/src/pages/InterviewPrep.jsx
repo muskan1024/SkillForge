@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { Brain, Loader2, RefreshCw, ChevronRight, CheckCircle2, XCircle, Star, Mic, Code2, Users } from 'lucide-react'
+import { Brain, Loader2, RefreshCw, ChevronRight, CheckCircle2, XCircle, Star, Mic, Code2, Users, Sparkles, ChevronDown } from 'lucide-react'
 
 const SKILLS = ['Python','JavaScript','React','Node.js','Java','DevOps','Machine Learning','SQL','Data Science','TypeScript','DSA','Web Development']
 const LEVELS = ['Beginner','Intermediate','Advanced']
@@ -12,10 +12,10 @@ const Q_TYPES = [
 ]
 
 const VERDICT_COLORS = {
-  Excellent:         'bg-green-50 border-green-300 text-green-700',
-  Good:              'bg-blue-50 border-blue-300 text-blue-700',
-  'Needs Improvement':'bg-yellow-50 border-yellow-300 text-yellow-700',
-  Poor:              'bg-red-50 border-red-300 text-red-700',
+  Excellent:         'bg-green-500/10 border-green-500/20 text-green-400',
+  Good:              'bg-blue-500/10 border-blue-500/20 text-blue-400',
+  'Needs Improvement':'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
+  Poor:              'bg-red-500/10 border-red-500/20 text-red-400',
 }
 
 export default function InterviewPrep() {
@@ -63,22 +63,28 @@ export default function InterviewPrep() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">Skill</label>
-            <select className="input text-sm" value={skill} onChange={e => setSkill(e.target.value)}>
-              {SKILLS.map(s => <option key={s}>{s}</option>)}
-            </select>
+            <div className="relative">
+              <select className="input text-sm appearance-none cursor-pointer pr-10" value={skill} onChange={e => setSkill(e.target.value)}>
+                {SKILLS.map(s => <option key={s}>{s}</option>)}
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">Level</label>
-            <select className="input text-sm" value={level} onChange={e => setLevel(e.target.value)}>
-              {LEVELS.map(l => <option key={l}>{l}</option>)}
-            </select>
+            <div className="relative">
+              <select className="input text-sm appearance-none cursor-pointer pr-10" value={level} onChange={e => setLevel(e.target.value)}>
+                {LEVELS.map(l => <option key={l}>{l}</option>)}
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">Question Type</label>
             <div className="flex gap-2">
               {Q_TYPES.map(t => (
                 <button key={t.id} onClick={() => setQType(t.id)}
-                  className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${qType===t.id ? 'bg-brand-600 text-white border-brand-600' : 'bg-white border-white/8 text-slate-300 hover:border-brand-500/20'}`}>
+                  className={`flex-1 h-[46px] rounded-xl border text-xs font-medium transition-all flex items-center justify-center ${qType===t.id ? 'bg-brand-600 text-white border-brand-600 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
                   {t.label}
                 </button>
               ))}
@@ -102,9 +108,9 @@ export default function InterviewPrep() {
             </div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-100 mb-4 leading-relaxed">{question.question}</h2>
             {question.what_interviewer_looks_for && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                <p className="text-xs font-medium text-amber-700 mb-1">💡 What the interviewer looks for:</p>
-                <p className="text-xs text-amber-600">{question.what_interviewer_looks_for}</p>
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                <p className="text-xs font-medium text-amber-400 mb-1 flex items-center gap-1.5"><Sparkles size={12} /> What the interviewer looks for:</p>
+                <p className="text-xs text-amber-200/80 leading-relaxed">{question.what_interviewer_looks_for}</p>
               </div>
             )}
           </div>
@@ -134,31 +140,31 @@ export default function InterviewPrep() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {evaluation.strengths?.length > 0 && (
-                  <div className="bg-green-50 rounded-xl p-4">
-                    <p className="text-xs font-semibold text-green-700 mb-2 flex items-center gap-1"><CheckCircle2 size={13}/> Strengths</p>
-                    <ul className="space-y-1">{evaluation.strengths.map((s,i) => <li key={i} className="text-xs text-green-600">• {s}</li>)}</ul>
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-green-400 mb-2 flex items-center gap-1"><CheckCircle2 size={13}/> Strengths</p>
+                    <ul className="space-y-1.5">{evaluation.strengths.map((s,i) => <li key={i} className="text-xs text-green-200/80 flex items-start gap-1.5"><span className="text-green-400 shrink-0">•</span> {s}</li>)}</ul>
                   </div>
                 )}
                 {evaluation.gaps?.length > 0 && (
-                  <div className="bg-red-50 rounded-xl p-4">
-                    <p className="text-xs font-semibold text-red-600 mb-2 flex items-center gap-1"><XCircle size={13}/> Gaps</p>
-                    <ul className="space-y-1">{evaluation.gaps.map((g,i) => <li key={i} className="text-xs text-red-500">• {g}</li>)}</ul>
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-red-400 mb-2 flex items-center gap-1"><XCircle size={13}/> Gaps</p>
+                    <ul className="space-y-1.5">{evaluation.gaps.map((g,i) => <li key={i} className="text-xs text-red-200/80 flex items-start gap-1.5"><span className="text-red-400 shrink-0">•</span> {g}</li>)}</ul>
                   </div>
                 )}
               </div>
               {evaluation.ideal_answer_points?.length > 0 && (
-                <div className="bg-brand-500/10 rounded-xl p-4 mb-4">
-                  <p className="text-xs font-semibold text-brand-400 mb-2">📋 Ideal Answer Should Include</p>
-                  <ul className="space-y-1">{evaluation.ideal_answer_points.map((p,i) => <li key={i} className="text-xs text-brand-400">• {p}</li>)}</ul>
+                <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-4 mb-4">
+                  <p className="text-xs font-semibold text-brand-400 mb-2 flex items-center gap-1.5"><Star size={13} /> Ideal Answer Should Include</p>
+                  <ul className="space-y-1.5">{evaluation.ideal_answer_points.map((p,i) => <li key={i} className="text-xs text-brand-200/80 flex items-start gap-1.5"><span className="text-brand-400 shrink-0">•</span> {p}</li>)}</ul>
                 </div>
               )}
-              <div className="bg-[#0f1117] rounded-xl p-4 mb-4">
+              <div className="bg-[#0d0f14] border border-white/5 rounded-xl p-4 mb-4">
                 <p className="text-xs font-semibold text-slate-300 mb-1">Overall Feedback</p>
                 <p className="text-sm text-slate-400 leading-relaxed">{evaluation.feedback}</p>
               </div>
               {evaluation.tip && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-                  <p className="text-xs font-medium text-yellow-700">💡 Pro tip: {evaluation.tip}</p>
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+                  <p className="text-xs font-medium text-yellow-400 flex items-center gap-1.5"><Sparkles size={13} /> Pro tip: {evaluation.tip}</p>
                 </div>
               )}
               <div className="flex gap-3 mt-5">

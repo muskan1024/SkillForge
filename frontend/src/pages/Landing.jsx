@@ -17,13 +17,13 @@ const PLATFORM_FEATURES = [
   {
     icon: Map, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20',
     title: 'Personalized AI Roadmaps',
-    desc: 'Tell us what you want to learn, your level, and how much time you have. Our AI generates a structured week-by-week roadmap instantly — no templates, fully tailored to you.',
+    desc: 'Tell us what you want to learn, your level, and how much time you have. Our AI generates a structured week-by-week roadmap instantly - no templates, fully tailored to you.',
     tags: ['Skill-based', 'Week-by-week', 'Free resources'],
   },
   {
     icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
     title: 'AI-Generated Lessons',
-    desc: 'Every topic in your roadmap comes with a full AI-written lesson — concept explanation, real-world examples, code walkthroughs and common mistakes. Learn without leaving SkillForge.',
+    desc: 'Every topic in your roadmap comes with a full AI-written lesson - concept explanation, real-world examples, code walkthroughs and common mistakes. Learn without leaving SkillForge.',
     tags: ['In-app lessons', 'Code examples', 'No external links'],
   },
   {
@@ -35,7 +35,7 @@ const PLATFORM_FEATURES = [
   {
     icon: MessageSquare, color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20',
     title: 'AI Learning Assistant',
-    desc: 'A 24/7 AI mentor that knows your roadmap. Ask anything — from "explain this concept" to "review my code". Chat history is organized by roadmap for easy reference.',
+    desc: 'A 24/7 AI mentor that knows your roadmap. Ask anything - from "explain this concept" to "review my code". Chat history is organized by roadmap for easy reference.',
     tags: ['Context-aware', 'Chat history', 'Code review'],
   },
   {
@@ -47,7 +47,7 @@ const PLATFORM_FEATURES = [
   {
     icon: Terminal, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20',
     title: 'Embedded Practice IDE',
-    desc: 'Write and run code in 10+ languages directly inside SkillForge — Python, JavaScript, Java, C++, Go, Rust and more. No installation, no redirects, no excuses.',
+    desc: 'Write and run code in 10+ languages directly inside SkillForge - Python, JavaScript, Java, C++, Go, Rust and more. No installation, no redirects, no excuses.',
     tags: ['10+ languages', 'Live execution', 'Web playground'],
   },
   {
@@ -65,7 +65,7 @@ const PLATFORM_FEATURES = [
   {
     icon: Award, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20',
     title: 'Badges & Achievements',
-    desc: 'Earn badges for every milestone — first roadmap, 7-day streak, completing 10 topics, finishing a full roadmap. Gamified learning that keeps you coming back.',
+    desc: 'Earn badges for every milestone - first roadmap, 7-day streak, completing 10 topics, finishing a full roadmap. Gamified learning that keeps you coming back.',
     tags: ['11 badges', 'XP system', 'Daily streaks'],
   },
   {
@@ -78,7 +78,7 @@ const PLATFORM_FEATURES = [
 
 const STEPS = [
   { num: '01', icon: Map, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20', title: 'Build your roadmap', desc: 'Choose your skill, level, goal and timeline. The AI creates your personalized week-by-week plan in seconds.' },
-  { num: '02', icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', title: 'Study AI-written lessons', desc: 'Each topic includes a full lesson with explanations, code examples, and key takeaways — all inside SkillForge.' },
+  { num: '02', icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', title: 'Study AI-written lessons', desc: 'Each topic includes a full lesson with explanations, code examples, and key takeaways - all inside SkillForge.' },
   { num: '03', icon: Brain, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20', title: 'Take the quiz', desc: 'Complete an AI-generated quiz to verify your understanding. Pass it and the topic auto-marks as done.' },
   { num: '04', icon: Target, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20', title: 'Daily challenge', desc: 'Every morning get a challenge based on exactly where you are in your roadmap.' },
   { num: '05', icon: Terminal, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20', title: 'Practice in the IDE', desc: 'Open the embedded IDE and write real code. Get AI code review without ever leaving the platform.' },
@@ -95,17 +95,17 @@ const SKILLS = [
 const TESTIMONIALS = [
   {
     name: 'Arjun Mehta', role: 'CS Student → SDE Intern', avatar: 'AM',
-    text: 'SkillForge isn\'t just a roadmap tool — it\'s like having a personal tutor. The AI lessons are better than most YouTube tutorials, and the quiz system actually made me learn instead of just watching.',
+    text: 'SkillForge isn\'t just a roadmap tool - it\'s like having a personal tutor. The AI lessons are better than most YouTube tutorials, and the quiz system actually made me learn instead of just watching.',
     highlight: 'Cracked my first SDE internship using only SkillForge.',
   },
   {
     name: 'Priya Sharma', role: 'BCA Graduate', avatar: 'PS',
-    text: 'I love that I never have to leave the website. I study the lesson, run code in the Practice IDE, then take the quiz — all in one place. The daily challenges keep me accountable every single day.',
+    text: 'I love that I never have to leave the website. I study the lesson, run code in the Practice IDE, then take the quiz - all in one place. The daily challenges keep me accountable every single day.',
     highlight: 'Maintained a 34-day streak. First time I stuck to a plan.',
   },
   {
     name: 'Rohan Verma', role: 'Working Professional', avatar: 'RV',
-    text: 'The interview prep feature alone is worth it. I practiced 50+ questions with AI feedback before my interview. The feedback is specific to YOUR answer — not generic tips you\'d find on Google.',
+    text: 'The interview prep feature alone is worth it. I practiced 50+ questions with AI feedback before my interview. The feedback is specific to YOUR answer - not generic tips you\'d find on Google.',
     highlight: 'Got my first senior developer role after 3 months of prep.',
   },
 ];
@@ -183,7 +183,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-base md:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto animate-slide-up font-medium" style={{ animationDelay: '100ms' }}>
-            SkillForge doesn't just give you a roadmap — it teaches you. AI lessons, quizzes, daily challenges, a practice IDE, interview prep, and an AI mentor. Everything in one place.
+            SkillForge doesn't just give you a roadmap - it teaches you. AI lessons, quizzes, daily challenges, a practice IDE, interview prep, and an AI mentor. Everything in one place.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up items-center" style={{ animationDelay: '200ms' }}>
@@ -252,10 +252,10 @@ export default function Landing() {
           <div className="flex-1 relative z-10">
             <p className="text-xs font-bold text-brand-400 uppercase tracking-[0.2em] mb-3">More than a roadmap generator</p>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
-              Learn, practice & get hired — without leaving SkillForge
+              Learn, practice & get hired - without leaving SkillForge
             </h2>
             <p className="text-zinc-400 leading-relaxed text-sm md:text-base">
-              Most platforms give you a list of links. We give you the actual lesson, let you run code, test your knowledge with quizzes, and prepare you for interviews — all in one unified platform.
+              Most platforms give you a list of links. We give you the actual lesson, let you run code, test your knowledge with quizzes, and prepare you for interviews - all in one unified platform.
             </p>
           </div>
 
@@ -263,7 +263,7 @@ export default function Landing() {
             {[
               { icon: '📍', text: 'AI lesson for every topic' },
               { icon: '🧠', text: 'Quiz-based auto progress' },
-              { icon: '💻', text: 'Embedded IDE — 10+ languages' },
+              { icon: '💻', text: 'Embedded IDE - 10+ languages' },
               { icon: '🎯', text: 'Daily topic-specific challenges' },
               { icon: '🤝', text: 'AI interview preparation' },
               { icon: '📊', text: 'GitHub-style activity tracking' },
@@ -353,21 +353,21 @@ export default function Landing() {
             {
               icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
               eyebrow: 'In-app lessons', title: 'AI writes the lesson. You just learn.',
-              desc: 'Every topic in your roadmap has a full lesson generated by AI — structured explanation, real-world example, code walkthrough, and common mistakes. No searching YouTube, no reading docs. Just open the topic and start learning.',
+              desc: 'Every topic in your roadmap has a full lesson generated by AI - structured explanation, real-world example, code walkthrough, and common mistakes. No searching YouTube, no reading docs. Just open the topic and start learning.',
               points: ['Full lesson for every topic', 'Code examples with explanations', 'Common mistakes section', 'Key takeaways summary'],
               flip: false,
             },
             {
               icon: Terminal, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20',
               eyebrow: 'Practice IDE', title: 'Write real code without leaving the page.',
-              desc: 'SkillForge has a built-in code editor supporting Python, JavaScript, Java, C++, TypeScript, Go, Rust, C#, SQL, and a full HTML/CSS/JS live preview. Run code, see output, get AI code review — all inside the platform.',
+              desc: 'SkillForge has a built-in code editor supporting Python, JavaScript, Java, C++, TypeScript, Go, Rust, C#, SQL, and a full HTML/CSS/JS live preview. Run code, see output, get AI code review - all inside the platform.',
               points: ['10+ languages supported', 'Live code execution', 'HTML/CSS/JS live preview', 'AI code review in one click'],
               flip: true,
             },
             {
               icon: Brain, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20',
               eyebrow: 'Interview prep', title: 'Practice interviews with an AI that evaluates you.',
-              desc: 'Get AI-generated technical, coding and behavioral interview questions tailored to your skill and level. Type your answer, submit it, and get scored feedback that references exactly what you wrote — not generic tips.',
+              desc: 'Get AI-generated technical, coding and behavioral interview questions tailored to your skill and level. Type your answer, submit it, and get scored feedback that references exactly what you wrote - not generic tips.',
               points: ['Technical, coding & behavioral', 'AI evaluates your exact answer', 'Score, strengths & gaps', 'Follow-up questions included'],
               flip: false,
             },
@@ -470,7 +470,7 @@ export default function Landing() {
             Your learning journey starts today
           </h2>
           <p className="text-lg text-zinc-300 mb-10 max-w-xl mx-auto relative z-10 font-medium">
-            Build a roadmap, study AI lessons, run code, take quizzes, and track your progress — all free, all in one place.
+            Build a roadmap, study AI lessons, run code, take quizzes, and track your progress - all free, all in one place.
           </p>
 
           <Link to="/register" className="btn-primary text-base md:text-lg px-10 py-4 mx-auto w-fit relative z-10 shadow-xl group-hover:scale-105 transition-all duration-300">
