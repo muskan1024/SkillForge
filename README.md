@@ -1,4 +1,4 @@
-# 🌌 SkillForge — Complete AI-Powered Skill Development & Learning Platform
+# 🌌 SkillForge - AI-Powered Skill Development & Learning Platform
 
 <p align="center">
   <a href="https://github.com/muskan1024/SkillForge">
@@ -13,7 +13,7 @@
 
 ---
 
-### 🚀 **A Unified Classroom, Sandbox, and Testing Center to Master Modern Technical Capabilities.**
+### 🚀 **The complete platform to learn any skill from scratch to job-ready**
 
 **SkillForge** is an advanced, production-ready, full-stack **Skill Development Platform** developed as an MCA Major Project. Unlike standard static roadmapping portals, SkillForge is a highly interactive, all-in-one ecosystem where learners can generate hyper-personalized curriculums, read dynamically synthesized AI lessons, take adaptive comprehension quizzes, compile and run code in an embedded multi-language IDE, practice live mock interview scenarios, and stay motivated through a robust gamified progression engine featuring XP points, daily challenges, and achievements badges.
 
@@ -123,13 +123,21 @@ graph TD
 
 ---
 
-## 💻 Tech Stack & Core Libraries
+## 💻 Tech Stack & Dependencies
 
-- **Frontend:** React 18, Vite, Tailwind CSS (Glassmorphism design tokens), Axios, Lucide Icons, React Context API.
-- **Backend:** Python FastAPI, Uvicorn, Motor (asynchronous MongoDB driver), Pydantic Settings.
-- **AI Core:** Meta Llama 3.3 70B via Groq Cloud API for ultra-low latency JSON generation.
-- **Security:** HMAC-SHA256 stateless JSON Web Tokens (JWT) + custom cryptography using `bcrypt` salting.
-- **Compilation Sandboxing:** Remote Judge0 CE gateway for programmatic execution of user-submitted source files.
+### Frontend (`/frontend`)
+- **React 18** - Component-driven user interface.
+- **Tailwind CSS** - Glassmorphic styling, dark modes, and micro-interactions.
+- **Vite** - High-performance, instant hot-module reloading build system.
+- **Axios & Context API** - Clean HTTP client routing and centralized state management.
+
+### Backend (`/backend`)
+- **FastAPI** - High-performance, modern Python web framework built on Starlette and Pydantic.
+- **Uvicorn** - Lightning-fast ASGI web server implementation.
+- **Motor** - Asynchronous Python driver for MongoDB.
+- **Pydantic Settings** - Modern environment configuration management.
+- **JWT (HS256) & bcrypt** - Production-standard encryption and security.
+- **Groq API** - Asynchronous API integrations for low-latency JSON response formatting.
 
 ---
 
