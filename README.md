@@ -1,4 +1,4 @@
-# 🌌 SkillForge - AI-Powered Skill Development & Learning Platform
+# <img src="frontend\src\assets\SkillForge_Logo_BG.png"> SkillForge - AI-Powered Skill Development & Learning Platform
 
 <p align="center">
   <a href="https://github.com/muskan1024/SkillForge">
