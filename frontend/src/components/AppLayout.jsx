@@ -1,25 +1,28 @@
 import { useState } from 'react'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink,useNavigate,useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, PlusCircle, LogOut, Zap, Bot, Code2, Menu, X, Award, Route, MessagesSquare } from 'lucide-react'
+import { LayoutDashboard,PlusCircle,LogOut,Zap,Bot,Code2,Menu,X,Award,Route,MessagesSquare } from 'lucide-react'
+import SkillForge_Logo_BG from '../assets/SkillForge_Logo_BG.png'
 
-function SidebarContent({ user, onLogout, onNavClick }) {
+
+function SidebarContent({ user,onLogout,onNavClick }) {
   return (
     <>
       <div className="flex items-center gap-3 px-4 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(124,58,237,0.4)]">
+        {/* <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(124,58,237,0.4)]">
           <Zap size={18} className="text-white fill-white/20" strokeWidth={2} />
-        </div>
+        </div> */}
+        <img src={SkillForge_Logo_BG} className='h-8' alt="SkillForge_Logo" srcset="" />
         <span className="font-bold text-zinc-100 text-lg tracking-tight">SkillForge</span>
       </div>
 
       <nav className="flex flex-col gap-1 flex-1 px-2">
         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-3 mb-2">Learn</p>
         {[
-          { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-          { to: '/roadmaps', icon: Route, label: 'My Roadmaps' },
-          { to: '/onboarding', icon: PlusCircle, label: 'New Roadmap' },
-        ].map(({ to, icon: Icon, label }) => (
+          { to: '/dashboard',icon: LayoutDashboard,label: 'Dashboard' },
+          { to: '/roadmaps',icon: Route,label: 'My Roadmaps' },
+          { to: '/onboarding',icon: PlusCircle,label: 'New Roadmap' },
+        ].map(({ to,icon: Icon,label }) => (
           <NavLink key={to} to={to} onClick={onNavClick}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <Icon size={18} className="shrink-0" />
@@ -67,10 +70,10 @@ function SidebarContent({ user, onLogout, onNavClick }) {
 }
 
 export default function AppLayout({ children }) {
-  const { user, logout } = useAuth()
+  const { user,logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen,setMobileOpen] = useState(false)
 
   const isChatPage = location.pathname === '/chat'
   const handleLogout = () => { logout(); navigate('/') }
@@ -109,9 +112,10 @@ export default function AppLayout({ children }) {
             <Menu size={22} />
           </button>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_15px_rgba(124,58,237,0.3)]">
+            {/* <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_15px_rgba(124,58,237,0.3)]">
               <Zap size={14} className="text-white" strokeWidth={2.5} />
-            </div>
+            </div> */}
+            <img src={SkillForge_Logo_BG} className='h-7' alt="SkillForge_Logo" srcset="" />
             <span className="font-bold text-base text-zinc-100 tracking-tight">SkillForge</span>
           </div>
         </header>

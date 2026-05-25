@@ -1,67 +1,89 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect,useState } from 'react';
 import {
-  Zap, Map, Brain, Award, MessageSquare, Target,
-  Star, ArrowRight, BookOpen, CheckCircle,
-  Cpu, PenLine, BarChart2, Layers, Terminal,
-  Github, Twitter, Linkedin, ChevronRight, LayoutDashboard, Code2, ShieldCheck, Sparkles, Globe,
+  Zap,Map,Brain,Award,MessageSquare,Target,
+  Star,ArrowRight,BookOpen,CheckCircle,
+  Cpu,PenLine,BarChart2,Layers,Terminal,
+  Github,Twitter,Linkedin,ChevronRight,LayoutDashboard,Code2,ShieldCheck,Sparkles,Globe,
   Route
 } from 'lucide-react';
+import { targetArrow } from '@lucide/lab';
+import SkillForge_Logo_BG from '../assets/SkillForge_Logo_BG.png'
+
+const TargetArrowIcon = ({ size = 24,className = "" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`lucide lucide-target-arrow ${className}`}
+  >
+    {targetArrow.map(([tag,attrs],index) => {
+      const Tag = tag;
+      return <Tag key={attrs.key || index} {...attrs} />;
+    })}
+  </svg>
+);
 
 const NAV_LINKS = [
-  { href: '#features', label: 'Features' },
-  { href: '#how-it-helps', label: 'Why SkillForge?' },
-  { href: '#how-it-works', label: 'How it works' },
+  { href: '#features',label: 'Features' },
+  { href: '#how-it-helps',label: 'Why SkillForge?' },
+  { href: '#how-it-works',label: 'How it works' },
   // { href: '#reviews', label: 'Reviews' },
 ];
 
 const PLATFORM_FEATURES = [
   {
-    icon: Route, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20',
+    icon: Route,color: 'text-brand-400',bg: 'bg-brand-500/10',border: 'border-brand-500/20',
     title: 'Personalized AI Roadmaps',
     desc: 'Structured week-by-week plans customized to your skill level and timeline. No generic templates.',
     size: 'md:col-span-2 lg:col-span-2'
   },
   {
-    icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
+    icon: BookOpen,color: 'text-emerald-400',bg: 'bg-emerald-500/10',border: 'border-emerald-500/20',
     title: 'AI-Generated Lessons',
     desc: 'Comprehensive, in-app lessons with real-world code examples and explanations for every topic.',
     size: 'md:col-span-1 lg:col-span-1'
   },
   {
-    icon: Terminal, color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20',
+    icon: Terminal,color: 'text-sky-400',bg: 'bg-sky-500/10',border: 'border-sky-500/20',
     title: 'Embedded Practice IDE',
     desc: 'Write, run, and test code in 10+ languages (Python, JS, Java, etc.) directly in your browser without any setup.',
     size: 'md:col-span-1 lg:col-span-1'
   },
   {
-    icon: Target, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20',
+    icon: Target,color: 'text-orange-400',bg: 'bg-orange-500/10',border: 'border-orange-500/20',
     title: 'Daily Challenges',
     desc: 'Receive fresh, context-aware coding challenges daily. Get instant AI feedback and earn XP.',
     size: 'md:col-span-1 lg:col-span-1'
   },
   {
-    icon: Cpu, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20',
+    icon: Cpu,color: 'text-pink-400',bg: 'bg-pink-500/10',border: 'border-pink-500/20',
     title: 'Interview Preparation',
     desc: 'Practice technical and behavioral rounds with our AI evaluator. Receive scored feedback and actionable tips.',
     size: 'md:col-span-1 lg:col-span-1'
   },
   {
-    icon: MessageSquare, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20',
+    icon: MessageSquare,color: 'text-purple-400',bg: 'bg-purple-500/10',border: 'border-purple-500/20',
     title: 'AI Learning Assistant',
     desc: 'Your 24/7 mentor. Ask questions, get code reviews, and clarify concepts instantly while studying.',
     size: 'md:col-span-2 lg:col-span-2'
   },
   {
-    icon: Brain, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20',
+    icon: Brain,color: 'text-yellow-400',bg: 'bg-yellow-500/10',border: 'border-yellow-500/20',
     title: 'Quiz-Based Progress',
     desc: 'Auto-complete topics by passing AI-generated quizzes. Ensure you actually understand the material.',
     size: 'md:col-span-1 lg:col-span-1'
   },
   {
-    icon: Award, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20',
+    icon: Award,color: 'text-brand-400',bg: 'bg-brand-500/10',border: 'border-brand-500/20',
     title: 'Gamification & Tracking',
-    desc: 'Earn badges, level up your XP, and visualize your consistency with a GitHub-style activity graph.',
+    desc: 'Earn badges, level up your XP, and visualize your consistency with a activity graph.',
     size: 'md:col-span-3 lg:col-span-3'
   },
 ];
@@ -71,55 +93,55 @@ const HOW_IT_HELPS = [
     title: "Everything in one place",
     desc: "Stop juggling between YouTube tutorials, documentation, and a local code editor. SkillForge brings lessons, practice, and evaluation into a single, unified workspace.",
     icon: LayoutDashboard,
-    color: "text-brand-400", bg: "bg-brand-500/10"
+    color: "text-brand-400",bg: "bg-brand-500/10"
   },
   {
     title: "Active Learning > Passive Watching",
     desc: "Tutorial hell is real. We force you to write code, take quizzes, and solve challenges. You only progress when the AI verifies your understanding.",
     icon: Code2,
-    color: "text-emerald-400", bg: "bg-emerald-500/10"
+    color: "text-emerald-400",bg: "bg-emerald-500/10"
   },
   {
     title: "Job-Ready Preparation",
     desc: "Learning syntax isn't enough. Our AI interview preparation simulator trains you for the real deal, evaluating both your technical answers and communication skills.",
     icon: ShieldCheck,
-    color: "text-sky-400", bg: "bg-sky-500/10"
+    color: "text-sky-400",bg: "bg-sky-500/10"
   }
 ];
 
 const SKILLS = [
-  'Python', 'JavaScript', 'React', 'Machine Learning', 'DevOps',
-  'Data Science', 'Java', 'Cloud Computing', 'SQL', 'TypeScript',
-  'DSA & Algorithms', 'Web Development', 'Node.js', 'Docker & K8s',
-  'Go', 'Rust', 'Cybersecurity', 'System Design',
+  'Python','JavaScript','React','Machine Learning','DevOps',
+  'Data Science','Java','Cloud Computing','SQL','TypeScript',
+  'DSA & Algorithms','Web Development','Node.js','Docker & K8s',
+  'Go','Rust','Cybersecurity','System Design',
 ];
 
 const TESTIMONIALS = [
   {
-    name: 'Arjun Mehta', role: 'CS Student → SDE Intern', avatar: 'AM',
+    name: 'Arjun Mehta',role: 'CS Student → SDE Intern',avatar: 'AM',
     text: 'SkillForge isn\'t just a roadmap tool - it\'s like having a personal tutor. The AI lessons are better than most YouTube tutorials, and the quiz system actually made me learn.',
     highlight: 'Cracked my first SDE internship using only SkillForge.',
   },
   {
-    name: 'Priya Sharma', role: 'BCA Graduate', avatar: 'PS',
+    name: 'Priya Sharma',role: 'BCA Graduate',avatar: 'PS',
     text: 'I love that I never have to leave the website. I study the lesson, run code in the Practice IDE, then take the quiz. The daily challenges keep me accountable.',
     highlight: 'Maintained a 34-day streak. First time I stuck to a plan.',
   },
   {
-    name: 'Rohan Verma', role: 'Working Professional', avatar: 'RV',
+    name: 'Rohan Verma',role: 'Working Professional',avatar: 'RV',
     text: 'The interview prep feature alone is worth it. I practiced 50+ questions with AI feedback before my interview. The feedback is specific to YOUR answer.',
     highlight: 'Got my first senior developer role after 3 months of prep.',
   },
 ];
 
 export default function Landing() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled,setScrolled] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
-    window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
+    window.addEventListener('scroll',fn);
+    return () => window.removeEventListener('scroll',fn);
+  },[]);
 
   return (
     <div className="relative overflow-x-hidden min-h-screen bg-surface-900 text-zinc-200 selection:bg-brand-500 selection:text-white">
@@ -137,10 +159,11 @@ export default function Landing() {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)] relative overflow-hidden group">
+            {/* <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)] relative overflow-hidden group">
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               <Zap size={22} className="text-white fill-white/20 relative z-10" strokeWidth={2.5} />
-            </div>
+            </div> */}
+            <img src={SkillForge_Logo_BG} className='h-9 ' alt="SkillForge_Logo" srcset="" />
             <a href="#"><span className="font-bold text-xl text-white tracking-tight">SkillForge</span></a>
           </div>
           <nav className="hidden md:flex gap-8 text-sm font-medium">
@@ -245,9 +268,9 @@ export default function Landing() {
           <div className="absolute top-0 bottom-0 right-0 w-20 md:w-40 bg-gradient-to-l from-surface-900 to-transparent z-10 pointer-events-none" />
 
           <div className="flex w-max hover:[animation-play-state:paused] animate-scroll-x">
-            {[...Array(2)].map((_, i) => (
+            {[...Array(2)].map((_,i) => (
               <div key={i} className="flex gap-4 pr-4">
-                {SKILLS.slice(0, 9).map((s) => (
+                {SKILLS.slice(0,9).map((s) => (
                   <div key={`${i}-${s}`} className="px-6 py-3 glass-card border-white/5 rounded-full text-sm md:text-base font-semibold text-zinc-300 whitespace-nowrap shadow-sm hover:border-brand-500/40 hover:bg-brand-500/10 hover:text-white transition-all cursor-default flex items-center gap-2">
                     <Globe size={16} className="text-brand-400" /> {s}
                   </div>
@@ -257,9 +280,9 @@ export default function Landing() {
           </div>
 
           <div className="flex w-max hover:[animation-play-state:paused] animate-scroll-x" style={{ animationDirection: 'reverse' }}>
-            {[...Array(2)].map((_, i) => (
+            {[...Array(2)].map((_,i) => (
               <div key={i} className="flex gap-4 pr-4">
-                {SKILLS.slice(9, 18).map((s) => (
+                {SKILLS.slice(9,18).map((s) => (
                   <div key={`${i}-${s}`} className="px-6 py-3 glass-card border-white/5 rounded-full text-sm md:text-base font-semibold text-zinc-300 whitespace-nowrap shadow-sm hover:border-brand-500/40 hover:bg-brand-500/10 hover:text-white transition-all cursor-default flex items-center gap-2">
                     <Globe size={16} className="text-brand-400" /> {s}
                   </div>
@@ -283,7 +306,7 @@ export default function Landing() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {HOW_IT_HELPS.map(({ title, desc, icon: Icon, color, bg }) => (
+          {HOW_IT_HELPS.map(({ title,desc,icon: Icon,color,bg }) => (
             <div key={title} className="glass-card p-8 group hover:-translate-y-2 transition-all duration-300 border-white/5 hover:border-white/20">
               <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                 <Icon size={28} className={color} />
@@ -309,7 +332,7 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {PLATFORM_FEATURES.map(({ icon: Icon, color, bg, border, title, desc, size }) => (
+            {PLATFORM_FEATURES.map(({ icon: Icon,color,bg,border,title,desc,size }) => (
               <div key={title} className={`glass-card p-8 group flex flex-col h-full hover:border-white/20 transition-all duration-500 overflow-hidden relative ${size}`}>
                 <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full ${bg} blur-[60px] group-hover:opacity-100 opacity-0 transition-opacity duration-500`} />
                 <div className={`w-12 h-12 rounded-xl ${bg} ${color} border ${border} flex items-center justify-center mb-6 relative z-10 group-hover:scale-110 transition-transform duration-300`}>
@@ -334,11 +357,11 @@ export default function Landing() {
 
         <div className="space-y-12">
           {[
-            { num: '01', title: 'Generate Your Roadmap', desc: 'Tell the AI what you want to learn. It creates a personalized week-by-week curriculum instantly.', icon: Map },
-            { num: '02', title: 'Study Interactive Lessons', desc: 'Read AI-generated lessons, explore real-world code snippets, and ask the AI mentor clarifying questions.', icon: BookOpen },
-            { num: '03', title: 'Practice in the IDE', desc: 'Open the embedded code editor and write real code to solidify concepts without switching tabs.', icon: Terminal },
-            { num: '04', title: 'Pass Quizzes & Challenges', desc: 'Prove your knowledge. Score 60%+ on the AI quiz to auto-complete the topic, and tackle the daily challenge.', icon: Target },
-          ].map((step, index) => (
+            { num: '01',title: 'Generate Your Roadmap',desc: 'Tell the AI what you want to learn. It creates a personalized week-by-week curriculum instantly.',icon: Route },
+            { num: '02',title: 'Study Interactive Lessons',desc: 'Read AI-generated lessons, explore real-world code snippets, and ask the AI mentor clarifying questions.',icon: BookOpen },
+            { num: '03',title: 'Practice in the IDE',desc: 'Open the embedded code editor and write real code to solidify concepts without switching tabs.',icon: Terminal },
+            { num: '04',title: 'Pass Quizzes & Challenges',desc: 'Prove your knowledge. Score 60%+ on the AI quiz to auto-complete the topic, and tackle the daily challenge.',icon: TargetArrowIcon },
+          ].map((step,index) => (
             <div key={step.num} className="flex flex-col md:flex-row items-center gap-8 glass-card p-8 group hover:border-brand-500/30 transition-all duration-300">
               <div className="text-[80px] font-black text-white/5 group-hover:text-white/10 transition-colors leading-none shrink-0">
                 {step.num}
@@ -399,7 +422,8 @@ export default function Landing() {
           <div className="absolute inset-0 bg-gradient-to-br from-brand-600/20 via-purple-600/15 to-sky-600/10 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
 
           <div className="w-20 h-20 rounded-3xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center mx-auto mb-10 relative z-10 animate-float shadow-[0_0_40px_rgba(124,58,237,0.4)]">
-            <Zap size={36} className="text-brand-400 fill-brand-400/20" />
+            <img src={SkillForge_Logo_BG} className='h-[36px]' alt="SkillForge_Logo" srcset="" />
+            {/* <Zap size={36} className="text-brand-400 fill-brand-400/20" /> */}
           </div>
 
           <h2 className="text-[clamp(36px,6vw,56px)] font-extrabold text-white mb-6 tracking-tight relative z-10 drop-shadow-md leading-tight">
@@ -423,9 +447,10 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-1">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
+                {/* <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
                   <Zap size={20} className="text-white fill-white/20" strokeWidth={2.5} />
-                </div>
+                </div> */}
+                <img src={SkillForge_Logo_BG} className='h-9' alt="SkillForge_Logo" srcset="" />
                 <span className="font-bold text-xl text-white tracking-tight">SkillForge</span>
               </div>
               <p className="text-sm text-zinc-400 leading-relaxed mb-6">
@@ -453,8 +478,8 @@ export default function Landing() {
               <ul className="space-y-4">
                 <li><Link to="/login" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">Sign in</Link></li>
                 <li><Link to="/register" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">Create Account</Link></li>
-                <li><a href="#" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">API Documentation</a></li>
+                {/* <li><a href="#" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">Help Center</a></li>
+                <li><a href="#" className="text-sm text-zinc-400 hover:text-brand-400 transition-colors">API Documentation</a></li> */}
               </ul>
             </div>
 
