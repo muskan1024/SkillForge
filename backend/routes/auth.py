@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks
 from datetime import datetime
 from bson import ObjectId
 from models import UserRegister, UserLogin, TokenResponse
 from auth_utils import hash_password, verify_password, create_token
 from database import get_db
+from pydantic import BaseModel, EmailStr
 
 router = APIRouter()
 
 @router.post("/register", response_model=TokenResponse)
-async def register(user_data: UserRegister, db=Depends(get_db)):
+async def register(user_data: UserRegister, background_tasks: BackgroundTasks, db=Depends(get_db)):
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -26,6 +27,13 @@ async def register(user_data: UserRegister, db=Depends(get_db)):
     result = await db.users.insert_one(user_doc)
     user_id = str(result.inserted_id)
     token = create_token({"sub": user_id})
+
+    # Trigger welcome email asynchronously in background thread
+    try:
+        from email_service import send_welcome_email
+        background_tasks.add_task(send_welcome_email, user_data.email, user_data.name)
+    except Exception as e:
+        print(f"[EMAIL SERVICE WARNING] Failed to add background welcome email task: {e}")
 
     return TokenResponse(
         access_token=token,
@@ -93,3 +101,26 @@ async def get_me(db=Depends(get_db), current_user=Depends(__import__('auth_utils
         "xp_points": current_user.get("xp_points", 0),
         "created_at": current_user.get("created_at"),
     }
+
+class SubscribeRequest(BaseModel):
+    email: EmailStr
+
+@router.post("/subscribe")
+async def subscribe(req: SubscribeRequest, background_tasks: BackgroundTasks, db=Depends(get_db)):
+    try:
+        await db.subscribers.update_one(
+            {"email": req.email},
+            {"$set": {"subscribed_at": datetime.utcnow()}},
+            upsert=True
+        )
+        
+        # Trigger pre-launch list confirmation email asynchronously in background thread
+        try:
+            from email_service import send_subscription_email
+            background_tasks.add_task(send_subscription_email, req.email)
+        except Exception as e:
+            print(f"[EMAIL SERVICE WARNING] Failed to add background pre-launch email task: {e}")
+            
+        return {"status": "success", "message": "Successfully subscribed to pricing notifications."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Subscription failed: {str(e)}")
