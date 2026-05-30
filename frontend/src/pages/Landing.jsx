@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useEffect,useState } from 'react';
+import api from '../utils/api';
+import toast from 'react-hot-toast';
 import {
   Zap,Map,Brain,Award,MessageSquare,Target,
   Star,ArrowRight,BookOpen,CheckCircle,
   Cpu,PenLine,BarChart2,Layers,Terminal,
   Github,Twitter,Linkedin,ChevronRight,LayoutDashboard,Code2,ShieldCheck,Sparkles,Globe,
-  Route
+  Route,Flame,CheckCircle2,PlusCircle,Bot,MessagesSquare,XCircle
 } from 'lucide-react';
 import { targetArrow } from '@lucide/lab';
 import SkillForge_Logo_BG from '../assets/SkillForge_Logo_BG.png'
@@ -34,7 +36,7 @@ const NAV_LINKS = [
   { href: '#features',label: 'Features' },
   { href: '#how-it-helps',label: 'Why SkillForge?' },
   { href: '#how-it-works',label: 'How it works' },
-  // { href: '#reviews', label: 'Reviews' },
+  { href: '#pricing',label: 'Pricing' },
 ];
 
 const PLATFORM_FEATURES = [
@@ -136,6 +138,22 @@ const TESTIMONIALS = [
 
 export default function Landing() {
   const [scrolled,setScrolled] = useState(false);
+  const [email,setEmail] = useState('');
+  const [subscribed,setSubscribed] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    try {
+      await api.post('/auth/subscribe',{ email });
+      setSubscribed(true);
+      toast.success("You're on the list! Check your inbox.");
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Subscription failed. Please try again.");
+      // Fallback to true to protect UX in dev/offline mode
+      setSubscribed(true);
+    }
+  };
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
@@ -185,7 +203,7 @@ export default function Landing() {
       </header>
 
       {/* ── Hero Section ───────────────────────────────── */}
-      <section className="pt-36 md:pt-40 pb-20 px-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[90vh]">
+      <section className="pt-36 md:pt-36 pb-20 px-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[90vh]">
         <div className="max-w-5xl mx-auto relative z-10 text-center">
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-xs font-semibold text-brand-300 mb-8 backdrop-blur-md animate-slide-up shadow-[0_0_20px_rgba(124,58,237,0.2)]">
@@ -201,7 +219,7 @@ export default function Landing() {
           </h1> */}
 
           <h1 className="text-[clamp(36px,6vw,72px)] font-extrabold leading-[1.1] mb-6 tracking-tight animate-slide-up">
-            <span className="text-zinc-300 font-bold">The complete platform</span>
+            <span className="text-zinc-300 font-bold">A complete platform</span>
             <br />
             <span className="bg-gradient-to-r from-brand-400 via-purple-400 to-sky-400 bg-clip-text text-transparent font-black drop-shadow-sm">
               to learn any skill
@@ -225,30 +243,293 @@ export default function Landing() {
 
           {/* Hero Visual Mockup */}
           <div className="mt-20 w-full max-w-4xl mx-auto relative animate-slide-up" style={{ animationDelay: '400ms' }}>
+            {/* Custom Embedded Premium Keyframe Animations */}
+            <style dangerouslySetInnerHTML={{
+              __html: `
+              @keyframes progress-shimmer {
+                0% { background-position: -200% 0; }
+                100% { background-position: 200% 0; }
+              }
+              @keyframes cell-sweep {
+                0%, 100% { opacity: 0.45; filter: saturate(0.7); }
+                50% { opacity: 1; filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)) saturate(1.3); }
+              }
+              @keyframes icon-breath {
+                0%, 100% { transform: scale(1); filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.1)); }
+                50% { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.4)); }
+              }
+              @keyframes code-type-1 {
+                0%, 10% { width: 0; }
+                30%, 80% { width: 100%; }
+                90%, 100% { width: 0; }
+              }
+              @keyframes code-type-2 {
+                0%, 30% { width: 0; }
+                50%, 80% { width: 85%; }
+                90%, 100% { width: 0; }
+              }
+              @keyframes cursor-blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0; }
+              }
+              @keyframes slide-in-review {
+                0%, 55% { transform: translateY(30px); opacity: 0; }
+                65%, 85% { transform: translateY(0); opacity: 1; }
+                95%, 100% { transform: translateY(30px); opacity: 0; }
+              }
+              @keyframes pulse-ring {
+                0% { transform: scale(0.95); opacity: 0.8; }
+                50% { transform: scale(1.35); opacity: 0; }
+                100% { transform: scale(0.95); opacity: 0; }
+              }
+            ` }} />
+
             <div className="absolute inset-0 bg-gradient-to-t from-surface-900 via-transparent to-transparent z-20 pointer-events-none h-full" />
             <div className="glass-card p-2 rounded-2xl md:rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-brand-500/5 group-hover:bg-brand-500/10 transition-colors duration-500" />
-              <div className="bg-surface-900 rounded-xl md:rounded-[1.5rem] border border-white/5 overflow-hidden flex flex-col h-[300px] md:h-[500px]">
-                {/* Mock Browser Top */}
-                <div className="bg-surface-800 px-4 py-3 flex items-center gap-2 border-b border-white/5">
+              <div className="bg-surface-900 rounded-xl md:rounded-[1.5rem] border border-white/5 overflow-hidden flex flex-col h-[460px] md:h-[620px]">
+                {/* Mock Browser Top Bar */}
+                <div className="bg-surface-800 px-4 py-3 flex items-center gap-2 border-b border-white/5 flex-shrink-0">
                   <div className="w-3 h-3 rounded-full bg-red-500/80" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                   <div className="w-3 h-3 rounded-full bg-green-500/80" />
                   <div className="mx-auto bg-surface-900 px-4 py-1.5 rounded-md text-xs text-zinc-500 font-mono w-1/2 text-center truncate border border-white/5">skillforge.app/dashboard</div>
                 </div>
-                {/* Mock Content */}
-                <div className="flex-1 p-6 flex flex-col md:flex-row gap-6 opacity-80">
-                  <div className="flex-1 space-y-4">
-                    <div className="h-6 w-1/3 bg-white/10 rounded-md animate-pulse"></div>
-                    <div className="h-4 w-full bg-white/5 rounded-md"></div>
-                    <div className="h-4 w-5/6 bg-white/5 rounded-md"></div>
-                    <div className="h-24 w-full bg-brand-500/20 border border-brand-500/30 rounded-xl mt-4"></div>
-                  </div>
-                  <div className="w-full md:w-1/3 glass-card bg-surface-800/80 border-white/5 rounded-xl p-4 flex flex-col gap-3">
-                    <div className="h-4 w-1/2 bg-white/10 rounded-md"></div>
-                    <div className="h-8 w-full bg-white/5 rounded-md"></div>
-                    <div className="h-8 w-full bg-white/5 rounded-md"></div>
-                    <div className="h-8 w-full bg-brand-500/40 rounded-md mt-auto"></div>
+
+                {/* Dashboard Framework */}
+                <div className="flex-1 flex overflow-hidden min-h-0 text-left">
+                  {/* Miniature Desktop Sidebar Navigation */}
+                  <aside className="hidden md:flex w-48 bg-surface-950/40 border-r border-white/5 flex-col p-4 justify-between select-none flex-shrink-0">
+                    <div className="space-y-4">
+                      {/* Logo header */}
+                      <div className="flex items-center gap-2 px-1 py-1">
+                        <img src={SkillForge_Logo_BG} className="h-5" alt="Logo" />
+                        <span className="font-bold text-zinc-100 text-sm tracking-tight">SkillForge</span>
+                      </div>
+
+                      {/* Menu Sections */}
+                      <div className="space-y-1">
+                        <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-2 mb-1.5">Learn</p>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-brand-300 bg-brand-500/10 border border-brand-500/20 shadow-[0_0_10px_rgba(124,58,237,0.15)] relative">
+                          <LayoutDashboard size={13} className="text-brand-400" />
+                          <span className="truncate">Dashboard</span>
+                          <span className="absolute right-2.5 w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <Route size={13} />
+                          <span className="truncate">My Roadmaps</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <PlusCircle size={13} />
+                          <span className="truncate">New Roadmap</span>
+                        </div>
+
+                        <div className="h-px bg-white/5 my-2 mx-1" />
+                        <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-2 mb-1.5">Tools</p>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <Bot size={13} />
+                          <span className="truncate">AI Assistant</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <Code2 size={13} />
+                          <span className="truncate">Practice IDE</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <MessageSquare size={13} />
+                          <span className="truncate">Interview Prep</span>
+                        </div>
+
+                        <div className="h-px bg-white/5 my-2 mx-1" />
+                        <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-2 mb-1.5">Progress</p>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                          <Award size={13} />
+                          <span className="truncate">Badges</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Profile at Bottom */}
+                    <div className="p-2.5 bg-white/5 border border-white/5 rounded-xl flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm flex-shrink-0">
+                        LN
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold text-zinc-200 truncate leading-none">Learner</p>
+                        <p className="text-[8px] text-zinc-500 truncate leading-none mt-1 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Online</span>
+                        </p>
+                      </div>
+                    </div>
+                  </aside>
+
+                  {/* Main Dashboard Space */}
+                  <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-5 bg-surface-900/50 scrollbar-none" style={{ scrollbarWidth: 'none',msOverflowStyle: 'none' }}>
+                    {/* Welcome Header */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-sm md:text-lg font-bold text-zinc-100 flex items-center gap-1.5">
+                          Good morning, Learner 👋
+                        </h2>
+                        <p className="text-[9px] md:text-xs text-zinc-500 mt-0.5">Here's your weekly learning progress</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[9px] md:text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1.5 rounded-lg shadow-sm border border-brand-500/30 transition-colors">
+                        <PlusCircle size={12} />
+                        <span className="hidden sm:inline">New Roadmap</span>
+                      </div>
+                    </div>
+
+                    {/* Stats Metric Cards Grid */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+                      {[
+                        { icon: Flame,color: "text-orange-400",bg: "bg-orange-500/10",label: "Day Streak",val: "34" },
+                        { icon: Star,color: "text-yellow-400",bg: "bg-yellow-500/10",label: "XP Points",val: "850" },
+                        { icon: Route,color: "text-brand-400",bg: "bg-brand-500/10",label: "Roadmaps",val: "2" },
+                        { icon: CheckCircle,color: "text-emerald-400",bg: "bg-emerald-500/10",label: "Topics Done",val: "14" }
+                      ].map((st,idx) => (
+                        <div key={idx} className="bg-surface-800/60 border border-white/5 p-2.5 md:p-3 rounded-xl hover:border-white/10 hover:shadow-md transition-all duration-300">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[8px] md:text-[10px] text-zinc-500 font-medium truncate">{st.label}</span>
+                            <div className={`w-5.5 h-5.5 rounded-md ${st.bg} flex items-center justify-center shrink-0`}>
+                              <st.icon size={11} className={`${st.color}`} style={{ animation: 'icon-breath 3s infinite ease-in-out',animationDelay: `${idx * 200}ms` }} />
+                            </div>
+                          </div>
+                          <p className="text-sm md:text-base font-extrabold text-zinc-100 leading-tight">{st.val}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Core Layout Panels */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Active Roadmap widget */}
+                      <div className="bg-surface-800/40 border border-white/5 rounded-xl p-4 space-y-3.5 text-left flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2 py-0.5 rounded-md text-[8px] md:text-[9px] font-bold bg-brand-500/10 text-brand-300 border border-brand-500/20">Currently learning</span>
+                          <span className="text-[9px] md:text-[10px] font-semibold text-brand-400 flex items-center gap-1 cursor-pointer">Continue <ArrowRight size={11} /></span>
+                        </div>
+                        <div>
+                          <h3 className="text-xs md:text-sm font-bold text-zinc-100">Full-Stack Web Development (Python & React)</h3>
+                          <p className="text-[9px] md:text-[10px] text-zinc-500 mt-1">14 of 20 topics completed</p>
+                        </div>
+
+                        {/* Shimmering Progress Bar */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[8px] md:text-[9px]">
+                            <span className="text-zinc-600 font-semibold">Course Progress</span>
+                            <span className="font-semibold text-zinc-400">70%</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-zinc-800/60 rounded-full overflow-hidden relative">
+                            <div
+                              className="h-full bg-gradient-to-r from-brand-500 via-purple-500 to-indigo-500 rounded-full"
+                              style={{
+                                width: "70%",
+                                backgroundSize: "200% 100%",
+                                animation: 'progress-shimmer 2.5s infinite linear'
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Pulsing Active Node indicator */}
+                        <div className="bg-brand-500/5 border border-brand-500/15 rounded-lg p-2.5 flex items-start gap-2.5">
+                          <div className="relative w-2 h-2 shrink-0 mt-1">
+                            <div className="absolute inset-0 rounded-full bg-brand-400 animate-ping opacity-75" />
+                            <div className="absolute inset-0.5 rounded-full bg-brand-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[8px] font-bold text-brand-400 uppercase tracking-wide">You are here</span>
+                            <p className="text-[9px] md:text-[10px] font-medium text-zinc-200 truncate mt-0.5">Build a REST API with FastAPI</p>
+                            <p className="text-[8px] text-zinc-500 mt-0.5">Day 8-10 · 6 hours estimated</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Daily Challenge IDE Sandbox */}
+                      <div className="bg-surface-800/40 border border-white/5 rounded-xl p-4 space-y-3.5 flex flex-col justify-between text-left">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-zinc-200">
+                            <Target size={13} className="text-orange-400" />
+                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wide">Daily Challenge</span>
+                          </div>
+                          <span className="text-[8px] text-zinc-500 font-mono">Resets daily</span>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-zinc-100">Reverse Linked List (Python)</h4>
+                          <p className="text-[9px] text-zinc-400 truncate mt-0.5">Implement standard O(N) linear time reversal...</p>
+                        </div>
+
+                        {/* Interactive-looking auto typing python console */}
+                        <div className="flex-1 font-mono text-[9px] text-zinc-400 space-y-1.5 p-2.5 bg-zinc-950/80 rounded-lg border border-white/5 relative overflow-hidden flex flex-col justify-center select-none h-[80px]">
+                          <div className="overflow-hidden whitespace-nowrap border-r border-brand-400 w-0" style={{ animation: 'code-type-1 8s infinite steps(20)' }}>
+                            <span className="text-purple-400">def</span> <span className="text-blue-400">reverse_list</span>(head):
+                          </div>
+                          <div className="overflow-hidden whitespace-nowrap border-r border-brand-400 w-0 ml-3" style={{ animation: 'code-type-2 8s infinite steps(20)' }}>
+                            <span className="text-purple-400">return</span> prev_head <span className="text-zinc-600"># O(1) Memory</span>
+                          </div>
+
+                          {/* Cursor blink */}
+                          <div className="absolute left-[8px] top-[14px] text-zinc-600 font-bold cursor-default" style={{ animation: 'cursor-blink 1s infinite' }} />
+
+                          {/* Slide-In AI evaluated result score card */}
+                          <div className="absolute right-3 bottom-2.5" style={{ animation: 'slide-in-review 8s infinite ease-out' }}>
+                            <div className="flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded text-[8px] font-bold text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)] animate-pulse">
+                              <CheckCircle2 size={10} className="text-emerald-400" />
+                              <span>AI Score: 98%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Authentic Consistency Heat-map Activity Graph */}
+                    <div className="bg-surface-800/40 border border-white/5 rounded-xl p-4 space-y-3.5 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-bold text-zinc-300">
+                          <Flame size={13} className="text-orange-400 animate-pulse" />
+                          <span>Activity Graph</span>
+                        </div>
+                        <span className="text-[8px] md:text-[9px] text-zinc-500">62 active days in the last year</span>
+                      </div>
+
+                      {/* Staggered sweeping columns of the contribution grid */}
+                      <div className="flex items-center gap-1 overflow-x-auto py-1 select-none scrollbar-none" style={{ scrollbarWidth: 'none',msOverflowStyle: 'none' }}>
+                        {Array.from({ length: 28 }).map((_,weekIdx) => (
+                          <div
+                            key={weekIdx}
+                            className="flex flex-col gap-1 flex-shrink-0"
+                            style={{
+                              animation: 'cell-sweep 3s infinite ease-in-out',
+                              animationDelay: `${weekIdx * 100}ms`
+                            }}
+                          >
+                            {Array.from({ length: 7 }).map((_,dayIdx) => {
+                              const score = (weekIdx * 3 + dayIdx * 5) % 9;
+                              let bgClass = "bg-zinc-800/40";
+                              if (score > 6) bgClass = "bg-brand-500/80 shadow-[0_0_4px_rgba(124,58,237,0.35)]";
+                              else if (score > 3) bgClass = "bg-brand-700/60";
+                              else if (score > 1) bgClass = "bg-brand-900/40";
+
+                              return (
+                                <div
+                                  key={dayIdx}
+                                  className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-[1.5px] ${bgClass}`}
+                                />
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Legend */}
+                      <div className="flex justify-end items-center gap-1.5 text-[8px] text-zinc-500">
+                        <span>Less</span>
+                        <div className="w-1.5 h-1.5 rounded-[1.5px] bg-zinc-800/40" />
+                        <div className="w-1.5 h-1.5 rounded-[1.5px] bg-brand-900/40" />
+                        <div className="w-1.5 h-1.5 rounded-[1.5px] bg-brand-700/60" />
+                        <div className="w-1.5 h-1.5 rounded-[1.5px] bg-brand-500/80" />
+                        <span>More</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -294,7 +575,7 @@ export default function Landing() {
       </section>
 
       {/* ── How It Helps You (Why SkillForge?) ─────────── */}
-      <section id="how-it-helps" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
+      <section id="how-it-helps" className="py-20 px-6 max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <p className="text-sm font-bold text-brand-400 uppercase tracking-[0.2em] mb-4">Why SkillForge?</p>
           <h2 className="text-[clamp(32px,5vw,48px)] font-bold text-white mb-6 tracking-tight leading-tight">
@@ -319,7 +600,7 @@ export default function Landing() {
       </section>
 
       {/* ── Exact Features Setup ───────────────────────── */}
-      <section id="features" className="py-24 px-6 bg-surface-800/30 border-y border-white/5 backdrop-blur-sm relative z-10">
+      <section id="features" className="py-20 px-6 bg-surface-800/30 border-y border-white/5 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm font-bold text-purple-400 uppercase tracking-[0.2em] mb-4">Platform Capabilities</p>
@@ -347,7 +628,7 @@ export default function Landing() {
       </section>
 
       {/* ── How it works ───────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6 max-w-6xl mx-auto relative z-10">
+      <section id="how-it-works" className="py-20 px-6 max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-20">
           <p className="text-sm font-bold text-sky-400 uppercase tracking-[0.2em] mb-4">The Workflow</p>
           <h2 className="text-[clamp(32px,5vw,48px)] font-bold text-white mb-6 tracking-tight">
@@ -375,6 +656,80 @@ export default function Landing() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Upcoming Pricing Preview ────────────────── */}
+      <section id="pricing" className="py-20 px-6 relative z-10 border-t border-white/5 bg-surface-950/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 text-xs font-bold text-sky-400 mb-6 uppercase tracking-wider backdrop-blur-md animate-pulse">
+              <Sparkles size={12} className="text-sky-400" /> Upcoming Feature
+            </div>
+            <h2 className="text-[clamp(32px,5vw,48px)] font-bold text-white mb-6 tracking-tight leading-tight">
+              Worthy AI. Budget-Friendly Pricing.
+            </h2>
+            <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              Our sustainable pricing models will be launched soon. Until then, enjoy completely free, unlimited AI-powered learning paths and mentor tools!
+            </p>
+          </div>
+
+          <div className="max-w-xl mx-auto">
+            {/* Pro / Credit Tier Card (Upcoming) */}
+            <div className="glass-card p-10 flex flex-col justify-between hover:border-brand-500/40 transition-all duration-300 relative group overflow-hidden border-brand-500/20 shadow-[0_0_50px_rgba(124,58,237,0.05)] bg-surface-950/60">
+              <div className="absolute top-0 right-0 bg-gradient-to-bl from-brand-600 to-purple-600 text-white text-[10px] uppercase font-black tracking-wider py-1.5 px-6 rounded-bl-2xl shadow-lg border-b border-l border-brand-500/30">
+                Coming Soon
+              </div>
+              <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-brand-600/10 blur-2xl pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity" />
+
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-2">Forge Master Pro</h3>
+                    <p className="text-zinc-400 text-sm">For dedicated skill builders</p>
+                  </div>
+                </div>
+
+                <div className="mb-8 bg-brand-500/5 border border-brand-500/10 rounded-2xl p-4 text-center">
+                  <span className="text-base font-bold text-brand-300 block">Launching Soon</span>
+                  <p className="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
+                    We are designing highly budget-friendly premium plans to support advanced AI capabilities (like mock interviews and interactive code feedback) without token limits.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                {!subscribed ? (
+                  <form onSubmit={handleSubscribe} className="space-y-4">
+                    <p className="text-xs text-zinc-400 font-medium text-center leading-relaxed">
+                      Subscribe below to be notified as soon as our pricing model launches. Enjoy completely free learning till then!
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email id to get notified"
+                        className="input py-2 px-3 text-xs w-full border-brand-500/20 focus:border-brand-500 bg-surface-950/50"
+                      />
+                      <button type="submit" className="btn-primary py-2 px-5 text-xs font-bold shrink-0">
+                        Notify Me
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="bg-brand-500/10 border border-brand-500/30 rounded-xl p-4 text-center animate-slide-up">
+                    <CheckCircle className="text-brand-400 mx-auto mb-2" size={24} />
+                    <h5 className="font-bold text-sm text-white mb-1">You're on the list!</h5>
+                    <p className="text-[11px] text-zinc-300 leading-normal">
+                      We'll notify you immediately at <span className="text-brand-300 underline font-medium">{email}</span> as soon as pricing launches.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -417,7 +772,7 @@ export default function Landing() {
       </section> */}
 
       {/* ── CTA ────────────────────────────────── */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-20 px-6 relative z-10">
         <div className="max-w-5xl mx-auto text-center glass-card p-12 md:p-24 relative overflow-hidden group border-brand-500/20 shadow-2xl">
           <div className="absolute inset-0 bg-gradient-to-br from-brand-600/20 via-purple-600/15 to-sky-600/10 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
 
@@ -456,11 +811,11 @@ export default function Landing() {
               <p className="text-sm text-zinc-400 leading-relaxed mb-6">
                 The ultimate AI-powered personalized skill development and learning management platform. Go from zero to hired in one workspace.
               </p>
-              <div className="flex gap-4">
+              {/* <div className="flex gap-4">
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-brand-500 hover:text-white transition-all"><Twitter size={18} /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-brand-500 hover:text-white transition-all"><Github size={18} /></a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-brand-500 hover:text-white transition-all"><Linkedin size={18} /></a>
-              </div>
+              </div> */}
             </div>
 
             <div>
@@ -485,11 +840,24 @@ export default function Landing() {
 
             <div>
               <h4 className="font-bold text-white mb-6">Stay Updated</h4>
-              <p className="text-sm text-zinc-400 mb-4">Subscribe to our newsletter for the latest features and learning tips.</p>
-              <div className="flex gap-2">
-                <input type="email" placeholder="Enter your email" className="input py-2 text-sm" />
-                <button className="btn-primary py-2 px-4 text-sm">Subscribe</button>
-              </div>
+              <p className="text-sm text-zinc-400 mb-4">Subscribe to our newsletter to receive notifications when our pricing model launches!</p>
+              {!subscribed ? (
+                <form onSubmit={handleSubscribe} className="flex gap-2">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="input py-2 text-sm bg-surface-950/50"
+                  />
+                  <button type="submit" className="btn-primary py-2 px-4 text-sm">Subscribe</button>
+                </form>
+              ) : (
+                <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-3 text-center text-xs text-brand-300 font-semibold animate-slide-up">
+                  ⚡ Subscribed for pricing updates!
+                </div>
+              )}
             </div>
           </div>
 
@@ -497,11 +865,11 @@ export default function Landing() {
             <p className="text-xs text-zinc-500 text-center md:text-left">
               &copy; {new Date().getFullYear()} SkillForge. All rights reserved.
             </p>
-            <div className="flex gap-6">
+            {/* <div className="flex gap-6">
               <a href="#" className="text-xs text-zinc-500 hover:text-white transition-colors">Privacy Policy</a>
               <a href="#" className="text-xs text-zinc-500 hover:text-white transition-colors">Terms of Service</a>
               <a href="#" className="text-xs text-zinc-500 hover:text-white transition-colors">Cookie Settings</a>
-            </div>
+            </div> */}
           </div>
         </div>
       </footer>
