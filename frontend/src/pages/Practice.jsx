@@ -1,25 +1,40 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Code2, Loader2, Send, ChevronDown } from 'lucide-react'
 
-// ── Embedded IDE configs using Judge0 CE (free, open source) ─────
-// We use the public Judge0 API for code execution
+// ── Embedded IDE configs using JDoodle (via backend proxy) ──────
 const LANGUAGES = [
-  { id: 'python',     label: 'Python',      judge0Id: 71,  color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',    dot: 'bg-blue-500',    starter: '# Python Playground\n# Write your code below and click Run\n\nprint("Hello, SkillForge!")\n\n# Try variables, loops, functions\nfor i in range(1, 6):\n    print(f"Learning Day {i} 🚀")\n' },
-  { id: 'javascript', label: 'JavaScript',  judge0Id: 63,  color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', dot: 'bg-yellow-400', starter: '// JavaScript Playground\nconsole.log("Hello, SkillForge!");\n\n// Try arrays, functions, loops\nconst skills = ["HTML", "CSS", "JavaScript"];\nskills.forEach((skill, i) => {\n    console.log(`${i+1}. Learning ${skill}`);\n});\n' },
-  { id: 'java',       label: 'Java',        judge0Id: 62,  color: 'bg-orange-500/10 text-orange-400 border-orange-500/20', dot: 'bg-orange-500', starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, SkillForge!");\n        \n        // Try loops and arrays\n        String[] skills = {"Java", "OOP", "DSA"};\n        for (int i = 0; i < skills.length; i++) {\n            System.out.println((i+1) + ". " + skills[i]);\n        }\n    }\n}\n' },
-  { id: 'c',          label: 'C',           judge0Id: 50,  color: 'bg-gray-500/10 text-gray-300 border-gray-500/20',      dot: 'bg-gray-400',   starter: '#include <stdio.h>\n\nint main() {\n    printf("Hello, SkillForge!\\n");\n    \n    // Try loops\n    for (int i = 1; i <= 5; i++) {\n        printf("Day %d of learning C\\n", i);\n    }\n    return 0;\n}\n' },
-  { id: 'cpp',        label: 'C++',         judge0Id: 54,  color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', dot: 'bg-indigo-500', starter: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    cout << "Hello, SkillForge!" << endl;\n    \n    vector<string> skills = {"C++", "STL", "OOP"};\n    for (auto& s : skills) {\n        cout << "Learning: " << s << endl;\n    }\n    return 0;\n}\n' },
-  { id: 'csharp',     label: 'C#',          judge0Id: 51,  color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', dot: 'bg-purple-500', starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, SkillForge!");\n        \n        string[] skills = {"C#", ".NET", "OOP"};\n        foreach (var s in skills) {\n            Console.WriteLine($"Learning: {s}");\n        }\n    }\n}\n' },
-  { id: 'go',         label: 'Go',          judge0Id: 60,  color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',      dot: 'bg-cyan-500',   starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, SkillForge!")\n    \n    skills := []string{"Go", "Goroutines", "Channels"}\n    for i, s := range skills {\n        fmt.Printf("%d. Learning %s\\n", i+1, s)\n    }\n}\n' },
-  { id: 'rust',       label: 'Rust',        judge0Id: 73,  color: 'bg-red-500/10 text-red-400 border-red-500/20',         dot: 'bg-red-500',    starter: 'fn main() {\n    println!("Hello, SkillForge!");\n    \n    let skills = vec!["Rust", "Ownership", "Borrowing"];\n    for (i, s) in skills.iter().enumerate() {\n        println!("{}. Learning {}", i+1, s);\n    }\n}\n' },
-  { id: 'typescript', label: 'TypeScript',  judge0Id: 74,  color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',     dot: 'bg-blue-500',   starter: '// TypeScript Playground\nconst greet = (name: string): string => {\n    return `Hello, ${name}!`;\n};\n\nconsole.log(greet("SkillForge"));\n\ninterface Skill {\n    name: string;\n    level: number;\n}\n\nconst skills: Skill[] = [\n    { name: "TypeScript", level: 1 },\n    { name: "React", level: 2 },\n];\n\nskills.forEach(s => console.log(`${s.name}: Level ${s.level}`));\n' },
-  { id: 'sql',        label: 'SQL',         judge0Id: null, color: 'bg-teal-500/10 text-teal-400 border-teal-500/20',    dot: 'bg-teal-500',   starter: '' },
+  { id: 'python',     label: 'Python',      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',    dot: 'bg-blue-500',    starter: '# Python Playground\n# Write your code below and click Run\n\nprint("Hello, SkillForge!")\n\n# Try variables, loops, functions\nfor i in range(1, 6):\n    print(f"Learning Day {i} 🚀")\n' },
+  { id: 'javascript', label: 'JavaScript',  color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', dot: 'bg-yellow-400', starter: '// JavaScript Playground\nconsole.log("Hello, SkillForge!");\n\n// Try arrays, functions, loops\nconst skills = ["HTML", "CSS", "JavaScript"];\nskills.forEach((skill, i) => {\n    console.log(`${i+1}. Learning ${skill}`);\n});\n' },
+  { id: 'java',       label: 'Java',        color: 'bg-orange-500/10 text-orange-400 border-orange-500/20', dot: 'bg-orange-500', starter: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, SkillForge!");\n        \n        // Try loops and arrays\n        String[] skills = {"Java", "OOP", "DSA"};\n        for (int i = 0; i < skills.length; i++) {\n            System.out.println((i+1) + ". " + skills[i]);\n        }\n    }\n}\n' },
+  { id: 'c',          label: 'C',           color: 'bg-gray-500/10 text-gray-300 border-gray-500/20',      dot: 'bg-gray-400',   starter: '#include <stdio.h>\n\nint main() {\n    printf("Hello, SkillForge!\\n");\n    \n    // Try loops\n    for (int i = 1; i <= 5; i++) {\n        printf("Day %d of learning C\\n", i);\n    }\n    return 0;\n}\n' },
+  { id: 'cpp',        label: 'C++',         color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', dot: 'bg-indigo-500', starter: '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    cout << "Hello, SkillForge!" << endl;\n    \n    vector<string> skills = {"C++", "STL", "OOP"};\n    for (auto& s : skills) {\n        cout << "Learning: " << s << endl;\n    }\n    return 0;\n}\n' },
+  { id: 'csharp',     label: 'C#',          color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', dot: 'bg-purple-500', starter: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, SkillForge!");\n        \n        string[] skills = {"C#", ".NET", "OOP"};\n        foreach (var s in skills) {\n            Console.WriteLine($"Learning: {s}");\n        }\n    }\n}\n' },
+  { id: 'go',         label: 'Go',          color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',      dot: 'bg-cyan-500',   starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, SkillForge!")\n    \n    skills := []string{"Go", "Goroutines", "Channels"}\n    for i, s := range skills {\n        fmt.Printf("%d. Learning %s\\n", i+1, s)\n    }\n}\n' },
+  { id: 'rust',       label: 'Rust',        color: 'bg-red-500/10 text-red-400 border-red-500/20',         dot: 'bg-red-500',    starter: 'fn main() {\n    println!("Hello, SkillForge!");\n    \n    let skills = vec!["Rust", "Ownership", "Borrowing"];\n    for (i, s) in skills.iter().enumerate() {\n        println!("{}. Learning {}", i+1, s);\n    }\n}\n' },
+  { id: 'typescript', label: 'TypeScript',  color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',     dot: 'bg-blue-500',   starter: '// TypeScript Playground\nconst greet = (name: string): string => {\n    return `Hello, ${name}!`;\n};\n\nconsole.log(greet("SkillForge"));\n\ninterface Skill {\n    name: string;\n    level: number;\n}\n\nconst skills: Skill[] = [\n    { name: "TypeScript", level: 1 },\n    { name: "React", level: 2 },\n];\n\nskills.forEach(s => console.log(`${s.name}: Level ${s.level}`));\n' },
+  { id: 'sql',        label: 'SQL',         color: 'bg-teal-500/10 text-teal-400 border-teal-500/20',    dot: 'bg-teal-500',   starter: '' },
 ]
 
-const JUDGE0_URL = 'https://judge0-ce.p.rapidapi.com'
-const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || ''
+// ── Extra languages shown in "More" dropdown ─────────────────────
+const MORE_LANGUAGES = [
+  { id: 'kotlin',   label: 'Kotlin',   dot: 'bg-orange-400',  starter: 'fun main() {\n    println("Hello, SkillForge!")\n    val skills = listOf("Kotlin", "Coroutines", "JVM")\n    skills.forEachIndexed { i, s -> println("${i+1}. $s") }\n}\n' },
+  { id: 'ruby',     label: 'Ruby',     dot: 'bg-red-400',     starter: 'puts "Hello, SkillForge!"\n\nskills = ["Ruby", "Rails", "Gems"]\nskills.each_with_index do |s, i|\n  puts "#{i+1}. #{s}"\nend\n' },
+  { id: 'php',      label: 'PHP',      dot: 'bg-violet-400',  starter: '<?php\necho "Hello, SkillForge!\\n";\n\n$skills = ["PHP", "Laravel", "Composer"];\nforeach ($skills as $i => $s) {\n    echo ($i+1) . ". $s\\n";\n}\n' },
+  { id: 'swift',    label: 'Swift',    dot: 'bg-orange-500',  starter: 'import Foundation\nprint("Hello, SkillForge!")\n\nlet skills = ["Swift", "iOS", "SwiftUI"]\nfor (i, s) in skills.enumerated() {\n    print("\\(i+1). \\(s)")\n}\n' },
+  { id: 'scala',    label: 'Scala',    dot: 'bg-red-600',     starter: 'object Main extends App {\n  println("Hello, SkillForge!")\n  val skills = List("Scala", "Akka", "Spark")\n  skills.zipWithIndex.foreach { case (s, i) => println(s"${i+1}. $s") }\n}\n' },
+  { id: 'perl',     label: 'Perl',     dot: 'bg-blue-300',    starter: 'print "Hello, SkillForge!\\n";\n\nmy @skills = ("Perl", "Regex", "CPAN");\nfor my $i (0..$#skills) {\n    print ($i+1) . ". $skills[$i]\\n";\n}\n' },
+  { id: 'haskell',  label: 'Haskell',  dot: 'bg-purple-400',  starter: 'main :: IO ()\nmain = do\n    putStrLn "Hello, SkillForge!"\n    let skills = ["Haskell", "Monads", "Types"]\n    mapM_ (\\(i,s) -> putStrLn $ show i ++ ". " ++ s) (zip [1..] skills)\n' },
+  { id: 'r',        label: 'R',        dot: 'bg-sky-400',     starter: 'cat("Hello, SkillForge!\\n")\n\nskills <- c("R", "ggplot2", "tidyverse")\nfor (i in seq_along(skills)) {\n  cat(i, ".", skills[i], "\\n")\n}\n' },
+  { id: 'bash',     label: 'Bash',     dot: 'bg-green-400',   starter: '#!/bin/bash\necho "Hello, SkillForge!"\n\nskills=("Bash" "Shell" "Linux")\nfor i in "${!skills[@]}"; do\n  echo "$((i+1)). ${skills[$i]}"\ndone\n' },
+  { id: 'lua',      label: 'Lua',      dot: 'bg-indigo-300',  starter: 'print("Hello, SkillForge!")\n\nlocal skills = {"Lua", "Tables", "Coroutines"}\nfor i, s in ipairs(skills) do\n    print(i .. ". " .. s)\nend\n' },
+  { id: 'dart',     label: 'Dart',     dot: 'bg-cyan-400',    starter: 'void main() {\n  print("Hello, SkillForge!");\n  var skills = ["Dart", "Flutter", "async"];\n  for (var i = 0; i < skills.length; i++) {\n    print("${i+1}. ${skills[i]}");\n  }\n}\n' },
+  { id: 'elixir',   label: 'Elixir',   dot: 'bg-purple-500',  starter: 'IO.puts "Hello, SkillForge!"\n\nskills = ["Elixir", "Phoenix", "OTP"]\nSkills\n|> Enum.with_index(1)\n|> Enum.each(fn {s, i} -> IO.puts "#{i}. #{s}" end)\n' },
+]
+
+// All language IDs that the backend supports (for CodeEditor fallback)
+const ALL_LANGUAGES = [...LANGUAGES.filter(l => l.id !== 'sql'), ...MORE_LANGUAGES]
 
 // ── Code Editor Component ────────────────────────────────────────
 function CodeEditor({ lang }) {
@@ -32,74 +47,34 @@ function CodeEditor({ lang }) {
 
   const runCode = async () => {
     if (!code.trim()) return
-    if (!RAPIDAPI_KEY) {
-      setOutput('⚠️ Judge0 API key not configured.\n\nAdd your RapidAPI key to frontend/.env:\nVITE_RAPIDAPI_KEY=your_key_here\n\nGet a free key at: rapidapi.com/judge0-official/api/judge0-ce')
-      setStatus('error')
-      return
-    }
     setRunning(true)
     setOutput('')
     setStatus(null)
 
     try {
-      // Step 1: Submit code to Judge0
-      const submitRes = await fetch(`${JUDGE0_URL}/submissions?base64_encoded=false`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-RapidAPI-Key': RAPIDAPI_KEY,
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
-        },
-        body: JSON.stringify({
-          source_code: code,
-          language_id: lang.judge0Id,
-          stdin: stdin || '',
-          cpu_time_limit: 5,
-          memory_limit: 128000,
-        })
+      const res = await api.post('/features/execute-code', {
+        language: lang.id,
+        code,
+        stdin: stdin || '',
       })
 
-      if (!submitRes.ok) {
-        const errText = await submitRes.text()
-        throw new Error(`Submission failed: ${errText}`)
-      }
-      const { token } = await submitRes.json()
+      const data = res.data
+      const out = data.output || ''
 
-      // Step 2: Poll for result (max 10 attempts, 1s apart)
-      let data = null
-      for (let i = 0; i < 10; i++) {
-        await new Promise(r => setTimeout(r, 1000))
-        const pollRes = await fetch(`${JUDGE0_URL}/submissions/${token}?base64_encoded=false`, {
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
-          }
-        })
-        data = await pollRes.json()
-        // Status IDs 1 (In Queue) and 2 (Processing) — keep polling
-        if (data.status?.id !== 1 && data.status?.id !== 2) break
-      }
-
-      if (!data) throw new Error('No response from execution service')
-
-      if (data.stdout) {
-        setOutput(data.stdout)
+      // JDoodle signals errors inside the output text when statusCode != 200
+      if (data.statusCode === 200) {
+        setOutput(out || '(no output)')
         setStatus('success')
-      } else if (data.stderr) {
-        setOutput(data.stderr)
-        setStatus('error')
-      } else if (data.compile_output) {
-        setOutput(data.compile_output)
-        setStatus('error')
-      } else if (data.status?.id === 5) {
+      } else if (data.statusCode === 'TIME_LIMIT_EXCEEDED' || out.includes('Time Limit')) {
         setOutput('⏱️ Time Limit Exceeded')
         setStatus('timeout')
       } else {
-        setOutput(data.message || `Status: ${data.status?.description || 'Unknown'}`)
+        setOutput(out || `Execution error (status ${data.statusCode})`)
         setStatus('error')
       }
     } catch (err) {
-      setOutput(`⚠️ Error: ${err.message}\n\nMake sure your VITE_RAPIDAPI_KEY in frontend/.env is valid.`)
+      const msg = err.response?.data?.detail || err.message
+      setOutput(`⚠️ Error: ${msg}`)
       setStatus('error')
     } finally {
       setRunning(false)
@@ -383,8 +358,18 @@ function CodeReview() {
 export default function Practice() {
   const [activeTab, setActiveTab]   = useState('ide')
   const [activeLang, setActiveLang] = useState('python')
+  const [moreOpen, setMoreOpen]     = useState(false)
+  const moreRef                     = useRef(null)
 
-  const selectedLang = LANGUAGES.find(l => l.id === activeLang) || LANGUAGES[0]
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const selectedLang = ALL_LANGUAGES.find(l => l.id === activeLang) || LANGUAGES[0]
+  const isMoreActive = MORE_LANGUAGES.some(l => l.id === activeLang)
 
   const tabs = [
     { id: 'ide',    label: '💻 Code IDE' },
@@ -415,18 +400,54 @@ export default function Practice() {
       {activeTab === 'ide' && (
         <div>
           {/* Language selector */}
-          <div className="flex gap-2 mb-4 flex-wrap">
+          <div className="flex gap-2 mb-4 flex-wrap items-center">
             {LANGUAGES.filter(l => l.id !== 'sql').map(l => (
-              <button key={l.id} onClick={() => setActiveLang(l.id)}
+              <button key={l.id} onClick={() => { setActiveLang(l.id); setMoreOpen(false) }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang===l.id ? `${l.color} shadow-sm` : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
                 <div className={`w-2 h-2 rounded-full ${l.dot}`}/>
                 {l.label}
               </button>
             ))}
-            <button onClick={() => setActiveLang('sql')}
+            <button onClick={() => { setActiveLang('sql'); setMoreOpen(false) }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${activeLang==='sql' ? 'bg-teal-500/10 text-teal-400 border-teal-500/20' : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'}`}>
               <div className="w-2 h-2 rounded-full bg-teal-500"/>SQL
             </button>
+
+            {/* ── More languages dropdown ── */}
+            <div className="relative" ref={moreRef}>
+              <button
+                onClick={() => setMoreOpen(o => !o)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                  isMoreActive
+                    ? 'bg-brand-500/20 text-brand-300 border-brand-500/40 shadow-sm'
+                    : 'bg-white/5 border-white/10 text-slate-300 hover:border-brand-500/30 hover:bg-white/10'
+                }`}
+              >
+                <span>{ isMoreActive ? MORE_LANGUAGES.find(l => l.id === activeLang)?.label : 'More' }</span>
+                <ChevronDown size={12} className={`transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`}/>
+              </button>
+
+              {moreOpen && (
+                <div className="absolute left-0 top-full mt-1.5 z-50 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-1.5 min-w-[160px]"
+                  style={{ backdropFilter: 'blur(12px)' }}>
+                  <p className="text-[10px] text-slate-500 px-2 py-1 font-medium uppercase tracking-wider">More Languages</p>
+                  {MORE_LANGUAGES.map(l => (
+                    <button
+                      key={l.id}
+                      onClick={() => { setActiveLang(l.id); setMoreOpen(false) }}
+                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-all ${
+                        activeLang === l.id
+                          ? 'bg-brand-600/40 text-brand-300'
+                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${l.dot}`}/>
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* IDE panel */}
@@ -437,10 +458,10 @@ export default function Practice() {
             }
           </div>
 
-          <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-            <p className="text-xs text-amber-400">
-              <strong>💡 Powered by Judge0:</strong> Code runs on Judge0 CE — a free, open-source code execution engine.
-              For best performance, get a free API key at <strong>rapidapi.com/judge0-ce</strong> and add it to your project.
+          <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+            <p className="text-xs text-green-400">
+              <strong>⚡ Powered by JDoodle:</strong> Code runs securely on JDoodle's execution engine via your backend.
+              Supports Python, JavaScript, Java, C, C++, C#, Go, Rust, and TypeScript.
             </p>
           </div>
         </div>

@@ -7,9 +7,91 @@ from bson import ObjectId
 from datetime import datetime
 from groq import Groq
 from routes.quiz import check_and_award_badges
-import json, re
+import json, re, httpx
 
 router = APIRouter()
+
+# ── JDoodle Code Execution ────────────────────────────────────────
+JDOODLE_URL = "https://api.jdoodle.com/v1/execute"
+
+# JDoodle language slugs + version map
+JDOODLE_LANG_MAP = {
+    # ── Primary (shown as pills in UI) ────────────────────────────
+    "python":     {"language": "python3",     "versionIndex": "4"},
+    "javascript": {"language": "nodejs",      "versionIndex": "4"},
+    "java":       {"language": "java",        "versionIndex": "4"},
+    "c":          {"language": "c",           "versionIndex": "5"},
+    "cpp":        {"language": "cpp17",       "versionIndex": "1"},
+    "csharp":     {"language": "csharp",      "versionIndex": "4"},
+    "go":         {"language": "go",          "versionIndex": "4"},
+    "rust":       {"language": "rust",        "versionIndex": "4"},
+    "typescript": {"language": "typescript",  "versionIndex": "4"},
+    # ── Extra (shown in "More" dropdown in UI) ─────────────────────
+    "kotlin":     {"language": "kotlin",      "versionIndex": "3"},
+    "ruby":       {"language": "ruby",        "versionIndex": "4"},
+    "php":        {"language": "php",         "versionIndex": "4"},
+    "swift":      {"language": "swift",       "versionIndex": "4"},
+    "scala":      {"language": "scala",       "versionIndex": "4"},
+    "perl":       {"language": "perl",        "versionIndex": "4"},
+    "haskell":    {"language": "haskell",     "versionIndex": "4"},
+    "r":          {"language": "r",           "versionIndex": "4"},
+    "bash":       {"language": "bash",        "versionIndex": "4"},
+    "lua":        {"language": "lua",         "versionIndex": "2"},
+    "dart":       {"language": "dart",        "versionIndex": "4"},
+    "elixir":     {"language": "elixir",      "versionIndex": "4"},
+}
+
+class ExecuteCodeRequest(BaseModel):
+    language: str
+    code: str
+    stdin: Optional[str] = ""
+
+@router.post("/execute-code")
+async def execute_code(req: ExecuteCodeRequest, current_user=Depends(get_current_user)):
+    settings = get_settings()
+
+    if not settings.jdoodle_client_id or not settings.jdoodle_client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Code execution service not configured. Add JDOODLE_CLIENT_ID and JDOODLE_CLIENT_SECRET to backend/.env"
+        )
+
+    lang_info = JDOODLE_LANG_MAP.get(req.language.lower())
+    if not lang_info:
+        raise HTTPException(status_code=400, detail=f"Unsupported language: {req.language}")
+
+    payload = {
+        "clientId":     settings.jdoodle_client_id,
+        "clientSecret": settings.jdoodle_client_secret,
+        "script":       req.code,
+        "stdin":        req.stdin or "",
+        "language":     lang_info["language"],
+        "versionIndex": lang_info["versionIndex"],
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(JDOODLE_URL, json=payload)
+
+        data = resp.json()
+
+        # JDoodle returns statusCode 200 in body on success
+        if resp.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"JDoodle error: {data.get('error', 'Unknown error')}")
+
+        return {
+            "output":      data.get("output", ""),
+            "statusCode":  data.get("statusCode", 200),
+            "memory":      data.get("memory", ""),
+            "cpuTime":     data.get("cpuTime", ""),
+        }
+
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Code execution timed out")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
 
 def get_groq():
     return Groq(api_key=get_settings().groq_api_key)

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 10080
     gemini_api_key: str = ""
     groq_api_key: str = ""
+    jdoodle_client_id: str = ""
+    jdoodle_client_secret: str = ""
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = "shaikhmuskan1024@gmail.com"
