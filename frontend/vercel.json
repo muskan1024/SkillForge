@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://skill-forge-backend-07dd95fd6405.herokuapp.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
