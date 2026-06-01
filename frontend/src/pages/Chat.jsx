@@ -544,8 +544,8 @@ export default function Chat() {
   useEffect(() => {
     Promise.all([api.get("/chat/sessions"), api.get("/roadmaps/")])
       .then(([s, r]) => {
-        setSessions(s.data);
-        setRoadmaps(r.data);
+        setSessions(Array.isArray(s.data) ? s.data : []);
+        setRoadmaps(Array.isArray(r.data) ? r.data : []);
         setLoadSess(false);
       })
       .catch(() => setLoadSess(false));

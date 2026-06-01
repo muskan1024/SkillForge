@@ -17,7 +17,7 @@ export default function MyRoadmaps() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/roadmaps/').then(r => { setRoadmaps(r.data); setLoading(false) }).catch(() => setLoading(false))
+    api.get('/roadmaps/').then(r => { setRoadmaps(Array.isArray(r.data) ? r.data : []); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return (
