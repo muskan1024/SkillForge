@@ -551,11 +551,11 @@ export default function Dashboard() {
       {data?.all_roadmaps?.length > 0 && (
         <div className="card p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-slate-100">All roadmaps</h2>
+            <h2 className="font-semibold text-slate-100">Top roadmaps</h2>
             <Link to="/roadmaps" className="text-sm text-brand-400 hover:underline">View all</Link>
           </div>
           <div className="space-y-2">
-            {data.all_roadmaps.slice(0, 5).map(r => (
+            {data.all_roadmaps.slice(0, 3).map(r => (
               <Link key={r.id} to={`/roadmaps/${r.id}`}
                 className="flex items-center justify-between p-3 rounded-xl transition-all group border border-white/10 hover:border-white/20 hover:bg-white/5 bg-surface-800/30 backdrop-blur-sm">
                 <div className="flex-1 min-w-0">
