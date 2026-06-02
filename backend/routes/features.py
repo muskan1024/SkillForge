@@ -254,93 +254,19 @@ async def get_badges(current_user=Depends(get_current_user), db=Depends(get_db))
         {"id": "multi_skill", "name": "Polymath", "icon": "Brain", "desc": "Learning 3+ different skills"},
         {"id": "interview_ready", "name": "Interview Ready", "icon": "Mic", "desc": "Completed first interview practice"},
         {"id": "interview_pro", "name": "Interview Pro", "icon": "MessagesSquare", "desc": "Completed 5 interview practices"},
+        {"id": "academic_ace", "name": "Academic Ace", "icon": "Award", "desc": "Scored a perfect 100% on any topic quiz"},
+        {"id": "elite_craftsman", "name": "Elite Craftsman", "icon": "Code2", "desc": "AI Code Audit score of 9/10 or higher"},
+        {"id": "silver_tongue", "name": "Silver Tongue", "icon": "PartyPopper", "desc": "Excellent verdict (9/10+) in Mock Interview"},
+        {"id": "daily_disciplinarian", "name": "Daily Disciplinarian", "icon": "CalendarDays", "desc": "Solved 5 dynamic Daily Challenges"},
+        {"id": "archivist", "name": "Archivist", "icon": "BookMarked", "desc": "Generated 5 Study Notes booklets"},
+        {"id": "curious_mind", "name": "Curious Mind", "icon": "MessageSquareQuote", "desc": "Sent 20+ messages to your AI Tutor"},
+        {"id": "night_owl", "name": "Night Owl", "icon": "Moon", "desc": "Learned or practiced between 12:00 AM & 4:00 AM"},
     ]
     earned_ids = {b["id"] for b in earned}
     return {
         "earned": earned,
         "all": [{**b, "earned": b["id"] in earned_ids} for b in all_badges]
     }
-
-# # ── Daily Challenge Submit ────────────────────────────────────────
-# class ChallengeSubmitRequest(BaseModel):
-#     challenge_id: str
-#     answer: str
-#     task: str
-#     title: str
-#     category: Optional[str] = None
-
-# @router.post("/daily-challenge/submit")
-# async def submit_daily_challenge(req: ChallengeSubmitRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
-#     try:
-#         # Idempotency: check if already submitted
-#         existing = await db.daily_challenges.find_one({"_id": ObjectId(req.challenge_id), "user_id": current_user["id"]})
-#         already_submitted = existing.get("submitted", False) if existing else False
-
-#         client = get_groq()
-#         prompt = f"""You are an expert programming tutor evaluating a learner's answer to a daily challenge.
-
-# Challenge Title: {req.title}
-# Category: {req.category or "Programming"}
-# Task: {req.task}
-
-# Learner's Answer:
-# {req.answer}
-
-# Evaluate whether the learner has correctly understood and answered the challenge. Be encouraging and constructive.
-
-# Return ONLY valid JSON:
-# {{
-#   "correct": true or false,
-#   "score": <integer 0-100>,
-#   "feedback": "2-3 sentences of specific, constructive feedback on their answer",
-#   "strengths": ["what they got right"],
-#   "improvements": ["what could be better or what was missing"],
-#   "xp_awarded": <20 if correct else 0>
-# }}
-
-# Be generous: if the answer shows good understanding (score >= 60), mark it as correct."""
-
-#         resp = client.chat.completions.create(
-#             model="llama-3.3-70b-versatile",
-#             messages=[{"role": "user", "content": prompt}],
-#             temperature=0.3, max_tokens=600
-#         )
-#         text = re.sub(r'^```(?:json)?\s*', '', resp.choices[0].message.content.strip())
-#         text = re.sub(r'\s*```$', '', text)
-#         result = json.loads(text)
-
-#         # Award XP only if correct and not already submitted
-#         xp_awarded = 0
-#         if result.get("correct") and not already_submitted:
-#             xp_awarded = 20
-#             await db.users.update_one(
-#                 {"_id": ObjectId(current_user["id"])},
-#                 {"$inc": {"xp_points": xp_awarded}, "$set": {"last_active": datetime.utcnow()}}
-#             )
-
-#         # Always persist the answer + review so the UI can restore on refresh
-#         try:
-#             update_fields = {
-#                 "submitted_answer": req.answer,
-#                 "review_result": result,
-#                 "submitted_at": datetime.utcnow(),
-#             }
-#             if result.get("correct") and not already_submitted:
-#                 update_fields["submitted"] = True  # lock XP gate only on first correct
-
-#             await db.daily_challenges.update_one(
-#                 {"_id": ObjectId(req.challenge_id)},
-#                 {"$set": update_fields}
-#             )
-#         except Exception:
-#             pass
-
-#         result["xp_awarded"] = xp_awarded
-#         result["already_submitted"] = already_submitted
-#         return result
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Answer evaluation failed: {str(e)}")
-
 
 # ── Daily Challenge Answer Review ────────────────────────────────
 class ChallengeAnswerRequest(BaseModel):
@@ -429,6 +355,8 @@ Scoring rules:
                 {"_id": ObjectId(req.challenge_id)},
                 {"$set": update_data}
             )
+            # ── Check and award badges ─────────────────────────────
+            await check_and_award_badges(current_user["id"], db)
         except Exception:
             pass
 
@@ -447,24 +375,32 @@ class CodeReviewRequest(BaseModel):
     context: Optional[str] = None
 
 @router.post("/code-review")
-async def review_code(req: CodeReviewRequest, current_user=Depends(get_current_user)):
+async def review_code(req: CodeReviewRequest, current_user=Depends(get_current_user), db=Depends(get_db)):
     try:
         client = get_groq()
-        prompt = f"""You are an expert code reviewer giving feedback directly to the developer who wrote this code.
+        system_prompt = """You are a senior, world-class developer conducting a strict, helpful, and highly detailed code review.
+Your review style:
+- Speak DIRECTLY to the developer using "you" and "your" throughout.
+- NEVER refer to the author in the third person (e.g., do NOT say "the developer", "the student", "the user", "the programmer", or "the author").
+- NEVER use third-person descriptions or passive voice.
+- Evaluate the code strictly and objectively based on the rubric. Most code is not perfect — award high scores (9 or 10) ONLY for truly exceptional production-grade code.
+"""
+        user_prompt = f"""Please review my {req.language} code.
 
-Review this {req.language} code:
-
+Here is my code:
 ```{req.language}
 {req.code}
 ```
 {f"Context: {req.context}" if req.context else ""}
 
-CRITICAL WRITING RULES:
-- Speak DIRECTLY to the developer using "you" and "your" throughout. NEVER say "the developer", "the code author", or use passive voice.
-- Reference specific parts of THEIR code. Quote line numbers or exact snippets.
-- Example: "Your use of X on line 3 is correct, but your variable naming in the loop could be clearer."
+SCORING RUBRIC (Be strict, realistic, and objective — most code is NOT a perfect 10):
+- 9-10/10: Exceptional. Elegant, perfectly optimized, includes robust error handling, edge-case management, clean architecture, and best practices.
+- 7-8/10: Good. Functional and correct, but has areas for optimization, minor redundant logic, or could improve naming/comment styling.
+- 5-6/10: Average. Works for basic cases but has zero error handling, minor logic gaps, potential security issues, or messy naming.
+- 3-4/10: Poor. Major structural issues, extremely inefficient logic, contains clear bugs, or doesn't fully solve the task.
+- 1-2/10: Non-functional. Broken, highly incomplete, off-topic, or fails to execute.
 
-Provide structured review using this exact format:
+Provide your structured review in this exact markdown format:
 ## Overall Assessment
 ## ✅ What You Did Well
 ## ⚠️ Issues in Your Code
@@ -472,13 +408,42 @@ Provide structured review using this exact format:
 ## 📚 Best Practices to Remember
 ## Score: X/10
 
-Be direct, honest, and specific. Don't say "the code" — say "your code"."""
+Be direct, honest, and reference specific parts of my code."""
+
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.4, max_tokens=2000
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7, max_tokens=2000
         )
-        return {"review": resp.choices[0].message.content.strip()}
+        review_text = resp.choices[0].message.content.strip()
+
+        # ── Parse Code Review Score ──────────────────────────────
+        score_match = re.search(r"Score:\s*(\d+(?:\.\d+)?)\s*/\s*10", review_text, re.IGNORECASE)
+        score_val = 0
+        if score_match:
+            try:
+                score_val = float(score_match.group(1))
+            except ValueError:
+                pass
+
+        # ── Save to Database & Check Badges ──────────────────────
+        try:
+            await db.code_reviews.insert_one({
+                "user_id": current_user["id"],
+                "language": req.language,
+                "code": req.code,
+                "review": review_text,
+                "score": score_val,
+                "created_at": datetime.utcnow()
+            })
+            await check_and_award_badges(current_user["id"], db)
+        except Exception:
+            pass
+
+        return {"review": review_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Code review failed: {str(e)}")
 
