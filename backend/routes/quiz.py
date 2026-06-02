@@ -131,6 +131,81 @@ async def check_and_award_badges(user_id: str, db):
 
         total_interviews = await db.interview_history.count_documents({"user_id": user_id})
 
+        # ── Academic Ace ───────────────────────────────────────────
+        has_perfect_quiz = False
+        for r in roadmaps:
+            for t in r.get("topics", []):
+                if t.get("completed") and t.get("quiz_score") == 100:
+                    has_perfect_quiz = True
+                    break
+            if has_perfect_quiz:
+                break
+
+        # ── Elite Craftsman ────────────────────────────────────────
+        has_elite_craftsman = await db.code_reviews.find_one({"user_id": user_id, "score": {"$gte": 9}}) is not None
+
+        # ── Silver Tongue ──────────────────────────────────────────
+        has_excellent_interview = await db.interview_history.find_one({"user_id": user_id, "evaluation.score": {"$gte": 9}}) is not None
+
+        # ── Daily Disciplinarian ───────────────────────────────────
+        total_challenges_solved = await db.daily_challenges.count_documents({"user_id": user_id, "answered": True})
+
+        # ── Archivist ──────────────────────────────────────────────
+        total_notes_generated = await db.study_notes.count_documents({"user_id": user_id})
+
+        # ── Curious Mind ───────────────────────────────────────────
+        total_chat_messages = 0
+        async for s in db.chat_sessions.find({"user_id": user_id}):
+            for msg in s.get("messages", []):
+                if msg.get("role") == "user":
+                    total_chat_messages += 1
+
+        # ── Night Owl ──────────────────────────────────────────────
+        is_night_owl = False
+        for r in roadmaps:
+            for t in r.get("topics", []):
+                if t.get("completed") and t.get("completed_at"):
+                    comp_time = t["completed_at"]
+                    if isinstance(comp_time, str):
+                        try:
+                            comp_time = datetime.fromisoformat(comp_time.replace("Z", "+00:00"))
+                        except Exception:
+                            comp_time = None
+                    if comp_time and (comp_time.hour >= 18 or comp_time.hour < 4):
+                        is_night_owl = True
+                        break
+            if is_night_owl:
+                break
+
+        if not is_night_owl:
+            async for int_sess in db.interview_history.find({"user_id": user_id}):
+                practiced_at = int_sess.get("practiced_at")
+                if practiced_at:
+                    if isinstance(practiced_at, str):
+                        try:
+                            practiced_at = datetime.fromisoformat(practiced_at.replace("Z", "+00:00"))
+                        except Exception:
+                            practiced_at = None
+                    if practiced_at and (practiced_at.hour >= 18 or practiced_at.hour < 4):
+                        is_night_owl = True
+                        break
+
+        if not is_night_owl:
+            async for s in db.chat_sessions.find({"user_id": user_id}):
+                for msg in s.get("messages", []):
+                    ts = msg.get("ts")
+                    if ts:
+                        if isinstance(ts, str):
+                            try:
+                                ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                            except Exception:
+                                ts = None
+                        if ts and (ts.hour >= 18 or ts.hour < 4):
+                            is_night_owl = True
+                            break
+                if is_night_owl:
+                    break
+
         badge_rules = [
             {"id": "first_roadmap", "name": "Pathfinder", "icon": "Map", "desc": "Created your first roadmap", "condition": total_roadmaps >= 1},
             {"id": "first_complete", "name": "Topic Master", "icon": "CheckCircle", "desc": "Completed your first topic", "condition": total_completed >= 1},
@@ -146,6 +221,13 @@ async def check_and_award_badges(user_id: str, db):
             {"id": "multi_skill", "name": "Polymath", "icon": "Brain", "desc": "Learning 3+ different skills", "condition": total_roadmaps >= 3},
             {"id": "interview_ready", "name": "Interview Ready", "icon": "Mic", "desc": "Completed first interview practice", "condition": total_interviews >= 1},
             {"id": "interview_pro", "name": "Interview Pro", "icon": "MessagesSquare", "desc": "Completed 5 interview practices", "condition": total_interviews >= 5},
+            {"id": "academic_ace", "name": "Academic Ace", "icon": "Award", "desc": "Scored a perfect 100% on any topic quiz", "condition": has_perfect_quiz},
+            {"id": "elite_craftsman", "name": "Elite Craftsman", "icon": "Code2", "desc": "AI Code Audit score of 9/10 or higher", "condition": has_elite_craftsman},
+            {"id": "silver_tongue", "name": "Silver Tongue", "icon": "PartyPopper", "desc": "Excellent verdict (9/10+) in Mock Interview", "condition": has_excellent_interview},
+            {"id": "daily_disciplinarian", "name": "Daily Disciplinarian", "icon": "CalendarDays", "desc": "Solved 5 dynamic Daily Challenges", "condition": total_challenges_solved >= 5},
+            {"id": "archivist", "name": "Archivist", "icon": "BookMarked", "desc": "Generated 5 Study Notes booklets", "condition": total_notes_generated >= 5},
+            {"id": "curious_mind", "name": "Curious Mind", "icon": "MessageSquareQuote", "desc": "Sent 20+ messages to your AI Tutor", "condition": total_chat_messages >= 20},
+            {"id": "night_owl", "name": "Night Owl", "icon": "Moon", "desc": "Learned or practiced between 12:00 AM & 4:00 AM", "condition": is_night_owl},
         ]
 
         for badge in badge_rules:
