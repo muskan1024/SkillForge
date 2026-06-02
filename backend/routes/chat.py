@@ -72,6 +72,19 @@ async def create_session(req: NewSessionRequest, current_user=Depends(get_curren
 @router.get("/sessions")
 async def list_sessions(current_user=Depends(get_current_user), db=Depends(get_db)):
     """List all chat sessions for the user, grouped by roadmap."""
+    # ── Auto-delete empty chat sessions ──────────────────────────
+    try:
+        await db.chat_sessions.delete_many({
+            "user_id": current_user["id"],
+            "$or": [
+                {"messages": {"$size": 0}},
+                {"messages": []},
+                {"messages": {"$exists": False}}
+            ]
+        })
+    except Exception:
+        pass
+
     cursor = db.chat_sessions.find({"user_id": current_user["id"]}).sort("updated_at", -1)
     sessions = []
     async for s in cursor:
@@ -172,6 +185,9 @@ async def chat(req: ChatRequest, current_user=Depends(get_current_user), db=Depe
                         ]}
                     }, "$set": update_fields}
                 )
+                # ── Check and award badges ─────────────────────────────
+                from routes.quiz import check_and_award_badges
+                await check_and_award_badges(current_user["id"], db)
             except Exception:
                 pass
 
