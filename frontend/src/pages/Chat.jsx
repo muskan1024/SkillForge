@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState,useEffect,useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +22,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import SkillForge_Logo_BG from "../assets/SkillForge_Logo_BG.png";
 
 const SUGGESTIONS = [
   "Explain the difference between SQL and NoSQL",
@@ -44,12 +45,12 @@ const BRAND = "#6366f1";
 
 /* ── Message renderer ─────────────────────────────────────── */
 function MessageContent({ text }) {
-  const renderLine = (line, key) => {
-    const segs = line.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((s, si) => {
+  const renderLine = (line,key) => {
+    const segs = line.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((s,si) => {
       if (s.startsWith("**") && s.endsWith("**"))
         return (
-          <strong key={si} style={{ fontWeight: 600, color: TEXT1 }}>
-            {s.slice(2, -2)}
+          <strong key={si} style={{ fontWeight: 600,color: TEXT1 }}>
+            {s.slice(2,-2)}
           </strong>
         );
       if (s.startsWith("`") && s.endsWith("`"))
@@ -65,23 +66,23 @@ function MessageContent({ text }) {
               fontFamily: "JetBrains Mono, monospace",
             }}
           >
-            {s.slice(1, -1)}
+            {s.slice(1,-1)}
           </code>
         );
       return s;
     });
     if (line.startsWith("- ") || line.startsWith("• "))
       return (
-        <div key={key} style={{ display: "flex", gap: 8, margin: "2px 0" }}>
-          <span style={{ color: BRAND, flexShrink: 0 }}>•</span>
+        <div key={key} style={{ display: "flex",gap: 8,margin: "2px 0" }}>
+          <span style={{ color: BRAND,flexShrink: 0 }}>•</span>
           <span>{segs.slice(1)}</span>
         </div>
       );
     if (line.match(/^\d+\.\s/)) {
       const num = line.match(/^(\d+)\./)[1];
       return (
-        <div key={key} style={{ display: "flex", gap: 8, margin: "2px 0" }}>
-          <span style={{ color: BRAND, width: 20, flexShrink: 0 }}>{num}.</span>
+        <div key={key} style={{ display: "flex",gap: 8,margin: "2px 0" }}>
+          <span style={{ color: BRAND,width: 20,flexShrink: 0 }}>{num}.</span>
           <span>{segs.slice(1)}</span>
         </div>
       );
@@ -90,14 +91,14 @@ function MessageContent({ text }) {
       return (
         <p
           key={key}
-          style={{ fontWeight: 600, color: TEXT1, margin: "12px 0 4px" }}
+          style={{ fontWeight: 600,color: TEXT1,margin: "12px 0 4px" }}
         >
-          {line.replace(/^#+\s/, "")}
+          {line.replace(/^#+\s/,"")}
         </p>
       );
     if (line.trim() === "") return <div key={key} style={{ height: 6 }} />;
     return (
-      <p key={key} style={{ margin: "2px 0", lineHeight: 1.65 }}>
+      <p key={key} style={{ margin: "2px 0",lineHeight: 1.65 }}>
         {segs}
       </p>
     );
@@ -105,14 +106,14 @@ function MessageContent({ text }) {
 
   if (!text.includes("```")) {
     return (
-      <div style={{ fontSize: 14, color: TEXT2 }}>
-        {text.split("\n").map((l, i) => renderLine(l, i))}
+      <div style={{ fontSize: 14,color: TEXT2 }}>
+        {text.split("\n").map((l,i) => renderLine(l,i))}
       </div>
     );
   }
   return (
-    <div style={{ fontSize: 14, color: TEXT2 }}>
-      {text.split(/(```[\s\S]*?```)/g).map((seg, i) => {
+    <div style={{ fontSize: 14,color: TEXT2 }}>
+      {text.split(/(```[\s\S]*?```)/g).map((seg,i) => {
         if (seg.startsWith("```")) {
           return (
             <pre
@@ -129,11 +130,11 @@ function MessageContent({ text }) {
                 lineHeight: 1.6,
               }}
             >
-              <code>{seg.replace(/^```\w*\n?/, "").replace(/```$/, "")}</code>
+              <code>{seg.replace(/^```\w*\n?/,"").replace(/```$/,"")}</code>
             </pre>
           );
         }
-        return seg.split("\n").map((l, li) => renderLine(l, `${i}-${li}`));
+        return seg.split("\n").map((l,li) => renderLine(l,`${i}-${li}`));
       })}
     </div>
   );
@@ -145,7 +146,7 @@ function ChatBubble({ msg }) {
     <div className={`flex gap-3 sm:gap-4 w-full animate-slide-up ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isUser ? 'bg-brand-600 text-white' : 'bg-[#2a2d3e] text-brand-400'
         }`}>
-        {isUser ? <User size={16} /> : <Bot size={18} />}
+        {isUser ? <User size={16} /> : <img src={SkillForge_Logo_BG} alt="SkillForge AI" style={{ width: 22, height: 22, objectFit: "contain" }} />}
       </div>
       <div className={`max-w-[85%] sm:max-w-[80%] ${isUser
         ? 'rounded-[20px_4px_20px_20px] bg-brand-600 px-5 py-3 text-white shadow-md shadow-brand-500/20'
@@ -173,8 +174,8 @@ function HistorySidebar({
   collapsed,
   onToggle,
 }) {
-  const [expanded, setExpanded] = useState({});
-  const toggle = (k) => setExpanded((p) => ({ ...p, [k]: p[k] === false }));
+  const [expanded,setExpanded] = useState({});
+  const toggle = (k) => setExpanded((p) => ({ ...p,[k]: p[k] === false }));
 
   const grouped = {};
   sessions.forEach((s) => {
@@ -187,7 +188,7 @@ function HistorySidebar({
     const r = roadmaps.find((r) => r.id === id);
     return r
       ? r.title.length > 20
-        ? r.title.slice(0, 20) + "…"
+        ? r.title.slice(0,20) + "…"
         : r.title
       : "Roadmap";
   };
@@ -220,11 +221,11 @@ function HistorySidebar({
         {!collapsed && (
           <div>
             <p
-              style={{ fontSize: 13, fontWeight: 600, color: TEXT1, margin: 0 }}
+              style={{ fontSize: 13,fontWeight: 600,color: TEXT1,margin: 0 }}
             >
               Chat History
             </p>
-            <p style={{ fontSize: 11, color: TEXT3, margin: 0 }}>
+            <p style={{ fontSize: 11,color: TEXT3,margin: 0 }}>
               Your conversations
             </p>
           </div>
@@ -283,7 +284,7 @@ function HistorySidebar({
             <Plus size={13} /> New chat
           </button>
 
-          <div style={{ flex: 1, overflowY: "auto", padding: "4px 0" }}>
+          <div style={{ flex: 1,overflowY: "auto",padding: "4px 0" }}>
             {loading ? (
               <div
                 style={{
@@ -299,16 +300,16 @@ function HistorySidebar({
                 />
               </div>
             ) : sessions.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div style={{ textAlign: "center",padding: "32px 16px" }}>
                 <MessageSquare
                   size={22}
                   color={TEXT3}
                   style={{ margin: "0 auto 8px" }}
                 />
-                <p style={{ fontSize: 12, color: TEXT3 }}>No chats yet</p>
+                <p style={{ fontSize: 12,color: TEXT3 }}>No chats yet</p>
               </div>
             ) : (
-              Object.entries(grouped).map(([key, gs]) => {
+              Object.entries(grouped).map(([key,gs]) => {
                 const isOpen = expanded[key] !== false;
                 const isGeneral = key === "general";
                 return (
@@ -407,7 +408,7 @@ function HistorySidebar({
                               e.currentTarget.style.background = "transparent";
                           }}
                         >
-                          <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ flex: 1,minWidth: 0 }}>
                             <p
                               style={{
                                 fontSize: 11,
@@ -521,35 +522,35 @@ function HistorySidebar({
 /* ── Main Chat ────────────────────────────────────────────── */
 export default function Chat() {
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams,setSearchParams] = useSearchParams();
 
-  const [sessions, setSessions] = useState([]);
-  const [activeSessionId, setActiveSess] = useState(null);
-  const [chatToDelete, setChatToDelete] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingSessions, setLoadSess] = useState(true);
-  const [loadingMsgs, setLoadMsgs] = useState(false);
-  const [roadmaps, setRoadmaps] = useState([]);
-  const [selectedRM, setSelectedRM] = useState("");
-  const [rmTitle, setRmTitle] = useState("");
-  const [showRmPicker, setShowRmPicker] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [sessions,setSessions] = useState([]);
+  const [activeSessionId,setActiveSess] = useState(null);
+  const [chatToDelete,setChatToDelete] = useState(null);
+  const [messages,setMessages] = useState([]);
+  const [input,setInput] = useState("");
+  const [loading,setLoading] = useState(false);
+  const [loadingSessions,setLoadSess] = useState(true);
+  const [loadingMsgs,setLoadMsgs] = useState(false);
+  const [roadmaps,setRoadmaps] = useState([]);
+  const [selectedRM,setSelectedRM] = useState("");
+  const [rmTitle,setRmTitle] = useState("");
+  const [showRmPicker,setShowRmPicker] = useState(false);
+  const [collapsed,setCollapsed] = useState(false);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const autoSent = useRef(false);
 
   useEffect(() => {
-    Promise.all([api.get("/chat/sessions"), api.get("/roadmaps/")])
-      .then(([s, r]) => {
+    Promise.all([api.get("/chat/sessions"),api.get("/roadmaps/")])
+      .then(([s,r]) => {
         setSessions(Array.isArray(s.data) ? s.data : []);
         setRoadmaps(Array.isArray(r.data) ? r.data : []);
         setLoadSess(false);
       })
       .catch(() => setLoadSess(false));
-  }, []);
+  },[]);
 
   useEffect(() => {
     if (loadingSessions) return;
@@ -570,22 +571,31 @@ export default function Chat() {
           setTimeout(() => {
             inputRef.current?.focus();
             inputRef.current?.select();
-          }, 150);
+          },150);
         }
       });
     }
-  }, [loadingSessions, searchParams]);
+  },[loadingSessions,searchParams]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  },[messages,loading]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      const scrollHeight = inputRef.current.scrollHeight;
+      inputRef.current.style.height = `${scrollHeight}px`;
+      inputRef.current.style.overflowY = scrollHeight > 200 ? "auto" : "hidden";
+    }
+  },[input]);
 
   const createNewSession = async (roadmapId = null) => {
     try {
-      const { data } = await api.post("/chat/session/new", {
+      const { data } = await api.post("/chat/session/new",{
         roadmap_id: roadmapId || null,
       });
-      setSessions((prev) => [data, ...prev]);
+      setSessions((prev) => [data,...prev]);
       setActiveSess(data.id);
       setMessages([]);
       if (roadmapId) {
@@ -648,10 +658,10 @@ export default function Chat() {
       if (!sess) return;
       sid = sess.id;
     }
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setMessages((prev) => [...prev,{ role: "user",content: userMsg }]);
     setLoading(true);
     try {
-      const { data } = await api.post("/chat/message", {
+      const { data } = await api.post("/chat/message",{
         message: userMsg,
         history: messages.slice(-12),
         roadmap_id: selectedRM || null,
@@ -659,12 +669,12 @@ export default function Chat() {
       });
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.reply },
+        { role: "assistant",content: data.reply },
       ]);
       api.get("/chat/sessions").then((r) => setSessions(r.data));
     } catch (err) {
       toast.error(err.response?.data?.detail || "Failed to get response.");
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => prev.slice(0,-1));
       setInput(userMsg);
     } finally {
       setLoading(false);
@@ -717,7 +727,8 @@ export default function Chat() {
               minWidth: 0,
             }}
           >
-            <Bot size={18} color={BRAND} />
+            {/* <Bot size={18} color={BRAND} /> */}
+            <img src={SkillForge_Logo_BG} alt="SkillForge_Logo" style={{ width: 30,height: 30,objectFit: "contain" }} />
             <div style={{ minWidth: 0 }}>
               <p
                 style={{
@@ -730,15 +741,15 @@ export default function Chat() {
                   whiteSpace: "nowrap",
                 }}
               >
-                {rmTitle || "AI Assistant"}
+                {rmTitle || "SkillForge AI"}
               </p>
-              <p style={{ fontSize: 11, color: TEXT3, margin: 0 }}>
+              <p style={{ fontSize: 11,color: TEXT3,margin: 0 }}>
                 {activeSession?.title || "Start a new conversation"}
               </p>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex",alignItems: "center",gap: 8 }}>
             <button
               onClick={handleNewChat}
               style={{
@@ -798,7 +809,7 @@ export default function Chat() {
                   {selectedRM
                     ? roadmaps
                       .find((r) => r.id === selectedRM)
-                      ?.title?.slice(0, 18) + "…"
+                      ?.title?.slice(0,18) + "…"
                     : "Roadmap context"}
                 </span>
                 <ChevronDown size={12} />
@@ -936,7 +947,7 @@ export default function Chat() {
                 paddingBottom: 40,
               }}
             >
-              <div
+              {/* <div
                 style={{
                   width: 64,
                   height: 64,
@@ -948,9 +959,10 @@ export default function Chat() {
                   justifyContent: "center",
                   marginBottom: 20,
                 }}
-              >
-                <Sparkles size={28} color={BRAND} />
-              </div>
+              > */}
+              {/* <Sparkles size={28} color={BRAND} /> */}
+              <img src={SkillForge_Logo_BG} alt="SkillForge Logo" style={{ width: 42,height: 42,objectFit: "contain" }} />
+              {/* </div> */}
               <h2
                 style={{
                   fontSize: 20,
@@ -1022,19 +1034,19 @@ export default function Chat() {
                   content: `Hi ${user?.name?.split(" ")[0]}! 👋${rmTitle ? ` Let's talk about your **${rmTitle}** roadmap.` : " I'm SkillForge AI. Ask me anything!"}`,
                 }}
               />
-              {messages.map((m, i) => (
+              {messages.map((m,i) => (
                 <ChatBubble key={i} msg={m} />
               ))}
               {loading && (
                 <div className="flex gap-3 sm:gap-4 w-full">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-[#2a2d3e] text-brand-400">
-                    <Bot size={18} />
+                    <img src={SkillForge_Logo_BG} alt="SkillForge AI" style={{ width: 22, height: 22, objectFit: "contain" }} />
                   </div>
                   <div className="rounded-2xl border-2 border-white/5 bg-[#0f1117] p-5 shadow-sm">
                     <div
-                      style={{ display: "flex", gap: 6, alignItems: "center" }}
+                      style={{ display: "flex",gap: 6,alignItems: "center" }}
                     >
-                      {[0, 150, 300].map((d) => (
+                      {[0,150,300].map((d) => (
                         <div
                           key={d}
                           style={{
@@ -1080,9 +1092,10 @@ export default function Chat() {
                 fontFamily: "DM Sans, system-ui, sans-serif",
                 resize: "none",
                 lineHeight: 1.5,
-                maxHeight: 120,
+                maxHeight: 200,
+                overflowY: "hidden",
               }}
-              placeholder="Ask anything… (Enter to send, Shift+Enter for new line)"
+              placeholder="Ask anything…"
             />
             <button
               onClick={() => sendMessage()}
@@ -1120,7 +1133,7 @@ export default function Chat() {
               marginTop: 8,
             }}
           >
-            AI can make mistakes — verify important information
+            AI can make mistakes - verify important information
           </p>
         </div>
       </div>
@@ -1152,12 +1165,12 @@ export default function Chat() {
             maxWidth: 400,
             boxShadow: "0 20px 40px rgba(0,0,0,0.4)"
           }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: "#e4e4e7", marginBottom: 8, marginTop: 0 }}>Delete Chat</h3>
-            <p style={{ fontSize: 14, color: "#94a3b8", marginBottom: 24, lineHeight: 1.5 }}>
+            <h3 style={{ fontSize: 18,fontWeight: 600,color: "#e4e4e7",marginBottom: 8,marginTop: 0 }}>Delete Chat</h3>
+            <p style={{ fontSize: 14,color: "#94a3b8",marginBottom: 24,lineHeight: 1.5 }}>
               Are you sure you want to delete this chat? This action cannot be undone.
             </p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-              <button 
+            <div style={{ display: "flex",gap: 12,justifyContent: "flex-end" }}>
+              <button
                 onClick={() => setChatToDelete(null)}
                 style={{
                   background: "transparent",
@@ -1175,7 +1188,7 @@ export default function Chat() {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={() => {
                   handleDeleteSession(chatToDelete);
                   setChatToDelete(null);
