@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { Routes,Route,Navigate } from 'react-router-dom'
+import { AuthProvider,useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -15,7 +15,7 @@ import AppLayout from './components/AppLayout'
 import LessonView from './pages/LessonView'
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user,loading } = useAuth()
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin" />
@@ -25,7 +25,7 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user,loading } = useAuth()
   if (loading) return null
   return user ? <Navigate to="/dashboard" replace /> : children
 }
@@ -36,7 +36,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
         <Route path="/onboarding" element={<ProtectedRoute><AppLayout><Onboarding /></AppLayout></ProtectedRoute>} />
         <Route path="/roadmaps" element={<ProtectedRoute><AppLayout><MyRoadmaps /></AppLayout></ProtectedRoute>} />

@@ -14,8 +14,15 @@ async def register(user_data: UserRegister, background_tasks: BackgroundTasks, d
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Resolve display name
+    first = (user_data.first_name or "").strip()
+    last  = (user_data.last_name  or "").strip()
+    full_name = user_data.name.strip() if user_data.name else f"{first} {last}".strip() or "User"
+
     user_doc = {
-        "name": user_data.name,
+        "first_name": first,
+        "last_name":  last,
+        "name": full_name,
         "email": user_data.email,
         "password": hash_password(user_data.password),
         "created_at": datetime.utcnow(),
@@ -39,7 +46,7 @@ async def register(user_data: UserRegister, background_tasks: BackgroundTasks, d
         access_token=token,
         user={
             "id": user_id,
-            "name": user_data.name,
+            "name": full_name,
             "email": user_data.email,
             "streak_days": 0,
             "xp_points": 0,

@@ -18,9 +18,11 @@ class Timeline(str, Enum):
 
 # Auth Models
 class UserRegister(BaseModel):
-    name: str = Field(..., min_length=2, max_length=50)
+    first_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
     email: EmailStr
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=8)
 
 class UserLogin(BaseModel):
     email: EmailStr
