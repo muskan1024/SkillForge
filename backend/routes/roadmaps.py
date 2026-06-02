@@ -77,10 +77,23 @@ async def generate(req: RoadmapRequest, current_user=Depends(get_current_user), 
 
 @router.get("/")
 async def list_roadmaps(current_user=Depends(get_current_user), db=Depends(get_db)):
-    cursor = db.roadmaps.find({"user_id": current_user["id"]}).sort("created_at", -1)
+    user_id = current_user["id"]
+    print(f"[DEBUG] Fetching roadmaps for user_id: '{user_id}'")
+
+    # Count total roadmaps in collection
+    total_in_db = await db.roadmaps.count_documents({})
+    print(f"[DEBUG] Total roadmaps in collection: {total_in_db}")
+
+    # Sample one doc to see what user_id format is stored
+    sample = await db.roadmaps.find_one({})
+    if sample:
+        print(f"[DEBUG] Sample roadmap user_id in DB: '{sample.get('user_id')}' (type: {type(sample.get('user_id')).__name__})")
+
+    cursor = db.roadmaps.find({"user_id": user_id}).sort("created_at", -1)
     roadmaps = []
     async for r in cursor:
         roadmaps.append(serialize_roadmap(r))
+    print(f"[DEBUG] Roadmaps found for this user: {len(roadmaps)}")
     return roadmaps
 
 @router.get("/{roadmap_id}")
